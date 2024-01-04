@@ -331,15 +331,15 @@ void profilesPage() {
   if ((display::refreshPage && display::showKeyboard) || (display::showKeyboard && device::updateKeyboardInput)) {
     // draw input box
     if (device::profileInputNumber == 1)
-      keyBoardInput(user::profileOneName, 11);
+      keyBoardInput(user::profileOneName, 16);
     else if (device::profileInputNumber == 2)
-      keyBoardInput(user::profileTwoName, 11);
+      keyBoardInput(user::profileTwoName, 16);
     else if (device::profileInputNumber == 3)
-      keyBoardInput(user::profileThreeName, 11);
+      keyBoardInput(user::profileThreeName, 16);
     else if (device::profileInputNumber == 4)
-      keyBoardInput(user::profileFourName, 11);
+      keyBoardInput(user::profileFourName, 16);
     else if (device::profileInputNumber == 5)
-      keyBoardInput(user::profileFiveName, 11);
+      keyBoardInput(user::profileFiveName, 16);
     device::updateKeyboardInput = false;
   }
   if (display::showKeyboard)
@@ -377,6 +377,7 @@ void tdsPage() {
     tft.print(530, 170, "Maximum");
     drawUpDownButtons(210, 400, 310, 400, RA8875_BLUE);
     drawUpDownButtons(580, 400, 680, 400, RA8875_BLUE);
+    infoButton(770, 120);
   }
   drawTwoValues(285, user::targetMinTds, RA8875_BLACK, 0, 650, user::targetMaxTds, RA8875_BLACK, 0, NULL, 0);
 }
@@ -392,6 +393,7 @@ void ecPage() {
     tft.print(530, 170, "Maximum");
     drawUpDownButtons(210, 400, 310, 400, RA8875_BLUE);
     drawUpDownButtons(580, 400, 680, 400, RA8875_BLUE);
+    infoButton(770, 120);
   }
   drawTwoValues(285, user::targetMinEc, RA8875_BLACK, 2, 650, user::targetMaxEc, RA8875_BLACK, 2, NULL, 0);
 }
@@ -407,6 +409,7 @@ void phPage() {
     tft.print(530, 170, "Maximum");
     drawUpDownButtons(210, 400, 310, 400, RA8875_BLUE);
     drawUpDownButtons(580, 400, 680, 400, RA8875_BLUE);
+    infoButton(770, 120);
   }
   drawTwoValues(285, user::targetMinPh, RA8875_BLACK, 2, 650, user::targetMaxPh, RA8875_BLACK, 2, NULL, 0);
 }
@@ -424,6 +427,7 @@ void co2Page() {
       tft.print(530, 166, "Tolerance");
       drawUpDownButtons(210, 400, 310, 400, RA8875_BLUE);
       drawUpDownButtons(580, 400, 680, 400, RA8875_BLUE);
+      infoButton(770, 120);
     }
     drawTwoValues(285, user::targetCo2, RA8875_BLACK, 0, 650, user::co2Offset, RA8875_BLACK, 0, NULL, 0);
   }
@@ -437,6 +441,7 @@ void co2Page() {
       tft.print(380, 166, "Width");
       tft.print(590, 166, "Height");
       drawThreeUpDownButtons();
+      infoButton(770, 120);
     }
     tft.setTextColor(RA8875_BLACK);
     tft.setFont(&HallfeticaLargenum_42px_Regular);
@@ -445,7 +450,7 @@ void co2Page() {
     static int roomLengthStartPos = 0, roomLengthEndPos = 0;
     static float previousRoomLength;
     float roomLength = user::convertToInches ? user::roomLengthInches : user::roomLengthCm;
-    if (display::refreshPage || roomLength != previousRoomLength) {
+    if (display::refreshPage || hasChanged(roomLength, previousRoomLength, 0.01)) {
       tft.fillRect(roomLengthStartPos, 236, roomLengthEndPos - roomLengthStartPos, 50, user::backgroundColor);
       if (user::convertToInches) {
         roomLengthStartPos = 225 - ((tft.getStringWidth(roomLength, 1) / 2) + 8);
@@ -461,7 +466,6 @@ void co2Page() {
         tft.setFontScale(1);
         tft.print(tft.getFontX() + 6, 250, "cm");
       }
-      previousRoomLength = roomLength;
       roomLengthEndPos = tft.getFontX();
     }
     // ROOM WIDTH
@@ -470,7 +474,7 @@ void co2Page() {
     static int roomWidthStartPos = 0, roomWidthEndPos = 0;
     static float previousRoomWidth;
     float roomWidth = user::convertToInches ? user::roomWidthInches : user::roomWidthCm;
-    if (display::refreshPage || roomWidth != previousRoomWidth) {
+    if (display::refreshPage || hasChanged(roomWidth, previousRoomWidth, 0.01)) {
       tft.fillRect(roomWidthStartPos, 236, roomWidthEndPos - roomWidthStartPos, 50, user::backgroundColor);
       if (user::convertToInches) {
         roomWidthStartPos = 430 - ((tft.getStringWidth(roomWidth, 1) / 2) + 8);
@@ -486,7 +490,6 @@ void co2Page() {
         tft.setFontScale(1);
         tft.print(tft.getFontX() + 6, 250, "cm");
       }
-      previousRoomWidth = roomWidth;
       roomWidthEndPos = tft.getFontX();
     }
     // ROOM HEIGHT
@@ -495,7 +498,7 @@ void co2Page() {
     static int roomHeightStartPos = 0, roomHeightEndPos = 0;
     static float previousRoomHeight;
     float roomHeight = user::convertToInches ? user::roomHeightInches : user::roomHeightCm;
-    if (display::refreshPage || roomHeight != previousRoomHeight) {
+    if (display::refreshPage || hasChanged(roomHeight, previousRoomHeight, 0.01)) {
       tft.fillRect(roomHeightStartPos, 236, roomHeightEndPos - roomHeightStartPos, 50, user::backgroundColor);
       if (user::convertToInches) {
         roomHeightStartPos = 640 - ((tft.getStringWidth(roomHeight, 1) / 2) + 8);
@@ -511,7 +514,6 @@ void co2Page() {
         tft.setFontScale(1);
         tft.print(tft.getFontX() + 6, 250, "cm");
       }
-      previousRoomHeight = roomHeight;
       roomHeightEndPos = tft.getFontX();
     }
   }
@@ -525,6 +527,7 @@ void co2Page() {
       tft.print(380, 166, "Time");
       tft.print(580, 166, "Fans off");
       drawThreeUpDownButtons();
+      infoButton(770, 120);
     }
     tft.setTextColor(RA8875_BLACK);
     tft.setFont(&HallfeticaLargenum_42px_Regular);
@@ -533,7 +536,7 @@ void co2Page() {
     static int co2FlowrateStartPos = 0, co2FlowrateEndPos = 0;
     static float previousco2Flowrate;
     float co2Flowrate = user::convertToInches ? user::co2FlowrateFeet3 : user::co2FlowrateLtrs;
-    if (display::refreshPage || co2Flowrate != previousco2Flowrate) {
+    if (display::refreshPage || hasChanged(co2Flowrate, previousco2Flowrate, 0.01)) {
       tft.fillRect(co2FlowrateStartPos, 238, co2FlowrateEndPos - co2FlowrateStartPos, 50, user::backgroundColor);
       if (co2Flowrate < 10)
         co2FlowrateStartPos = 140;
@@ -554,7 +557,6 @@ void co2Page() {
         tft.setCursor(tft.getFontX() + 4, 250);
         co2Flowrate == 1 ? tft.print("ltr") : tft.print("ltrs");
       }
-      previousco2Flowrate = co2Flowrate;
       co2FlowrateEndPos = tft.getFontX();
     }
     // CO2 CHECK TIME
@@ -622,6 +624,7 @@ void co2Page() {
       tft.print(358, 196, "duration");
       tft.print(592, 166, "Disable");
       tft.print(624, 196, "Co2");
+      infoButton(770, 120);
       tft.setFont(&akashi_36px_Regular);
       tft.setTextColor(RA8875_BLACK);
     }
@@ -695,6 +698,7 @@ void waterPage() {
       tft.print(530, 170, "Maximum");
       drawUpDownButtons(210, 400, 310, 400, RA8875_BLUE);
       drawUpDownButtons(580, 400, 680, 400, RA8875_BLUE);
+      infoButton(770, 120);
     }
     if (user::convertToInches)
       drawTwoValues(285, user::targetMinWaterHeightInches, RA8875_BLACK, 1, 650, user::targetMaxWaterHeightInches, RA8875_BLACK, 1, "\"", 0);
@@ -711,6 +715,7 @@ void waterPage() {
       tft.print(530, 170, "Maximum");
       drawUpDownButtons(210, 400, 310, 400, RA8875_BLUE);
       drawUpDownButtons(580, 400, 680, 400, RA8875_BLUE);
+      infoButton(770, 120);
     }
     if (user::convertToF)
       drawTwoValues(285, user::targetMinWaterTempF, RA8875_BLACK, 1, 650, user::targetMaxWaterTempF, RA8875_BLACK, 1, "F", 0);
@@ -727,6 +732,7 @@ void waterPage() {
       tft.print(540, 170, "Width");
       drawUpDownButtons(210, 400, 310, 400, RA8875_BLUE);
       drawUpDownButtons(580, 400, 680, 400, RA8875_BLUE);
+      infoButton(770, 120);
     }
     if (user::convertToInches)
       drawTwoValues(285, user::waterTankLength, RA8875_BLACK, 1, 650, user::waterTankWidth, RA8875_BLACK, 1, "\"", 0);    
@@ -743,6 +749,7 @@ void waterPage() {
       tft.print(510, 250, "and refill");
       tft.print(100, 420, "Time");
       drawMiniButtonIncrements(385, 440);
+      infoButton(770, 120);
     }
     if (display::refreshPage || display::refreshCalander) {
       tft.setFont(&akashi_36px_Regular);
@@ -803,6 +810,7 @@ void waterPage() {
       tft.setTextColor(RA8875_BLACK);
       tft.print(276, 110, "Refill doser mls");
       drawFourUpDownButtons(60);
+      infoButton(770, 120);
     }
     if (display::refillDoserPageScrollPos > 0) {
       tft.fillTriangle(95, 240, 115, 200, 115, 280, RA8875_BLUE);
@@ -859,6 +867,7 @@ void dosersPage() {
     primeButton(309, 443);
     primeButton(489, 443);
     primeButton(666, 443);
+    infoButton(770, 120);
     if (user::numberOfDosers > 4) {
       if (display::doserPageScrollPos > 0) {
         tft.fillTriangle(95, 240, 115, 200, 115, 280, RA8875_BLUE);
@@ -919,6 +928,7 @@ void lightingPage() {
     tft.print(550, 166, "On/Auto/Off");
     drawUpDownButtons(164, 366, 243, 366, RA8875_BLUE);
     drawUpDownButtons(374, 366, 457, 366, RA8875_BLUE);
+    infoButton(770, 120);
   }
   // LIGHT ON TIME
   static uint8_t previousOnTime;
@@ -1002,6 +1012,7 @@ void fansPage() {
       tft.print(506, 166, "Max speed");
       drawUpDownButtons(230, 400, 310, 400, RA8875_BLUE);
       drawUpDownButtons(570, 400, 650, 400, RA8875_BLUE);
+      infoButton(770, 120);
     }
     drawTwoValues(285, user::targetMinFanOneSpeed, RA8875_BLACK, 0, 620, user::targetMaxFanOneSpeed, RA8875_BLACK, 0, "%", 50);
   }
@@ -1015,6 +1026,7 @@ void fansPage() {
       tft.print(506, 166, "Max speed");
       drawUpDownButtons(230, 400, 310, 400, RA8875_BLUE);
       drawUpDownButtons(570, 400, 650, 400, RA8875_BLUE);
+      infoButton(770, 120);
     }
     drawTwoValues(285, user::targetMinFanTwoSpeed, RA8875_BLACK, 0, 620, user::targetMaxFanTwoSpeed, RA8875_BLACK, 0, "%", 50);
   }
@@ -1028,6 +1040,7 @@ void fansPage() {
       tft.print(530, 170, "Maximum");
       drawUpDownButtons(230, 400, 310, 400, RA8875_BLUE);
       drawUpDownButtons(585, 400, 665, 400, RA8875_BLUE);
+      infoButton(770, 120);
     }
     if (user::convertToF)
       drawTwoValues(285, user::targetMinAirTempF, RA8875_BLACK, 1, 650, user::targetMaxAirTempF, RA8875_BLACK, 1, "F", 0);
@@ -1044,6 +1057,7 @@ void fansPage() {
       tft.print(530, 170, "Maximum");
       drawUpDownButtons(230, 400, 310, 400, RA8875_BLUE);
       drawUpDownButtons(585, 400, 665, 400, RA8875_BLUE);
+      infoButton(770, 120);
     }
     drawTwoValues(285, user::targetMinHumidity, RA8875_BLACK, 1, 650, user::targetMaxHumidity, RA8875_BLACK, 1, "%", 50);
   }
@@ -1058,6 +1072,7 @@ void fansPage() {
       tft.print(110, 230, "Control humidity");
       tft.print(110, 280, "Fan one fixed speed");
       tft.print(110, 330, "Fan two fixed speed");
+      infoButton(770, 120);
     }
     // FAN MODES
     static bool previousFansControlTemperature;
@@ -1094,6 +1109,7 @@ void warningsPage() {
     tft.print(116, 170, "Current reading");
     tft.print(470, 170, "Error margin");
     drawUpDownButtons(554, 400, 664, 400, RA8875_BLUE);
+    infoButton(770, 120);
   }
   if (display::warningsPage == 0) {
     if (display::refreshPage)

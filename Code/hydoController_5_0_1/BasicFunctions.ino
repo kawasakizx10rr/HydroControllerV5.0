@@ -97,6 +97,7 @@ void initializeDevice() {
     server.on("/setValue", setValue);
     // Start the Wifi portal
     server.begin();  //Start web server
+    delay(2000);
   }
 
   rtc.refresh();
@@ -105,6 +106,7 @@ void initializeDevice() {
 
   saveLogMessage(0); // save log message, system started
 
+  // JUST FOR TESTING -->
   for (int i = 0; i < device::maxGraphArrayValues; i++) {
     device::phArray[i] = random(1, 14);
     device::co2Array[i] = random(300, 1200);
@@ -121,6 +123,7 @@ void initializeDevice() {
     device::fanTwoSpeedArray[i] = random(0, 100);
   }
   device::graphArrayPos = device::maxGraphArrayValues;
+  // < ---- TO HERE
   
   tft.fillWindow(user::backgroundColor);
   frame();
@@ -189,8 +192,8 @@ void beep() {
 // Adjust any (uint8_t,int,float or long) value by x increment within the range of min and max
 float adjustValue(float a_val, float a_increment, const float& a_min, const float& a_max) {
   beep();
-  if (display::currentTouch - display::lastTouch > 10000UL)
-    a_increment *= 10.0;
+  if (display::lastTouchMillis - display::touchStartMillis > 5000UL)
+    display::debounceTime = 0;
 
   if (a_increment < 0) {
     if (a_val >= (a_min + abs(a_increment)))

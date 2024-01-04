@@ -1,7 +1,7 @@
 void readSensors() {
   static uint8_t swapSenor;
   static unsigned long sensorPreviousMillis = 0;
-  if (millis() - sensorPreviousMillis >= 2000UL) {
+  if (millis() - sensorPreviousMillis >= 2000UL && (display::page == 0 || display::page == 1 || display::page == 2 || display::page == 12 || millis() - display::lastTouchMillis > 10000UL)) {
     // WATER TEMP =========================================================================
     dallasTemperature.requestTemperatures();
     sensor::waterTemp = dallasTemperature.getTempCByIndex(0);
@@ -48,10 +48,10 @@ void readSensors() {
     //DHT.read22(pin::dht22);
     //sensor::airTemp = DHT.temperature;
     //sensor::humidity = DHT.humidity;  
-    //printf("Air temp: %.2fc\n", sensor::airTemp);
+    printf("Air temp: %.2fc\n", sensor::airTemp);
     if (sensor::airTemp < 0)
       sensor::airTemp = 0;
-    //printf("Humidity: %.2fc\n", sensor::humidity);
+    printf("Humidity: %.2f%%\n", sensor::humidity);
     if (sensor::humidity > 99.9)
       sensor::humidity = 99.9;
     // LDR ===============================================================================

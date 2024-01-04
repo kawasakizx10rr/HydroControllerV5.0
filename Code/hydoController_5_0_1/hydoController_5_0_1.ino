@@ -149,9 +149,9 @@ bool displayIsOff = false;
 bool refreshPage = true;
 int cursourPosition = 0;
 bool refreshCalander;
-unsigned long debounceTime = 250; // in millis
-unsigned long currentTouch = 0, lastTouch = 0;
-unsigned long previousTouchMillis = 0;
+unsigned long debounceTime = 200; // in millis
+unsigned long lastTouchMillis = 0;
+unsigned long touchStartMillis = 0; // time button has been held down
 const unsigned int RA8875_SEABLUE      = 0x1C1F;
 const unsigned int RA8875_DARKGREY     = 0x8C51;
 const unsigned int RA8875_LIGHTGREY    = 0xE71C;
@@ -166,40 +166,46 @@ const unsigned int RA8875_PURPLE       = 0x981F;
 }
 
 namespace message {
-const char saveProfile []               = "Are you sure you want to\nsave profile $? This will\noverwrite all the data\ncurrently saved to profile $";
-const char resetDevice []               = "Are you sure you want to\nreset the device to its default\nstate? This will delete all\nsave profiles and system\nconfiguration settings.";
-const char setWaterHeight []            = "Please make sure the tank\nis completely empty and the\nheight sensor is correctly\nmounted before continuing!";
-const char setEtapeMinReading []        = "Please remove the Etape\nfrom the water and ensure\nthe Etape is not bent before\ncontinuing the calibration!";
-const char setEtapeMaxReading []        = "Please place the Etape\nin water up to 32cm and\nthe Etape is not bent before\ncontinuing the calibration!";
-const char calibrateError []            = "Error: the calibrate has\nfailed, please try again\nor cancel the calibration.";
-const char calibrateTds []              = "Please place the TDS probe\nin $ mS/cm calibration\nsolution, and do not disturb\nthe sensor then press\ncontinue.";
-const char calibratePh []               = "Please place the PH probe\nin PH $ calibration\nsolution, and do not disturb\nthe sensor then press\ncontinue.";
-const char drainingAlert []             = "Alert the system is about\nto start draining and filling\nthe water reservoir.\nStarting in $ seconds\nDo you want to continue?";
-const char cancelDraining []            = "The system is currently\ndraining the water reservoir\nto the minimum target $*\nPress cancel to quit draining\nat any time.";
-const char refillingAlert []            = "Alert the system is about\nto start refilling the water\nreservoir.\nStarting in $ seconds\nDo you want to continue?";
-const char cancelRefilling []           = "The system is currently\nfilling the water reservoir to\nthe maximum target $*\nPress cancel to quit refilling\nat any time.";
-const char cancelDosing []              = "Dosing currently in progress\n* out of range by $%\nCurrently running doser #\nPress cancel to quit dosing\nat any time.";
-const char calibrateCo2 []              = "Please make sure the Co2\nhas been a constant 400ppm\nfor at least an hour before\nstarting the calibration\nDo you want to continue?";
-const char calibratingCo2 []            = "Please wait 10 seconds\nwhile the Co2 sensor is\ncalibrating. And do not\ninterfere with the Co2 while\nthe sensor is calibrating.";
-const char co2Alert []                  = "Alert the system is about\nto start pumping Co2. Please\nmake sure that no one is\ninside! Starting in $ seconds\nDo you want to continue?";
-const char cancelCo2 []                 = "Pumping Co2 for $ minutes.\nPlease make sure that no\none is inside! Press cancel to\nquit Co2 pumping at any time.";
+// dialogs
+const char* saveProfile                = "Are you sure you want to\nsave profile $? This will\noverwrite all the data\ncurrently saved to profile $";
+const char* resetDevice                = "Are you sure you want to\nreset the device to its default\nstate? This will delete all\nsave profiles and system\nconfiguration settings.";
+const char* setWaterHeight             = "Please make sure the tank\nis completely empty and the\nheight sensor is correctly\nmounted before continuing!";
+const char* setEtapeMinReading         = "Please remove the Etape\nfrom the water and ensure\nthe Etape is not bent before\ncontinuing the calibration!";
+const char* setEtapeMaxReading         = "Please place the Etape\nin water up to 32cm and\nthe Etape is not bent before\ncontinuing the calibration!";
+const char* calibrateError             = "Error: the calibrate has\nfailed, please try again\nor cancel the calibration.";
+const char* calibrateTds               = "Please place the TDS probe\nin $ mS/cm calibration\nsolution, and do not disturb\nthe sensor then press\ncontinue.";
+const char* calibratePh                = "Please place the PH probe\nin PH $ calibration\nsolution, and do not disturb\nthe sensor then press\ncontinue.";
+const char* drainingAlert              = "Alert the system is about\nto start draining and filling\nthe water reservoir.\nStarting in $ seconds\nDo you want to continue?";
+const char* cancelDraining             = "The system is currently\ndraining the water reservoir\nto the minimum target $*\nPress cancel to quit draining\nat any time.";
+const char* refillingAlert             = "Alert the system is about\nto start refilling the water\nreservoir.\nStarting in $ seconds\nDo you want to continue?";
+const char* cancelRefilling            = "The system is currently\nfilling the water reservoir to\nthe maximum target $*\nPress cancel to quit refilling\nat any time.";
+const char* cancelDosing               = "Dosing currently in progress\n* out of range by $%\nCurrently running doser #\nPress cancel to quit dosing\nat any time.";
+const char* calibrateCo2               = "Please make sure the Co2\nhas been a constant 400ppm\nfor at least an hour before\nstarting the calibration\nDo you want to continue?";
+const char* calibratingCo2             = "Please wait 10 seconds\nwhile the Co2 sensor is\ncalibrating. And do not\ninterfere with the Co2 while\nthe sensor is calibrating.";
+const char* co2Alert                   = "Alert the system is about\nto start pumping Co2. Please\nmake sure that no one is\ninside! Starting in $ seconds\nDo you want to continue?";
+const char* cancelCo2                  = "Pumping Co2 for $ minutes.\nPlease make sure that no\none is inside! Press cancel to\nquit Co2 pumping at any time.";
+// info's
+const char* ecPageInfo                 = "Set the minimum and maximum\ntarget EC values. The EC\nwill be adjusted when the\nEC goes outside the minimum target"; // TO DO...
+const char* tdsPageInfo                = "Set the minimum and maximum\ntarget TDS values. The TDS\nwill be adjusted when the\nTDS goes outside the minimum target"; // TO DO...
+const char* phPageInfo                 = "Set the minimum and maximum\ntarget PH values. The PH\nwill be adjusted when the\nPH goes outside the minimum\n or maximum targets"; // TO DO...
+// TO DO, add all the other info messages...
 // log messages
-const char bootNotification[]           = "System started";     // 0
-const char drainNotification[]          = "Drained water";      // 1
-const char refillNotification[]         = "Refilled water";     // 2
-const char co2Notification[]            = "Adjusted Co2";       // 3
-const char lightOnNotification[]        = "Light on";           // 4
-const char lightOffNotification[]       = "Light off";          // 5
-const char lightErrorNotification[]     = "Error light off";    // 6
-const char phUpNotification[]           = "Adjusted PH up";     // 7
-const char phDownNotification[]         = "Adjusted PH down";   // 8
-const char ecNotification[]             = "Adjusted EC";        // 9
-const char tdsNotification[]            = "Adjusted TDS";       // 10
-const char heaterOnNotification[]       = "Air heater on";      // 11
-const char heaterOffNotification[]      = "Air heater off";     // 12
-const char waterOnNotification[]        = "Water heater on";    // 13
-const char waterOffNotification[]       = "Water heater off";   // 14
-const char* const notificationsArray[]  = {
+const char* bootNotification           = "System started";     // 0
+const char* drainNotification          = "Drained water";      // 1
+const char* refillNotification         = "Refilled water";     // 2
+const char* co2Notification            = "Adjusted Co2";       // 3
+const char* lightOnNotification        = "Light on";           // 4
+const char* lightOffNotification       = "Light off";          // 5
+const char* lightErrorNotification     = "Error light off";    // 6
+const char* phUpNotification           = "Adjusted PH up";     // 7
+const char* phDownNotification         = "Adjusted PH down";   // 8
+const char* ecNotification             = "Adjusted EC";        // 9
+const char* tdsNotification            = "Adjusted TDS";       // 10
+const char* heaterOnNotification       = "Air heater on";      // 11
+const char* heaterOffNotification      = "Air heater off";     // 12
+const char* waterOnNotification        = "Water heater on";    // 13
+const char* waterOffNotification       = "Water heater off";   // 14
+const char* const notificationsArray[] = {
   bootNotification,
   drainNotification,
   refillNotification,
@@ -224,7 +230,7 @@ uint8_t systemLogPos = 0;
 }
 
 namespace device {
-const char versionNumber[] = "5.0.0"; // do not adjust !
+const char* versionNumber = "5.0.0"; // do not adjust !
 bool relayOffState = HIGH;
 const uint8_t slaveAddress = 9;
 int remotlyLoadUserProfile = -1;
@@ -357,11 +363,11 @@ enum controlOptions {
 }
 
 namespace user {
-char profileOneName[11]   = "Profile_1";
-char profileTwoName[11]   = "Profile_2";
-char profileThreeName[11] = "Profile_3";
-char profileFourName[11]  = "Profile_4";
-char profileFiveName[11]  = "Profile_5";
+char profileOneName[16]   = "Profile_1";
+char profileTwoName[16]   = "Profile_2";
+char profileThreeName[16] = "Profile_3";
+char profileFourName[16]  = "Profile_4";
+char profileFiveName[16]  = "Profile_5";
 uint8_t lightOnTimeHour = 23;
 uint8_t lightOnTimeMin = 0;
 uint8_t lightOffTimeHour = 22;

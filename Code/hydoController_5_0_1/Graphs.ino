@@ -28,10 +28,10 @@ void drawGraph (
     // work out the x position to start the graph at, based on the width on the y axis numbers. while drawing the draw y line and numbers   
     float yIncrement = 0;
     if (!isEqual(maxArrayVal,  minArrayVal, 0.01))
-      yIncrement = (maxArrayVal - minArrayVal) / a_numYLabels - 1;
+      yIncrement = (maxArrayVal - minArrayVal) / a_numYLabels;
     else
       yIncrement = maxArrayVal / a_numYLabels;
-    //printf("minArrayVal %0.2f, maxArrayVal %0.2f, yIncrement %0.2f\n", minArrayVal, maxArrayVal, yIncrement);
+    printf("minArrayVal %0.2f, maxArrayVal %0.2f, yIncrement %0.2f\n", minArrayVal, maxArrayVal, yIncrement);
     float yLablePosition = a_yStartPos - 6;
     float tempYmax = maxArrayVal;
     const float yLableGap = (a_graphHeight - 10) / a_numYLabels;

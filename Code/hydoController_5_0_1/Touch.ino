@@ -1,33 +1,25 @@
 void touchEvent() {
    if (tft.touched()) {
     tft.touchReadPixel(&display::touch_x, &display::touch_y);
-    display::currentTouch = millis();
+    display::lastTouchMillis = millis();
     static uint16_t previousTouchX = 0, previousTouchY = 0;
     if (display::touch_x > 0 && display::touch_y > 0) {
       //tft.fillCircle(display::touch_x, display::touch_y, 2, RA8875_WHITE); // for touch debugging / calibration check
-      if (abs(display::touch_x - previousTouchX) <= 20 && abs(display::touch_y - previousTouchY) <= 20)
-        mainMenuNavigation();
       sliders();
-      if (millis() - display::previousTouchMillis >= display::debounceTime) {
+      static unsigned long previousTouchMillis = 0;
+      if (millis() - previousTouchMillis >= display::debounceTime) {       
+        mainMenuNavigation();
         adjustPageValues();
-        display::previousTouchMillis = millis();
-      }
+        previousTouchMillis = millis();
+      }      
       previousTouchX = display::touch_x;
       previousTouchY = display::touch_y;
     }
   }
-  else if (millis() > display::currentTouch + display::debounceTime) {
-    display::lastTouch = millis();
-   // display::lastLeftTouch = tft.width();
-   // display::lastRightTouch = 0;
-   // display::lastUpTouch = tft.height();
-   // display::lastDownTouch = 0;
-    if (device::isPriming != 0) {
-      device::isPriming = 0;
-      prime(0, 0, 0);
-    }
-  }
-  display::debounceTime = 250;
+  else if (millis() - display::lastTouchMillis >= 250UL) {
+    display::touchStartMillis = millis();
+    display::debounceTime = 200;
+  }    
 }
 
 void mainMenuNavigation() {
@@ -646,7 +638,7 @@ void profilesPageTouched() {
       a_charPtr = user::profileFiveName;
     static unsigned long previousKeyTouch;
     if (millis() - previousKeyTouch > 500UL) {
-      keyboardTouched(a_charPtr, 11);
+      keyboardTouched(a_charPtr, 16);
       previousKeyTouch = millis();
     }
   }
@@ -1577,6 +1569,8 @@ void settingsFourPageTouched() {
           user::doserOneSpeed = adjustValue(user::doserOneSpeed, 1, 1, 4096);
         else if (display::touch_x >= 120 - startPosition && display::touch_x <= 240 - startPosition && display::touch_y >= 310 && display::touch_y <= 350) // doser 1 prime
           prime(1, pca9685Channel::doserOne, user::doserOneSpeed);
+        else if (device::isPriming == 1)
+          prime(1, pca9685Channel::doserOne, 0);
       }
       else if (n == 1) {
         if (display::touch_x >= 278 - startPosition && display::touch_x <= 358 - startPosition && display::touch_y >= 370 && display::touch_y <= 410) // doser speed 2 down
@@ -1585,6 +1579,8 @@ void settingsFourPageTouched() {
           user::doserTwoSpeed = adjustValue(user::doserTwoSpeed, 1, 1, 4096);
         else if (display::touch_x >= 293 - startPosition && display::touch_x <= 413 - startPosition && display::touch_y >= 310 && display::touch_y <= 350) // doser 2 prime
           prime(2, pca9685Channel::doserTwo, user::doserTwoSpeed);
+        else if (device::isPriming == 2)
+          prime(2, pca9685Channel::doserTwo, 0);
       }
       else if (n == 2) {
         if (display::touch_x >= 458 - startPosition && display::touch_x <= 538 - startPosition && display::touch_y >= 370 && display::touch_y <= 410) // doser speed 3 down
@@ -1593,6 +1589,8 @@ void settingsFourPageTouched() {
           user::doserThreeSpeed = adjustValue(user::doserThreeSpeed, 1, 1, 4096);
         else if (display::touch_x >= 473 - startPosition && display::touch_x <= 593 - startPosition && display::touch_y >= 310 && display::touch_y <= 350) // doser 3 prime
           prime(3, pca9685Channel::doserThree, user::doserThreeSpeed);
+        else if (device::isPriming == 3)
+          prime(3, pca9685Channel::doserThree, 0);
       }
       else if (n == 3) {
         if (display::touch_x >= 635 - startPosition && display::touch_x <= 702 - startPosition && display::touch_y >= 370 && display::touch_y <= 410) // doser speed 4 down
@@ -1601,6 +1599,8 @@ void settingsFourPageTouched() {
           user::doserFourSpeed = adjustValue(user::doserFourSpeed, 1, 1, 4096);
         else if (display::touch_x >= 650 - startPosition && display::touch_x <= 770 - startPosition && display::touch_y >= 310 && display::touch_y <= 350) // doser 4 prime
           prime(4, pca9685Channel::doserFour, user::doserFourSpeed);
+        else if (device::isPriming == 4)
+          prime(4, pca9685Channel::doserFour, 0);
       }
       else if (n == 4) {
         if (display::touch_x >= 813 - startPosition && display::touch_x <= 880 - startPosition && display::touch_y >= 370 && display::touch_y <= 410) // doser speed 5 down
@@ -1609,6 +1609,8 @@ void settingsFourPageTouched() {
           user::doserFiveSpeed = adjustValue(user::doserFiveSpeed, 1, 1, 4096);
         else if (display::touch_x >= 828 - startPosition && display::touch_x <= 948 - startPosition && display::touch_y >= 310 && display::touch_y <= 350) // doser 5 prime
           prime(5, pca9685Channel::doserFive, user::doserFiveSpeed);
+        else if (device::isPriming == 5)
+          prime(5, pca9685Channel::doserFive, 0);
       }
       else if (n == 5) {
         if (display::touch_x >= 991 - startPosition && display::touch_x <= 1058 - startPosition && display::touch_y >= 370 && display::touch_y <= 410) // doser speed 6 down
@@ -1617,6 +1619,8 @@ void settingsFourPageTouched() {
           user::doserSixSpeed = adjustValue(user::doserSixSpeed, 1, 1, 4096);
         else if (display::touch_x >= 1006 - startPosition && display::touch_x <= 1126 - startPosition && display::touch_y >= 310 && display::touch_y <= 350) // doser 6 prime
           prime(6, pca9685Channel::doserSix, user::doserSixSpeed);
+        else if (device::isPriming == 6)
+          prime(6, pca9685Channel::doserSix, 0);
       }
     }
     if (display::touch_x >= 400 && display::touch_x <= 500 && display::touch_y >= 410 && display::touch_y <= 460) { // exit
@@ -2143,6 +2147,8 @@ void dosersPageTouched() {
           user::doserOneMode = device::DOSER_OFF;
         device::settingsAdjusted = true;
       }
+      else if (device::isPriming == 1)
+        prime(1, pca9685Channel::doserOne, 0);
     }
     else if (n == 1) {
       if (display::touch_x >= (278 - startPosition) && display::touch_x <= (358 - startPosition) && display::touch_y >= 310 && display::touch_y <= 410) { // doser 2 down
@@ -2170,6 +2176,8 @@ void dosersPageTouched() {
           user::doserTwoMode = device::DOSER_OFF;
         device::settingsAdjusted = true;
       }
+      else if (device::isPriming == 2)
+        prime(2, pca9685Channel::doserTwo, 0);
     }
     else if (n == 2) {
       if (display::touch_x >= (458 - startPosition) && display::touch_x <= (538 - startPosition) && display::touch_y >= 310 && display::touch_y <= 410) { // doser 3 down
@@ -2197,6 +2205,8 @@ void dosersPageTouched() {
           user::doserThreeMode = device::DOSER_OFF;
         device::settingsAdjusted = true;
       }
+      else if (device::isPriming == 3)
+        prime(3, pca9685Channel::doserThree, 0);
     }
     else if (n == 3) {
       if (display::touch_x >= (635 - startPosition) && display::touch_x <= (702 - startPosition) && display::touch_y >= 310 && display::touch_y <= 410) { // doser 4 down
@@ -2224,6 +2234,8 @@ void dosersPageTouched() {
           user::doserFourMode = device::DOSER_OFF;
         device::settingsAdjusted = true;
       }
+      else if (device::isPriming == 4)
+        prime(4, pca9685Channel::doserFour, 0);
     }
     else if (n == 4) {
       if (display::touch_x >= (813 - startPosition) && display::touch_x <= (880 - startPosition) && display::touch_y >= 310 && display::touch_y <= 410) { // doser 5 down
@@ -2251,6 +2263,8 @@ void dosersPageTouched() {
           user::doserFiveMode = device::DOSER_OFF;
         device::settingsAdjusted = true;
       }
+      else if (device::isPriming == 5)
+        prime(5, pca9685Channel::doserFive, 0);
     }
     else if (n == 5) {
       if (display::touch_x >= (991 - startPosition) && display::touch_x <= (1058 - startPosition) && display::touch_y >= 310 && display::touch_y <= 410) { // doser 6 down
@@ -2278,6 +2292,8 @@ void dosersPageTouched() {
           user::doserSixMode = device::DOSER_OFF;
         device::settingsAdjusted = true;
       }
+      else if (device::isPriming == 6)
+        prime(6, pca9685Channel::doserSix, 0);
     }
   }
 }
@@ -2619,6 +2635,23 @@ void warningsPageTouched() {
   }
 }
 
+void addCharToStr(char* a_charPtr, const int a_arrayLen, const char a_char) {
+  for (int i = 0; i < a_arrayLen; i++) {
+    if (tft.getStringWidth(a_charPtr) + tft.getStringWidth(a_char) > 336) {
+      if (device::intputPosition > 0)
+        device::intputPosition--;
+      a_charPtr[device::intputPosition] = 0;
+    }
+    else {
+      break;
+    }
+  }
+  a_charPtr[device::intputPosition] = a_char;
+  if (device::intputPosition < a_arrayLen - 2)
+    device::intputPosition++;
+  device::updateKeyboardInput = true;
+}
+
 // This function is in charge of all keys pressed within the keybaord.
 void keyboardTouched(char* a_charPtr, const int a_arrayLen) {
   //printf("keyboard touched\n");
@@ -2640,10 +2673,7 @@ void keyboardTouched(char* a_charPtr, const int a_arrayLen) {
     if (display::touch_x >= keyboardColumn && display::touch_x <= keyboardColumn + 50 && display::touch_y >= keyboardRow - 60 && display::touch_y <= keyboardRow - 2) {
       //printf("Touched dot\n");
       beep();
-      a_charPtr[device::intputPosition] = '.';
-      if (device::intputPosition < a_arrayLen - 2)
-        device::intputPosition++;
-      device::updateKeyboardInput = true;
+      addCharToStr(a_charPtr, a_arrayLen, '.');
     }
     // 0-9
     keyboardColumn += 60;
@@ -2651,10 +2681,7 @@ void keyboardTouched(char* a_charPtr, const int a_arrayLen) {
       if (display::touch_x >= keyboardColumn && display::touch_x <= keyboardColumn + 50 && display::touch_y >= keyboardRow - 60 && display::touch_y <= keyboardRow - 2) {
         //printf("Touched num: %c\n", (char)numbers);
         beep();
-        a_charPtr[device::intputPosition] = numbers;
-        if (device::intputPosition < a_arrayLen - 2)
-          device::intputPosition++;
-        device::updateKeyboardInput = true;
+        addCharToStr(a_charPtr, a_arrayLen, numbers);
         break;
       }
       keyboardColumn += 60;
@@ -2665,11 +2692,8 @@ void keyboardTouched(char* a_charPtr, const int a_arrayLen) {
     for (int i = 0; i < 11; i++) {
       if (display::touch_x >= keyboardColumn && display::touch_x <= keyboardColumn + 50 && display::touch_y >= keyboardRow - 60 && display::touch_y <= keyboardRow - 2) {
         //printf("Touched num: %c\n", (char)numbers);
-        beep();
-        a_charPtr[device::intputPosition] = device::specialSymbols[i];
-        if (device::intputPosition < a_arrayLen - 2)
-          device::intputPosition++;
-        device::updateKeyboardInput = true;
+        beep();  
+        addCharToStr(a_charPtr, a_arrayLen, device::specialSymbols[i]);
         break;
       }
       keyboardColumn += 60;
@@ -2682,10 +2706,7 @@ void keyboardTouched(char* a_charPtr, const int a_arrayLen) {
     if (display::touch_x >= keyboardColumn && display::touch_x <= keyboardColumn + 50 && display::touch_y >= keyboardRow && display::touch_y <= keyboardRow + 58) {
       //printf("Touched char: %c\n", (char)characters);
       beep();
-      a_charPtr[device::intputPosition] = characters;
-      if (device::intputPosition < a_arrayLen - 2)
-        device::intputPosition++;
-      device::updateKeyboardInput = true;
+      addCharToStr(a_charPtr, a_arrayLen, characters);
       break;
     }
     characters++;
@@ -2706,10 +2727,7 @@ void keyboardTouched(char* a_charPtr, const int a_arrayLen) {
   if (display::touch_x >= keyboardColumn && display::touch_x <= keyboardColumn + 50 && display::touch_y >= keyboardRow && display::touch_y <= keyboardRow + 58) {
     //printf("Touched UnderScore\n");
     beep();
-    a_charPtr[device::intputPosition] = '_'; // " " for space
-    if (device::intputPosition < a_arrayLen - 2)
-      device::intputPosition++;
-    device::updateKeyboardInput = true;
+    addCharToStr(a_charPtr, a_arrayLen, '_'); 
   }
   // DELETE CHAR
   else if (display::touch_x >= (keyboardColumn += 60) && display::touch_x <= keyboardColumn + 80 && display::touch_y >= keyboardRow && display::touch_y <= keyboardRow + 58) {
