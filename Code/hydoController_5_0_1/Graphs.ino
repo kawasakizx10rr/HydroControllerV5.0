@@ -29,6 +29,8 @@ void drawGraph (
     float yIncrement = 0;
     if (!isEqual(maxArrayVal,  minArrayVal, 0.01))
       yIncrement = (maxArrayVal - minArrayVal) / a_numYLabels - 1;
+    else
+      yIncrement = maxArrayVal / a_numYLabels;
     //printf("minArrayVal %0.2f, maxArrayVal %0.2f, yIncrement %0.2f\n", minArrayVal, maxArrayVal, yIncrement);
     float yLablePosition = a_yStartPos - 6;
     float tempYmax = maxArrayVal;
