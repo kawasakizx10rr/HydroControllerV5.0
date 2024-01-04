@@ -8,7 +8,7 @@ void handleRoot() {
   for (int n = 0; n < 2048; n++) {
     packetBuffer[n] = 0;
   }
-  printf("Sending %d bytes...\n", sizeof(htmlText));
+  printf("Sending html file @ %d bytes...\n", sizeof(htmlText));
   for (unsigned int i = 0; i < sizeof(htmlText);) {
     if (byteCount < 2048) {
       packetBuffer[byteCount] = htmlText[i++];
@@ -44,10 +44,10 @@ void setValue() {
   char val[64] {0};
   server.arg("val").toCharArray(val, 64);
   if (cmd == "" || val[0] == 0) { //Parameters not found
-    printf("Arguments not found!\n");
+    printf("Web argument not found!\n");
   }
   else {
-    printf("Received cmd: %s and val: %s\n", cmd, val);
+    printf("Received web cmd: %s and val: %s\n", cmd, val);
     // ============== PROFILES PAGE  ==============
     // profileOneName
     if (cmd == "profileOneName") {
@@ -422,7 +422,7 @@ void setValue() {
 }
 
 void buildArgs() {
-  printf("Building args...\n");
+  printf("Building web args...\n");
   memset(wifi::webData, 0, sizeof(wifi::webData));
   delay(1);
   // ec array val 0
@@ -670,7 +670,7 @@ void buildArgs() {
   // dosing Interval (val 1380)
   copyIntToArrray(user::dosingInterval);
   // swap Interval (val 1381)
-  copyIntToArrray(user::swapInterval);
+  copyIntToArrray(0);
   // refill Doser One Mills (val 1382)
   copyIntToArrray(user::refillDoserOneMills);
   // refill Doser Two Mills (val 1383)

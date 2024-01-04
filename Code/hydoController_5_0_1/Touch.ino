@@ -695,9 +695,9 @@ void settingsZeroPageTouched() {
     }
     else if (display::setRtcTimePos == 2) {
       if (display::touch_x >= 495 && display::touch_x <= 545 && display::touch_y >= 375 && display::touch_y <= 425 ) // rtcMonth down
-        user::rtcMonth = adjustValue(user::rtcMonth, -1, 0, 12);
+        user::rtcMonth = adjustValue(user::rtcMonth, -1, 1, 12);
       else if (display::touch_x >= 585 && display::touch_x <= 635 && display::touch_y >= 375 && display::touch_y <= 425 ) // rtcMonth up
-        user::rtcMonth = adjustValue(user::rtcMonth, 1, 0, 12);      
+        user::rtcMonth = adjustValue(user::rtcMonth, 1, 1, 12);      
     }
     else if (display::setRtcTimePos == 3) {
       if (display::touch_x >= 495 && display::touch_x <= 545 && display::touch_y >= 375 && display::touch_y <= 425 ) // rtcYear down
@@ -950,11 +950,7 @@ void settingsOnePageTouched() {
         else if (display::touch_x >= 460 && display::touch_x <= 620 && display::touch_y >= 430 && display::touch_y <= 470) { // confirm
           beep();
           if (wifi::wifiEnabled) {
-            WiFi.softAPdisconnect(false);
-            WiFi.enableAP(false);
-            delay(100);
-            WiFi.softAP(wifi::ssid, wifi::password, wifi::hiddenNetwork);
-            WiFi.enableAP(true);
+            restartWifi();
           }
           display::showWifiSsid = false;
           clearPage();
@@ -988,11 +984,7 @@ void settingsOnePageTouched() {
         else if (display::touch_x >= 460 && display::touch_x <= 620 && display::touch_y >= 430 && display::touch_y <= 470) { // confirm
           beep();
           if (wifi::wifiEnabled) {
-            WiFi.softAPdisconnect(false);
-            WiFi.enableAP(false);
-            delay(100);
-            WiFi.softAP(wifi::ssid, wifi::password, wifi::hiddenNetwork);
-            WiFi.enableAP(true);
+            restartWifi();
           }
           display::showWifiPassword = false;
           clearPage();
@@ -1073,11 +1065,16 @@ void settingsOnePageTouched() {
           if (wifi::wifiEnabled) {
             WiFi.softAP(wifi::ssid, wifi::password, wifi::hiddenNetwork);
             WiFi.enableAP(true);
+            server.begin(); // Start web server
+            String IP = WiFi.softAPIP().toString();
+            printf("Started AP on IP address: %s\n", IP);
+            printf("AP SSID: %s\n", wifi::ssid);
+            printf("AP password: %s\n", wifi::password);
           }
           else {
-            WiFi.softAPdisconnect(false);
+            WiFi.softAPdisconnect(true);
             WiFi.enableAP(false);
-            
+            server.stop(); // Stop web server           
           }
           previousWifiOnOffTime = millis();
         }

@@ -832,7 +832,8 @@ void displaySetRTCTime() {
   static int previousDatePosition;
   static uint8_t previousUserRTCDay;
   static uint8_t previousUserRTCMonth;
-  if (display::refreshPage || previousUserRTCDay != user::rtcDay || previousUserRTCMonth != user::rtcMonth) {
+  static int previousUserRTCYear;
+  if (display::refreshPage || previousUserRTCDay != user::rtcDay || previousUserRTCMonth != user::rtcMonth || previousUserRTCYear != user::rtcYear) {
     char dateStr[16];
     memset(dateStr, 0, 16);
     memset(buffer, 0, 8);
@@ -880,6 +881,7 @@ void displaySetRTCTime() {
     previousDatePosition = tft.getFontX();
     previousUserRTCDay = user::rtcDay;
     previousUserRTCMonth = user::rtcMonth;
+    previousUserRTCYear = user::rtcYear;
   }
   // time
   static int previousTimePosition;

@@ -318,7 +318,6 @@ void loadProfile(int a_address) {
   EEPROM.get(a_address, user::doserFiveSpeed);               a_address += sizeof(user::doserFiveSpeed);
   EEPROM.get(a_address, user::doserSixSpeed);                a_address += sizeof(user::doserSixSpeed);
   EEPROM.get(a_address, user::dosingInterval);               a_address += sizeof(user::dosingInterval);
-  EEPROM.get(a_address, user::swapInterval);                 a_address += sizeof(user::swapInterval);
   EEPROM.get(a_address, user::refillDoserOneMills);          a_address += sizeof(user::refillDoserOneMills);
   EEPROM.get(a_address, user::refillDoserTwoMills);          a_address += sizeof(user::refillDoserTwoMills);
   EEPROM.get(a_address, user::refillDoserThreeMills);        a_address += sizeof(user::refillDoserThreeMills);
@@ -459,7 +458,6 @@ void saveProfile(int a_address) {
   EEPROM.put(a_address, user::doserFiveSpeed);               a_address += sizeof(user::doserFiveSpeed);
   EEPROM.put(a_address, user::doserSixSpeed);                a_address += sizeof(user::doserSixSpeed);
   EEPROM.put(a_address, user::dosingInterval);               a_address += sizeof(user::dosingInterval);
-  EEPROM.put(a_address, user::swapInterval);                 a_address += sizeof(user::swapInterval);
   EEPROM.put(a_address, user::refillDoserOneMills);          a_address += sizeof(user::refillDoserOneMills);
   EEPROM.put(a_address, user::refillDoserTwoMills);          a_address += sizeof(user::refillDoserTwoMills);
   EEPROM.put(a_address, user::refillDoserThreeMills);        a_address += sizeof(user::refillDoserThreeMills);

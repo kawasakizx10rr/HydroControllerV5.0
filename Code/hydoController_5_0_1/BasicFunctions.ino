@@ -10,13 +10,13 @@ void initializeDevice() {
   tft.setCursor(120, 276);
   tft.print("version "); tft.print(device::versionNumber);
   int startX = 305;
-  for (uint8_t i = 0; i < 6; i++) {
-    tft.fillCircle(startX, 340, 14, RA8875_WHITE);
-    startX += 38;
-    delay(500);
-  }
   //externalEEPROM.setMemoryType(256);
-  initializeEEPROM();
+  for (int i = 0; i < 5; i++)  {
+    tft.fillCircle(startX, 340, 14, RA8875_WHITE);
+    delay(500);
+    startX += 38;
+  }
+  //initializeEEPROM();
   //
   dallasTemperature.begin();
   //
@@ -39,6 +39,7 @@ void initializeDevice() {
   analogWriteChnl(pca9685Channel::outletPump, (device::relayOffState == HIGH ? 4096 : 0));
   analogWriteChnl(pca9685Channel::light, (device::relayOffState == HIGH ? 4096 : 0));
   analogWriteChnl(pca9685Channel::waterHeater, (device::relayOffState == HIGH ? 4096 : 0));
+
   // If light is set to auto mode check timer
   if (user::lightMode == 0 && restartLightingTimer()) {
     analogWriteChnl(pca9685Channel::light, (device::relayOffState == HIGH ? 0 : 4096));
@@ -80,23 +81,24 @@ void initializeDevice() {
     device::fanTwoSpeedArray[0] = 0.01;
     device::graphArrayPos = 1;
   }
+
   if (wifi::wifiEnabled) {
-  // Connect to Wi-Fi network with SSID and password
-  // Remove the password parameter, if you want the AP (Access Point) to be open
-  //WiFi.softAP(wifi::ssid, wifi::password, wifi::hiddenNetwork);
-  // Print connection details
-  ///IPAddress IP = WiFi.softAPIP();
-  //printf("Started AP on IP address: %s\n", IP);
-  //printf("AP SSID: %s\n", wifi::ssid);
-  //printf("AP password: %s\n", wifi::password);
-  // HTML call back functions from user interactions
-  //server.on("/", handleRoot);  // This is display page
-  //server.on("/getData", getData);
-  //server.on("/setValue", setValue);
-  // Start the Wifi portal
-  //server.begin();  //Start server
-  //delay(2000);
+    // Connect to Wi-Fi network with SSID and password
+    // Remove the password parameter, if you want the AP (Access Point) to be open
+    WiFi.softAP(wifi::ssid, wifi::password, wifi::hiddenNetwork);
+    // Print connection details
+    IPAddress IP = WiFi.softAPIP();
+    printf("Started AP on IP address: %s\n", IP);
+    printf("AP SSID: %s\n", wifi::ssid);
+    printf("AP password: %s\n", wifi::password);
+    // HTML call back functions from user interactions
+    server.on("/", handleRoot);  // This is display page
+    server.on("/getData", getData);
+    server.on("/setValue", setValue);
+    // Start the Wifi portal
+    server.begin();  //Start web server
   }
+
   rtc.refresh();
   device::previousDosingMinute = rtc.minute();
   device::previousDosingHour = rtc.hour();
@@ -481,11 +483,7 @@ void clearSystemLogs() {
 }
 
 float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {
-  if (in_min == in_max) {
-    out_min -= 0.01;
-    out_max += 0.01;
-  } 
-  else if (out_min == out_max)
+  if (in_min == in_max || out_min == out_max)
     return out_max;
   else if (x < in_min)
     return out_min;
@@ -508,4 +506,18 @@ bool hasChanged(const float& a_val, float& a_prevVal, const float& epsilon) {
     return true;
   }
   return false;
+}
+
+void restartWifi() {
+  WiFi.softAPdisconnect(false);
+  WiFi.enableAP(false);
+  server.stop(); // Stop web server   
+  delay(100);
+  WiFi.softAP(wifi::ssid, wifi::password, wifi::hiddenNetwork);
+  WiFi.enableAP(true);
+  server.begin(); // Start web server server.stop(); // Stop web server   
+  String IP = WiFi.softAPIP().toString();
+  printf("Started AP on IP address: %s\n", IP);
+  printf("AP SSID: %s\n", wifi::ssid);
+  printf("AP password: %s\n", wifi::password);
 }

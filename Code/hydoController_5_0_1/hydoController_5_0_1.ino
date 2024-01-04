@@ -44,7 +44,7 @@ const uint8_t rxd2 = 16;
 const uint8_t txd2 = 17;
 // display
 const uint8_t ra8875_rst = 33;
-const uint8_t ra8875_cs = 5;
+const uint8_t ra8875_cs = 32; // was 5
 const uint8_t ra8875_sdo = 19;
 const uint8_t ra8875_sdi = 23;
 const uint8_t ra8875_sck = 18;
@@ -54,7 +54,7 @@ const uint8_t oneWireBus = 26;
 const uint8_t phTransistor = 4;
 const uint8_t tdsTransistor = 27;
 // Ultrasonic sensor
-const uint8_t hcsrEcho = 32;
+const uint8_t hcsrEcho = 5;
 const uint8_t hcsrTrigger = 15;
 }
 
@@ -435,7 +435,6 @@ int doserFourSpeed = 4096;
 int doserFiveSpeed = 4096;
 int doserSixSpeed = 4096;
 uint8_t dosingInterval = 6;
-uint8_t swapInterval = 2;
 int refillDoserOneMills = 10;
 int refillDoserTwoMills = 10;
 int refillDoserThreeMills = 10;
@@ -565,7 +564,6 @@ WebServer server(80);
 void setup() {
   Serial.begin(115200); // debugging
   Serial2.begin(9600, SERIAL_8N1, pin::rxd2, pin::txd2); // co2 sensor
-  delay(1000);
   pinMode(pin::hcsrEcho, INPUT);
   pinMode(pin::hcsrTrigger, OUTPUT);
   pinMode(pin::tdsTransistor, OUTPUT);
@@ -582,8 +580,8 @@ void loop() {
   readSensors();
   drawPages();
   envriomentalControl();
-  //if (wifi::wifiEnabled)
-  //server.handleClient();
+  if (wifi::wifiEnabled)
+    server.handleClient();
   displayWarnings();
   screenSaver();
 }

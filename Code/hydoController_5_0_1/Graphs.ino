@@ -26,11 +26,12 @@ void drawGraph (
   if (display::refreshPage || hasChanged(minArrayVal, prevMinArrayVal, 0.01) || hasChanged(maxArrayVal, prevMaxArrayVal, 0.01)) {
     tft.fillRect(a_xStartPos, a_yStartPos, a_graphWidth, 480 - a_yStartPos, user::backgroundColor); //
     // work out the x position to start the graph at, based on the width on the y axis numbers. while drawing the draw y line and numbers   
-    float yIncrement = maxArrayVal / a_numYLabels;
+    float yIncrement = (maxArrayVal - minArrayVal) / a_numYLabels - 1;
     float yLablePosition = a_yStartPos - 6;
     float tempYmax = maxArrayVal;
     const float yLableGap = (a_graphHeight - 10) / a_numYLabels;
     graphXstartPosition = a_xStartPos;
+
     for (int i = 0; i < a_numYLabels + 1; i++) {
       tft.setCursor(a_xStartPos, yLablePosition);
       tft.print(tempYmax, a_percision);
