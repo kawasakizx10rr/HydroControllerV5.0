@@ -529,3 +529,20 @@ void restartWifi() {
   printf("AP SSID: %s\n", wifi::ssid);
   printf("AP password: %s\n", wifi::password);
 }
+
+void addCharToStr(char* a_charPtr, const int a_arrayLen, const char a_char) {
+  for (int i = 0; i < a_arrayLen; i++) {
+    if (tft.getStringWidth(a_charPtr) + tft.getStringWidth(a_char) > 336) {
+      if (device::intputPosition > 0)
+        device::intputPosition--;
+      a_charPtr[device::intputPosition] = 0;
+    }
+    else {
+      break;
+    }
+  }
+  a_charPtr[device::intputPosition] = a_char;
+  if (device::intputPosition < a_arrayLen - 2)
+    device::intputPosition++;
+  device::updateKeyboardInput = true;
+}

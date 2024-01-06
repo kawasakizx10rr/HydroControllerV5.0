@@ -443,6 +443,8 @@ void adjustPageValues() {
     infoDialogTouched();
   else if (display::page == 1)
     graphsPageTouched();
+  else if (display::page == 2)
+    maxMinsPageTouched();
   else if (display::page == 3)
     profilesPageTouched();
   else if (display::page == 4)
@@ -507,6 +509,16 @@ void graphsPageTouched() {
   }
 }
 
+void maxMinsPageTouched() {
+  if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+    message::infoPos = 20;
+    display::showingDialog = true;
+    display::showInfoDialog = true;
+    display::refreshPage = true;
+    display::infoDialogDisplayTime = millis();
+  }
+}
+
 void profilesPageTouched() {
   if (display::showSaveDialog && !display::showKeyboard) {
     if (display::touch_x >= 284 && display::touch_x <= 422 && display::touch_y >= 368 && display::touch_y <= 414) { // cancel saving profile
@@ -528,6 +540,13 @@ void profilesPageTouched() {
       display::showSaveDialog = false;
       display::refreshPage = true;
       clearPage();
+    }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 21;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
     }
   }
   else if (device::lockSaveButtons) {
@@ -744,6 +763,13 @@ void settingsZeroPageTouched() {
       display::showingDialog = false;
       display::refreshPage = true;
     }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 23;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
+    }
   }
   else if (display::showAfkTime) {
     if (display::touch_x >= 370 && display::touch_x <= 420 && display::touch_y >= 350 && display::touch_y <= 400) // afkTime time down
@@ -757,6 +783,13 @@ void settingsZeroPageTouched() {
       display::refreshPage = true;    
       display::showingDialog = false;
     }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 24;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
+    }
   }
   else if (display::showGraphInterval) {
     if (display::touch_x >= 370 && display::touch_x <= 420 && display::touch_y >= 350 && display::touch_y <= 400) // graphInterval time down
@@ -769,6 +802,13 @@ void settingsZeroPageTouched() {
       display::showGraphInterval = false;
       display::refreshPage = true;    
       display::showingDialog = false;
+    }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 25;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
     }
   }
   else {
@@ -938,6 +978,13 @@ void settingsOnePageTouched() {
       display::refreshPage = true;
       clearPage();
     }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 28;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
+    }
   }
   else if (display::showWifiSsid) {
     if (!display::showKeyboard) {
@@ -963,6 +1010,13 @@ void settingsOnePageTouched() {
           display::showingDialog = false;
           display::refreshPage = true;
         }
+      }
+      else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+        message::infoPos = 33;
+        display::showingDialog = true;
+        display::showInfoDialog = true;
+        display::refreshPage = true;
+        display::infoDialogDisplayTime = millis();
       }
     }
     else {
@@ -996,6 +1050,13 @@ void settingsOnePageTouched() {
           clearPage();
           display::showingDialog = false;
           display::refreshPage = true;
+        }
+        else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+          message::infoPos = 34;
+          display::showingDialog = true;
+          display::showInfoDialog = true;
+          display::refreshPage = true;
+          display::infoDialogDisplayTime = millis();
         }
       }
     }
@@ -1168,6 +1229,13 @@ void settingsTwoPageTouched() {
       display::refreshPage = true;    
       display::showingDialog = false;
     }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 27;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
+    }
   }
   else if (display::showDosingInterval) {
     if (display::touch_x >= 370 && display::touch_x <= 420 && display::touch_y >= 350 && display::touch_y <= 400) {// dosingInterval time down
@@ -1184,6 +1252,13 @@ void settingsTwoPageTouched() {
       display::showDosingInterval = false;
       display::refreshPage = true;    
       display::showingDialog = false;
+    }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 26;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
     }
   }
   else if (display::showEcDosingMode) {
@@ -1204,6 +1279,13 @@ void settingsTwoPageTouched() {
       display::refreshPage = true;    
       display::showingDialog = false;
     }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 29;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
+    }
   }
   else if (display::showPhDosingMode) {
     if (display::touch_x >= 190 && display::touch_x <= 700 && display::touch_y >= 220 && display::touch_y <= 270) { // PH dosing mode precise
@@ -1222,6 +1304,13 @@ void settingsTwoPageTouched() {
       display::showPhDosingMode = false;
       display::refreshPage = true;    
       display::showingDialog = false;
+    }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 30;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
     }
   }
   else if (display::showEcTdsValue) {
@@ -1248,6 +1337,13 @@ void settingsTwoPageTouched() {
       display::refreshPage = true;    
       display::showingDialog = false;
     }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 31;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
+    }
   }
   else if (display::showPhDownUpValue) {
     if (display::touch_x >= 210 && display::touch_x <= 260 && display::touch_y >= 400 && display::touch_y <= 450) {  // ph down solution down
@@ -1272,6 +1368,13 @@ void settingsTwoPageTouched() {
       display::showPhDownUpValue = false;
       display::refreshPage = true;    
       display::showingDialog = false;
+    }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 32;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
     }
   }
   else {
@@ -1650,6 +1753,13 @@ void settingsFourPageTouched() {
       display::refreshPage = true;
       clearPage();
       // save profile - speed could vary due to fluids viscosity and volatge so per profile save thus no auto save ?
+    }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 22;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
     }
   }
   else if (display::showEtapeCalibration == device::PAGE_ONE) {
@@ -2077,6 +2187,13 @@ void waterPageTouched() {
         user::waterTankWidth = adjustValue(user::waterTankWidth, 0.1, 0.1, 999);
       device::settingsAdjusted = true;
     }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 9;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
+    }
   }
   else if (display::waterPageScrollPos == 3) {
     uint16_t calanderX = 110;
@@ -2132,6 +2249,13 @@ void waterPageTouched() {
       user::disableDrainAndRefill = !user::disableDrainAndRefill;
       device::settingsAdjusted = true;
       beep();
+    }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 10;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
     }
   }
   else if (display::waterPageScrollPos == 4) {
@@ -2197,6 +2321,13 @@ void waterPageTouched() {
           device::settingsAdjusted = true;
         }
       }
+    }
+    if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 11;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
     }
   }
 }
@@ -2386,6 +2517,13 @@ void dosersPageTouched() {
       }
     }
   }
+  if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+    message::infoPos = 12;
+    display::showingDialog = true;
+    display::showInfoDialog = true;
+    display::refreshPage = true;
+    display::infoDialogDisplayTime = millis();
+  }
 }
 
 void lightingPageTouched() {
@@ -2473,6 +2611,13 @@ void lightingPageTouched() {
     user::lightMode = 2;
     device::settingsAdjusted = true;
   }
+  else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+    message::infoPos = 13;
+    display::showingDialog = true;
+    display::showInfoDialog = true;
+    display::refreshPage = true;
+    display::infoDialogDisplayTime = millis();
+  }
 }
 
 void fansPageTouched() {
@@ -2511,6 +2656,13 @@ void fansPageTouched() {
         device::settingsAdjusted = true;
       }
     }
+    if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 14;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
+    }
   }
   else if (display::fansPage == 1) {
     if (user::fanTwoFixedSpeed) {
@@ -2547,6 +2699,13 @@ void fansPageTouched() {
         device::settingsAdjusted = true;
       }
     }
+    if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 15;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
+    }
   }
   else if (display::fansPage == 2) {
     if (display::touch_x >= 210 && display::touch_x <= 260 && display::touch_y >= 400 && display::touch_y <= 450) { // min target air temp down
@@ -2577,6 +2736,13 @@ void fansPageTouched() {
         user::targetMaxAirTemp = adjustValue(user::targetMaxAirTemp, 0.1, 0, 99);
       device::settingsAdjusted = true;
     }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 16;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
+    }
   }
   else if (display::fansPage == 3) {
     if (display::touch_x >= 210 && display::touch_x <= 260 && display::touch_y >= 400 && display::touch_y <= 450) { // min target humidity down
@@ -2594,6 +2760,13 @@ void fansPageTouched() {
     else if (display::touch_x >= 680 && display::touch_x <= 730 && display::touch_y >= 400 && display::touch_y <= 450) { // max target humidity up
       user::targetMaxHumidity = adjustValue(user::targetMaxHumidity, 0.1, 1, 100);
       device::settingsAdjusted = true;
+    }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 17;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
     }
   }
   else if (display::fansPage == 4) {
@@ -2620,6 +2793,13 @@ void fansPageTouched() {
       if (user::fanTwoFixedSpeed)
         user::targetMinFanTwoSpeed = user::targetMaxFanTwoSpeed;
       device::settingsAdjusted = true;
+    }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 18;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
     }
   }
 }
@@ -2723,23 +2903,13 @@ void warningsPageTouched() {
       device::settingsAdjusted = true;
     }
   }
-}
-
-void addCharToStr(char* a_charPtr, const int a_arrayLen, const char a_char) {
-  for (int i = 0; i < a_arrayLen; i++) {
-    if (tft.getStringWidth(a_charPtr) + tft.getStringWidth(a_char) > 336) {
-      if (device::intputPosition > 0)
-        device::intputPosition--;
-      a_charPtr[device::intputPosition] = 0;
-    }
-    else {
-      break;
-    }
+  if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+    message::infoPos = 19;
+    display::showingDialog = true;
+    display::showInfoDialog = true;
+    display::refreshPage = true;
+    display::infoDialogDisplayTime = millis();
   }
-  a_charPtr[device::intputPosition] = a_char;
-  if (device::intputPosition < a_arrayLen - 2)
-    device::intputPosition++;
-  device::updateKeyboardInput = true;
 }
 
 // This function is in charge of all keys pressed within the keybaord.

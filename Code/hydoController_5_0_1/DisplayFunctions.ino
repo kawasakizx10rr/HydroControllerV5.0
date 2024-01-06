@@ -548,8 +548,7 @@ void continueMessage(const char* a_text, const float& a_num, const uint8_t a_pre
   //Frame
   if (!a_refresh) {
     tft.fillRoundRect(startX - 30, startY, 620, 250, 5, display::RA8875_SMOKE_WHITE);
-    tft.drawRoundRect(startX - 32, startY - 2, 622, 254, 5, RA8875_BLACK);
-    tft.drawRoundRect(startX - 32, startY - 1, 621, 252, 5, RA8875_BLACK);
+    tft.drawRoundRect(startX - 31, startY - 1, 622, 252, 5, RA8875_BLACK);
     // Buttons
     if (a_showContiue && a_showCancel) {
       cancelButton(startX + 108, startY + 200);
@@ -591,8 +590,7 @@ void abortMessage(const char *a_text, const char* a_str, const float& a_value, c
   uint16_t startX = 166, startY = 166;
   //Frame
   tft.fillRoundRect(startX - 20, startY, 600, 250, 5, display::RA8875_SMOKE_WHITE);
-  tft.drawRoundRect(startX - 22, startY - 2, 602, 254, 5, RA8875_BLACK);
-  tft.drawRoundRect(startX - 22, startY - 1, 601, 252, 5, RA8875_BLACK);
+  tft.drawRoundRect(startX - 21, startY - 1, 602, 252, 5, RA8875_BLACK);
   // Buttons
   cancelButton(startX + 200, startY + 200); // x was 178
   // Draw text
@@ -644,9 +642,8 @@ void infoMessage() {
     if (fontX > 0)
       dialogHeight += 40;
     //Frame
-    tft.fillRoundRect(startX - 20, startY, 620, dialogHeight, 5, display::RA8875_SMOKE_WHITE);
-    tft.drawRoundRect(startX - 22, startY - 2, 622, dialogHeight, 5, RA8875_BLACK);
-    tft.drawRoundRect(startX - 22, startY - 1, 621, dialogHeight, 5, RA8875_BLACK);
+    tft.fillRoundRect(startX - 20, startY, 630, dialogHeight, 5, display::RA8875_SMOKE_WHITE);
+    tft.drawRoundRect(startX - 21, startY - 1, 632, dialogHeight + 2, 5, RA8875_BLACK);
     //closeButton(startX + 200, startY + 250);
     tft.setCursor(startX - 8, startY);
     // Draw text
@@ -657,7 +654,7 @@ void infoMessage() {
       if (charPos < 32)
         charBuffer[charPos++] = c;
       if (charPos == 32 || c == ' ' || i == strlen(message::infoMessageArray[message::infoPos]) - 1) {
-        if (tft.getFontX() + tft.getStringWidth(charBuffer) > startX + 600) {
+        if (tft.getFontX() + tft.getStringWidth(charBuffer) > startX + 610) {
           startY += 38;
           tft.setCursor(startX - 8, startY);
         }

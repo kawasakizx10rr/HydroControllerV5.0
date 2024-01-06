@@ -189,8 +189,8 @@ const char* cancelCo2                  = "Pumping Co2 for $ minutes.\nPlease mak
 // pages info's
 const char* ecPageInfo                 = "Set the minimum and maximum EC target. The EC will be adjusted when the EC falls below the minimum target.";
 const char* tdsPageInfo                = "Set the minimum and maximum TDS target. The TDS will be adjusted when the TDS falls below the minimum target.";
-const char* phPageInfo                 = "Set the minimum and maximum PH target. The PH will be adjusted when the PH goes outside the minimum or maximum targets. ";
-const char* co2Page1Info               = "Set the Co2 target and offset. The Co2 will be adjusted when the Co2 falls below the target - offset.";
+const char* phPageInfo                 = "Set the minimum and maximum PH target. The PH will be adjusted when the PH goes outside the minimum or maximum targets.";
+const char* co2Page1Info               = "Set the Co2 target and offset. The Co2 will be adjusted when the Co2 falls below the target minus the offset.";
 const char* co2Page2Info               = "Set the dimensions of the room to control the Co2. The system will use these measurements to assist in calculating the gas duration.";
 const char* co2Page3Info               = "Set the Co2 flow rate, the time to adjust the rooms Co2, and the duration in minutes to disable the extraction fans.";
 const char* co2Page4Info               = "Enable or disable manual Co2 gas duration, when enabled the Co2 duration will be static, and manual Co2 gas duration can be adjusted. The Co2 adjustment can also be disabled";
@@ -213,7 +213,7 @@ const char* profilesPageInfo           = "Select the user profile to load. You c
 const char* calDoserPageInfo           = "Set the PWM for each of the dosing pumps, the aim is to achive 1 milliliter per second. You can also adjust the pumps voltage on the PCB if required."; 
 const char* rtcTimePageInfo            = "Set the date and time for the clock. Note the time is a 24 hour format and the date is a dd-mm-yyyy format.";
 const char* displayTimeoutPageInfo     = "Set the display timeout interval in minutes, the display will be turned off when it has not been touched for the given interval.";
-const char* graphIntervalPageInfo      = "Set the graph update interval in seconds or minutes. The valid range update interval is 2 to 59 seconds, or 1 to 999 minutes.";
+const char* graphIntervalPageInfo      = "Set the graph update interval in seconds or minutes. The valid range is 2 to 59 seconds, or 1 to 999 minutes.";
 const char* dosingIntervalPageInfo     = "Set the dosing interval in hours. The system will adjust the waters EC, TDS or PH every dosing interval.";
 const char* numDosersPageInfo          = "Set the number of dosing pumps connected to the hydro controller. The minimum number of dosing pumps is 4.";
 const char* systemLosPageInfo          = "View the log history, this includes a brief description and the date and time of each environmental adjustment.";
@@ -244,7 +244,7 @@ const char* infoMessageArray[] = {
   fanPage4Info,                  // 17
   fanPage5Info,                  // 18
   warningPageInfo,               // 19
-  maxminsPageInfo,               // 20
+  maxminsPageInfo,               // 20 
   profilesPageInfo,              // 21
   calDoserPageInfo,              // 22
   rtcTimePageInfo,               // 23
