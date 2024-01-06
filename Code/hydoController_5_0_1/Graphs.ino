@@ -31,7 +31,7 @@ void drawGraph (
       yIncrement = (maxArrayVal - minArrayVal) / a_numYLabels;
     else
       yIncrement = maxArrayVal / a_numYLabels;
-    printf("minArrayVal %0.2f, maxArrayVal %0.2f, yIncrement %0.2f\n", minArrayVal, maxArrayVal, yIncrement);
+    //printf("minArrayVal %0.2f, maxArrayVal %0.2f, yIncrement %0.2f\n", minArrayVal, maxArrayVal, yIncrement);
     float yLablePosition = a_yStartPos - 6;
     float tempYmax = maxArrayVal;
     const float yLableGap = (a_graphHeight - 10) / a_numYLabels;

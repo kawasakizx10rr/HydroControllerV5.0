@@ -295,6 +295,7 @@ void setPage(const uint8_t& a_page) {
     beep();
     display::page = a_page;
     OuterMenuIcons();
+    display::showInfoDialog = false;
     display::refreshPage = true;
     clearPage();
   }
@@ -543,8 +544,7 @@ void displayDosingNotification(const uint8_t& a_seconds, const float& a_outOfRan
 
 // Show a continue message with the string stored in the Program memory / Flash, and a float which can be excluded if -1
 void continueMessage(const char* a_text, const float& a_num, const uint8_t a_precision, const bool& a_showContiue, const bool& a_showCancel, bool a_refresh) {
-  int startX = 166; // makes it eaiser to position
-  int startY = 166;
+  uint16_t startX = 166, startY = 166;
   //Frame
   if (!a_refresh) {
     tft.fillRoundRect(startX - 30, startY, 620, 250, 5, display::RA8875_SMOKE_WHITE);
@@ -568,8 +568,8 @@ void continueMessage(const char* a_text, const float& a_num, const uint8_t a_pre
   tft.setTextColor(RA8875_BLACK);
   tft.setCursor(startX - 8, startY);
   static int numX = 0, numY = 0;
-  for (unsigned int i = 0; i < strlen_P(a_text); i++) {
-    char c = pgm_read_byte_near(a_text + i);
+  for (unsigned int i = 0; i < strlen(a_text); i++) {
+    char c = a_text[i];
     if (c == '$' && a_num != -1) {
       numX = tft.getFontX();
       numY = tft.getFontY();
@@ -577,19 +577,18 @@ void continueMessage(const char* a_text, const float& a_num, const uint8_t a_pre
         tft.fillRect(numX, numY, 744 - numX, 36, display::RA8875_SMOKE_WHITE);
       tft.print(a_num, a_precision);
     }
-    else
-      tft.print(c);
     if (c == '\n') {
       startY += 38;
       tft.setCursor(startX - 8, startY);
     }
+    else 
+      tft.print(c);
   }
 }
 
 // Show an abort message with the string stored in the Program memory / Flash, and a float and int which can be excluded if -1
 void abortMessage(const char *a_text, const char* a_str, const float& a_value, const int& a_doserNum, const uint8_t& a_precison) {
-  int startX = 166; // makes it eaiser to position
-  int startY = 166;
+  uint16_t startX = 166, startY = 166;
   //Frame
   tft.fillRoundRect(startX - 20, startY, 600, 250, 5, display::RA8875_SMOKE_WHITE);
   tft.drawRoundRect(startX - 22, startY - 2, 602, 254, 5, RA8875_BLACK);
@@ -601,9 +600,13 @@ void abortMessage(const char *a_text, const char* a_str, const float& a_value, c
   tft.setFontScale(1);
   tft.setTextColor(RA8875_BLACK);
   tft.setCursor(startX - 8, startY);
-  for (unsigned int i = 0; i < strlen_P(a_text); i++) {
-    char c = pgm_read_byte_near(a_text + i);
-    if (c == '*')
+  for (unsigned int i = 0; i < strlen(a_text); i++) {
+    char c = a_text[i];
+    if (c == '\n') {
+      startY += 38;
+      tft.setCursor(startX - 8, startY);
+    }
+    else if (c == '*')
       tft.print(a_str);
     else if (c == '$' && a_value != -1)
       tft.print(a_value, a_precison);
@@ -611,9 +614,57 @@ void abortMessage(const char *a_text, const char* a_str, const float& a_value, c
       tft.print(a_doserNum);
     else
       tft.print(c);
-    if (c == '\n') {
-      startY += 38;
-      tft.setCursor(startX - 8, startY);
+  }
+}
+
+
+void infoMessage() {
+  char charBuffer[32]{0};
+  uint16_t startX = 146, startY = 166;
+  uint charPos = 0, fontX = 0, dialogHeight = 40;
+  tft.setFont(&akashi_36px_Regular);
+  tft.setFontScale(1);
+  tft.setTextColor(RA8875_BLACK);  
+  if (display::refreshPage) {
+    // Work out the dialog height
+    for (unsigned int i = 0; i < strlen(message::infoMessageArray[message::infoPos]); i++) {
+      char c = message::infoMessageArray[message::infoPos][i];
+      if (charPos < 32)
+        charBuffer[charPos++] = c;
+      if (charPos == 32 || c == ' ' || i == strlen(message::infoMessageArray[message::infoPos]) - 1) {
+        if (fontX + tft.getStringWidth(charBuffer) > startX + 610) {
+          dialogHeight += 40;
+          fontX = 0;
+        }
+        fontX += tft.getStringWidth(charBuffer);
+        memset(charBuffer, 0 , 32);
+        charPos = 0;
+      }
+    }
+    if (fontX > 0)
+      dialogHeight += 40;
+    //Frame
+    tft.fillRoundRect(startX - 20, startY, 620, dialogHeight, 5, display::RA8875_SMOKE_WHITE);
+    tft.drawRoundRect(startX - 22, startY - 2, 622, dialogHeight, 5, RA8875_BLACK);
+    tft.drawRoundRect(startX - 22, startY - 1, 621, dialogHeight, 5, RA8875_BLACK);
+    //closeButton(startX + 200, startY + 250);
+    tft.setCursor(startX - 8, startY);
+    // Draw text
+    charPos = 0;
+    memset(charBuffer, 0 , 32);
+    for (unsigned int i = 0; i < strlen(message::infoMessageArray[message::infoPos]); i++) {
+      char c = message::infoMessageArray[message::infoPos][i];
+      if (charPos < 32)
+        charBuffer[charPos++] = c;
+      if (charPos == 32 || c == ' ' || i == strlen(message::infoMessageArray[message::infoPos]) - 1) {
+        if (tft.getFontX() + tft.getStringWidth(charBuffer) > startX + 600) {
+          startY += 38;
+          tft.setCursor(startX - 8, startY);
+        }
+        tft.print(charBuffer);
+        memset(charBuffer, 0 , 32);
+        charPos = 0;
+      }
     }
   }
 }
@@ -691,6 +742,17 @@ void primeButton(const int& a_x, const int& a_y) {
   tft.print(a_x - 6, a_y - 23, "prime");
 }
 
+// draw a prime button at a given x and y
+void stopButton(const int& a_x, const int& a_y) {
+  tft.fillCircle(a_x, a_y, 20, RA8875_RED);
+  tft.fillRect(a_x - 3, a_y - 20, 100, 41, RA8875_RED);
+  tft.fillCircle(a_x + 92, a_y, 20, RA8875_RED);
+  tft.setFont(&akashi_36px_Regular);
+  tft.setTextColor(RA8875_BLACK);
+  tft.setFontScale(1);
+  tft.print(a_x, a_y - 23, "stop");
+}
+
 // draw a exit button at a given x and y
 void exitButton(const int& a_x, const int& a_y) {
   tft.setFont(&akashi_36px_Regular);
@@ -711,6 +773,17 @@ void cancelButton(const int& a_x, const int& a_y) {
   tft.drawRoundRect(a_x - 2, a_y - 2, 152, 46, 5, RA8875_BLACK);
   tft.drawRoundRect(a_x - 1, a_y - 1, 150, 44, 5, RA8875_BLACK);
   tft.print(a_x + 14, a_y + 1, "Cancel");
+}
+
+// draw a Close button at a given x and y
+void closeButton(const int& a_x, const int& a_y) {
+  tft.setFont(&akashi_36px_Regular);
+  tft.setFontScale(1);
+  tft.setTextColor(RA8875_BLACK);
+  tft.fillRoundRect(a_x, a_y, 148, 42, 5, display::RA8875_DARKGREY);
+  tft.drawRoundRect(a_x - 2, a_y - 2, 152, 46, 5, RA8875_BLACK);
+  tft.drawRoundRect(a_x - 1, a_y - 1, 150, 44, 5, RA8875_BLACK);
+  tft.print(a_x + 18, a_y + 1, "Close");
 }
 
 // draw a Continue button at a given x and y

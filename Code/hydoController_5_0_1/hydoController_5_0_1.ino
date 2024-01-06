@@ -128,6 +128,7 @@ bool showPhCalibration = false;
 bool showRTCtime = false;
 bool showKeyboard = false;
 bool showSaveDialog = false;
+bool showInfoDialog = false; /////////
 uint8_t co2PageScrollPos = 0;
 uint8_t waterPageScrollPos = 0;
 uint8_t doserPageScrollPos = 0;
@@ -152,6 +153,7 @@ bool refreshCalander;
 unsigned long debounceTime = 200; // in millis
 unsigned long lastTouchMillis = 0;
 unsigned long touchStartMillis = 0; // time button has been held down
+unsigned long infoDialogDisplayTime = 0;
 const unsigned int RA8875_SEABLUE      = 0x1C1F;
 const unsigned int RA8875_DARKGREY     = 0x8C51;
 const unsigned int RA8875_LIGHTGREY    = 0xE71C;
@@ -184,11 +186,80 @@ const char* calibrateCo2               = "Please make sure the Co2\nhas been a c
 const char* calibratingCo2             = "Please wait 10 seconds\nwhile the Co2 sensor is\ncalibrating. And do not\ninterfere with the Co2 while\nthe sensor is calibrating.";
 const char* co2Alert                   = "Alert the system is about\nto start pumping Co2. Please\nmake sure that no one is\ninside! Starting in $ seconds\nDo you want to continue?";
 const char* cancelCo2                  = "Pumping Co2 for $ minutes.\nPlease make sure that no\none is inside! Press cancel to\nquit Co2 pumping at any time.";
-// info's
-const char* ecPageInfo                 = "Set the minimum and maximum\ntarget EC values. The EC\nwill be adjusted when the\nEC goes outside the minimum target"; // TO DO...
-const char* tdsPageInfo                = "Set the minimum and maximum\ntarget TDS values. The TDS\nwill be adjusted when the\nTDS goes outside the minimum target"; // TO DO...
-const char* phPageInfo                 = "Set the minimum and maximum\ntarget PH values. The PH\nwill be adjusted when the\nPH goes outside the minimum\n or maximum targets"; // TO DO...
-// TO DO, add all the other info messages...
+// pages info's
+const char* ecPageInfo                 = "Set the minimum and maximum EC target. The EC will be adjusted when the EC falls below the minimum target.";
+const char* tdsPageInfo                = "Set the minimum and maximum TDS target. The TDS will be adjusted when the TDS falls below the minimum target.";
+const char* phPageInfo                 = "Set the minimum and maximum PH target. The PH will be adjusted when the PH goes outside the minimum or maximum targets. ";
+const char* co2Page1Info               = "Set the Co2 target and offset. The Co2 will be adjusted when the Co2 falls below the target - offset.";
+const char* co2Page2Info               = "Set the dimensions of the room to control the Co2. The system will use these measurements to assist in calculating the gas duration.";
+const char* co2Page3Info               = "Set the Co2 flow rate, the time to adjust the rooms Co2, and the duration in minutes to disable the extraction fans.";
+const char* co2Page4Info               = "Enable or disable manual Co2 gas duration, when enabled the Co2 duration will be static, and manual Co2 gas duration can be adjusted. The Co2 adjustment can also be disabled";
+const char* waterPage1Info             = "Set the minimum and maximum target water height. The water will be refilled with the water falls below the minimum target.";
+const char* waterPage2Info             = "Set the minimum and maximum target water temperature. The water will be heated when the temperature falls below the minimum target.";
+const char* waterPage3Info             = "Set the dimensions of the water tank. The system will use these measurements to assist in calculating the precise EC, TDS, PH dosing amount.";
+const char* waterPage4Info             = "Set the days and time to refresh the water tank. The system will drain and refill the water and run the doser using the fixed refill tank mls. The drain and refill can also be disabled.";
+const char* waterPage5Info             = "Set the dosing millilitres for each dosing pump. The system will run the dosers using the fixed refill tank mls after the drain and refill.";
+const char* dosingPageInfo             = "Set the dosing millilitres when in incremental mode and dosing mode for each pump. EC# mode is for nutrients that does not effect the EC. You can also prime each pump.";
+const char* lightPageInfo              = "Set the light on and off time, and the timer mode. The modes available are constant on, constant off, and auto. A warning will be raised if the LDR fails to detect the light.";
+const char* fanPage1Info               = "Set the minimum and maximum fans speed targets for the main fan. Note, you should ensure that at the minimum fan speed, the fan still rotates sufficiently.";
+const char* fanPage2Info               = "Set the minimum and maximum fans speed targets for the secondary fan. Note, you should ensure that at the minimum fan speed, the fan still rotates sufficiently.";
+const char* fanPage3Info               = "Set the minimum and maximum air temperature targets. The system will use these values to control the rooms air temperature via the extraction fans."; 
+const char* fanPage4Info               = "Set the minimum and maximum humidity targets. The system will use these values to control the rooms humidity via the extraction fans.";
+const char* fanPage5Info               = "Set the fan modes. The air temperature control, and humidity control can be disabled. And each fan can be set to a fixed speed mode.";
+const char* warningPageInfo            = "Set the error margin for each environmental reading. When the given reading is outside the target +/- the error margin, a critical error is raised.";
+const char* maxminsPageInfo            = "View the environmental readings history. Note the maximum and minimum readings are shared between save profiles.";
+const char* profilesPageInfo           = "Select the user profile to load. You can save and load the current settings to any of the profiles., and rename each of the profile.";
+// settings info
+const char* calDoserPageInfo           = "Set the PWM for each of the dosing pumps, the aim is to achive 1 milliliter per second. You can also adjust the pumps voltage on the PCB if required."; 
+const char* rtcTimePageInfo            = "Set the date and time for the clock. Note the time is a 24 hour format and the date is a dd-mm-yyyy format.";
+const char* displayTimeoutPageInfo     = "Set the display timeout interval in minutes, the display will be turned off when it has not been touched for the given interval.";
+const char* graphIntervalPageInfo      = "Set the graph update interval in seconds or minutes. The valid range update interval is 2 to 59 seconds, or 1 to 999 minutes.";
+const char* dosingIntervalPageInfo     = "Set the dosing interval in hours. The system will adjust the waters EC, TDS or PH every dosing interval.";
+const char* numDosersPageInfo          = "Set the number of dosing pumps connected to the hydro controller. The minimum number of dosing pumps is 4.";
+const char* systemLosPageInfo          = "View the log history, this includes a brief description and the date and time of each environmental adjustment.";
+const char* ecDosingModePageInfo       = "Set the EC/TDS dosing mode, when set to precise the system will calculate the dosing mls required to meet the target, and when set to incremental the system will dose the user defined mls.";
+const char* phDosingModePageInfo       = "Set the PH dosing mode, when set to precise the system will calculate the dosing mls required to meet the target, and when set to incremental the system will dose the user defined mls.";
+const char* ecTdsValuePageInfo         = "Set the value of the EC and TDS nutrients used to adjust the waters EC/TDS when EC mode is set to precise. Note this is the value of all the nutrients mixed together.";
+const char* phValuePageInfo            = "Set the value of the PH down and PH up buffer solutions, these values are used to adjust the waters PH when PH mode is set to precise.";
+const char* wifiSsidPageInfo           = "Set the SSID for the WiFi hotspot, note the minimum SSID length is 8 characters and 16 characters maximum.";
+const char* wifiPassPageInfo           = "Set the password for the WiFi hotspot, note the minimum password length is 8 characters and 16 characters maximum.";
+const char* infoMessageArray[] = {
+  ecPageInfo,                    // 0
+  tdsPageInfo,                   // 1
+  phPageInfo,                    // 2
+  co2Page1Info,                  // 3
+  co2Page2Info,                  // 4
+  co2Page3Info,                  // 5
+  co2Page4Info,                  // 6
+  waterPage1Info,                // 7
+  waterPage2Info,                // 8
+  waterPage3Info,                // 9
+  waterPage4Info,                // 10
+  waterPage5Info,                // 11
+  dosingPageInfo,                // 12
+  lightPageInfo,                 // 13
+  fanPage1Info,                  // 14
+  fanPage2Info,                  // 15
+  fanPage3Info,                  // 16
+  fanPage4Info,                  // 17
+  fanPage5Info,                  // 18
+  warningPageInfo,               // 19
+  maxminsPageInfo,               // 20
+  profilesPageInfo,              // 21
+  calDoserPageInfo,              // 22
+  rtcTimePageInfo,               // 23
+  displayTimeoutPageInfo,        // 24
+  graphIntervalPageInfo,         // 25
+  dosingIntervalPageInfo,        // 26
+  numDosersPageInfo,             // 27
+  systemLosPageInfo,             // 28
+  ecDosingModePageInfo,          // 29
+  phDosingModePageInfo,          // 30
+  ecTdsValuePageInfo,            // 31
+  phValuePageInfo,               // 32
+  wifiSsidPageInfo,              // 33
+  wifiPassPageInfo               // 34
+};
 // log messages
 const char* bootNotification           = "System started";     // 0
 const char* drainNotification          = "Drained water";      // 1
@@ -227,6 +298,7 @@ const uint8_t maxCharsPerLog = 16;
 uint8_t logTypeArray[maxLogs];
 char timeStrArray[maxLogs][maxCharsPerLog];
 uint8_t systemLogPos = 0;
+uint8_t infoPos = 0;
 }
 
 namespace device {
@@ -244,7 +316,8 @@ uint8_t currentDoserNum = 0;
 bool systemReset = false;
 bool serialDebug = true;
 uint8_t dosingTimerHourCounter = 0;
-uint8_t isPriming; // current doser that is priming
+unsigned long primeTouchTime = 0;
+bool doserIsPriming[6] {0,0,0,0,0,0};
 uint8_t previousDosingMinute = 0, previousDosingHour = 0;
 unsigned long slideShowpreviousMillis = millis();
 uint8_t continueDosing = 0;

@@ -264,15 +264,16 @@ void adjustrtc() {
 }
 
 // prime a doser at a given speed in PWM 0-255
-void prime(const uint8_t& a_doser, const uint8_t& a_pin, const uint8_t& a_speed) {
+void prime(const uint8_t& a_doser, const uint8_t& a_channel, const int& a_speed) {
   static uint8_t previousDoser = 0;
   static int currentDosingAmount = 0;
   static unsigned long primeRunTime = 0;
+  device::primeTouchTime = millis();
   if (a_speed != 0) {
     if (a_doser != previousDoser) {
-      printf("Priming doser: %d\n", a_doser);
-      analogWrite(a_pin, a_speed * 2.55);
-      device::isPriming = a_doser;
+      printf("Priming doser: %d at PWM: %d\n", a_doser, a_speed);
+      analogWriteChnl(a_channel, a_speed);
+      device::doserIsPriming[a_doser-1] = true;
       currentDosingAmount = 0;
       primeRunTime = millis();
       previousDoser = a_doser;
@@ -284,13 +285,9 @@ void prime(const uint8_t& a_doser, const uint8_t& a_pin, const uint8_t& a_speed)
     }
   }
   else { // If not priming turn all off dosers, just to be safe
-    printf("Stopping dosers\n");
-    analogWriteChnl(pca9685Channel::doserOne, 0);
-    analogWriteChnl(pca9685Channel::doserTwo, 0);
-    analogWriteChnl(pca9685Channel::doserThree, 0);
-    analogWriteChnl(pca9685Channel::doserFour, 0);
-    analogWriteChnl(pca9685Channel::doserFive, 0);
-    analogWriteChnl(pca9685Channel::doserSix, 0);
+    printf("Stopping doser %d\n", a_doser);
+    analogWriteChnl(a_channel, 0);
+    device::doserIsPriming[a_doser-1] = false;
     previousDoser = 0;
     currentDosingAmount = 0;
     primeRunTime = 0;
@@ -495,16 +492,24 @@ float mapFloat(float x, float in_min, float in_max, float out_min, float out_max
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-bool isEqual(const float& a_val, const float& a_val2, const float& epsilon) {
-  return fabs(a_val - a_val2) < epsilon;
+bool isEqual(const float& a_val, const float& a_val2, const float& a_epsilon) {
+  return fabs(a_val - a_val2) < a_epsilon;
 }
 
-bool hasChanged(const float& a_val, float& a_prevVal, const float& epsilon) {
-  long val = a_val * (epsilon * 100.0);
-  long prevVal = a_prevVal * (epsilon * 100.0);
+bool hasChanged(const int& a_val, int& a_prevVal) {
+  if (a_val != a_prevVal) {
+    //printf("change in a_val: %d, a_prevVal: %d\n", a_val, a_prevVal);
+    a_prevVal = a_val;
+    return true;
+  }
+  return false;
+}
+
+bool hasChanged(const float& a_val, float& a_prevVal, const float& a_epsilon) {
+  long val = a_epsilon != 0 ? a_val * (a_epsilon * 100.0) : a_val;
+  long prevVal = a_epsilon != 0 ? a_prevVal * (a_epsilon * 100.0) : a_prevVal;
   if (val != prevVal) {
-    //printf("epsilon: %.2f\n", epsilon);
-    //printf("change in a_val: %.2f\n" a_prevVal: %.2f, a_val, a_prevVal);
+    //printf("change in a_val: %.2f, a_prevVal: %.2f, epsilon: %.2f\n", a_val, a_prevVal, a_epsilon);
     a_prevVal = a_val;
     return true;
   }

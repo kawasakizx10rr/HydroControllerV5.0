@@ -50,6 +50,7 @@ void mainMenuNavigation() {
       display::showEtapeCalibration = 0;
       display::showCalErrorMessage = false;
       display::showingDialog = false;
+      display::showInfoDialog = false;
       display::showSystemLogs = false;
       display::showAfkTime = false;
       display::showWifiSsid = false;
@@ -438,7 +439,9 @@ int sliderYTouch() {
 }
 
 void adjustPageValues() {
-  if (display::page == 1)
+  if (display::showInfoDialog)
+    infoDialogTouched();
+  else if (display::page == 1)
     graphsPageTouched();
   else if (display::page == 3)
     profilesPageTouched();
@@ -460,6 +463,17 @@ void adjustPageValues() {
     fansPageTouched();
   else if (display::page == 12)
     warningsPageTouched();
+}
+
+void infoDialogTouched() {
+  if (millis() - display::infoDialogDisplayTime > 3000UL) {
+    if (display::touch_x >= 100 && display::touch_x <= 800 && display::touch_y >= 100 && display::touch_y <= 480) {
+      clearPage();
+      display::showingDialog = false;
+      display::showInfoDialog = false;
+      display::refreshPage = true;
+    }
+  }
 }
 
 void graphsPageTouched() {
@@ -1568,9 +1582,10 @@ void settingsFourPageTouched() {
         else if (display::touch_x >= 190 - startPosition && display::touch_x <= 268 - startPosition && display::touch_y >= 370 && display::touch_y <= 410) // doser speed 1 up
           user::doserOneSpeed = adjustValue(user::doserOneSpeed, 1, 1, 4096);
         else if (display::touch_x >= 120 - startPosition && display::touch_x <= 240 - startPosition && display::touch_y >= 310 && display::touch_y <= 350) // doser 1 prime
-          prime(1, pca9685Channel::doserOne, user::doserOneSpeed);
-        else if (device::isPriming == 1)
-          prime(1, pca9685Channel::doserOne, 0);
+          if (!device::doserIsPriming[n] && millis() - device::primeTouchTime >= 1500UL)
+            prime(1, pca9685Channel::doserOne, user::doserOneSpeed);
+          else if (millis() - device::primeTouchTime >= 1500UL)
+            prime(1, pca9685Channel::doserOne, 0);
       }
       else if (n == 1) {
         if (display::touch_x >= 278 - startPosition && display::touch_x <= 358 - startPosition && display::touch_y >= 370 && display::touch_y <= 410) // doser speed 2 down
@@ -1578,9 +1593,10 @@ void settingsFourPageTouched() {
         else if (display::touch_x >= 368 - startPosition && display::touch_x <= 448 - startPosition && display::touch_y >= 370 && display::touch_y <= 410) // doser speed 2 up
           user::doserTwoSpeed = adjustValue(user::doserTwoSpeed, 1, 1, 4096);
         else if (display::touch_x >= 293 - startPosition && display::touch_x <= 413 - startPosition && display::touch_y >= 310 && display::touch_y <= 350) // doser 2 prime
-          prime(2, pca9685Channel::doserTwo, user::doserTwoSpeed);
-        else if (device::isPriming == 2)
-          prime(2, pca9685Channel::doserTwo, 0);
+          if (!device::doserIsPriming[n] && millis() - device::primeTouchTime >= 1500UL)
+            prime(2, pca9685Channel::doserTwo, user::doserTwoSpeed);
+          else if (millis() - device::primeTouchTime >= 1500UL)
+            prime(2, pca9685Channel::doserTwo, 0);
       }
       else if (n == 2) {
         if (display::touch_x >= 458 - startPosition && display::touch_x <= 538 - startPosition && display::touch_y >= 370 && display::touch_y <= 410) // doser speed 3 down
@@ -1588,9 +1604,10 @@ void settingsFourPageTouched() {
         else if (display::touch_x >= 548 - startPosition && display::touch_x <= 625 - startPosition && display::touch_y >= 370 && display::touch_y <= 410) // doser speed 3 up
           user::doserThreeSpeed = adjustValue(user::doserThreeSpeed, 1, 1, 4096);
         else if (display::touch_x >= 473 - startPosition && display::touch_x <= 593 - startPosition && display::touch_y >= 310 && display::touch_y <= 350) // doser 3 prime
-          prime(3, pca9685Channel::doserThree, user::doserThreeSpeed);
-        else if (device::isPriming == 3)
-          prime(3, pca9685Channel::doserThree, 0);
+          if (!device::doserIsPriming[n] && millis() - device::primeTouchTime >= 1500UL)
+            prime(3, pca9685Channel::doserThree, user::doserThreeSpeed);
+          else if (millis() - device::primeTouchTime >= 1500UL)
+            prime(3, pca9685Channel::doserThree, 0);
       }
       else if (n == 3) {
         if (display::touch_x >= 635 - startPosition && display::touch_x <= 702 - startPosition && display::touch_y >= 370 && display::touch_y <= 410) // doser speed 4 down
@@ -1598,9 +1615,10 @@ void settingsFourPageTouched() {
         else if (display::touch_x >= 712 - startPosition && display::touch_x <= 800 - startPosition && display::touch_y >= 370 && display::touch_y <= 410) // doser speed 4 up
           user::doserFourSpeed = adjustValue(user::doserFourSpeed, 1, 1, 4096);
         else if (display::touch_x >= 650 - startPosition && display::touch_x <= 770 - startPosition && display::touch_y >= 310 && display::touch_y <= 350) // doser 4 prime
-          prime(4, pca9685Channel::doserFour, user::doserFourSpeed);
-        else if (device::isPriming == 4)
-          prime(4, pca9685Channel::doserFour, 0);
+          if (!device::doserIsPriming[n] && millis() - device::primeTouchTime >= 1500UL)
+            prime(4, pca9685Channel::doserFour, user::doserFourSpeed);
+          else if (millis() - device::primeTouchTime >= 1500UL)
+            prime(4, pca9685Channel::doserFour, 0);
       }
       else if (n == 4) {
         if (display::touch_x >= 813 - startPosition && display::touch_x <= 880 - startPosition && display::touch_y >= 370 && display::touch_y <= 410) // doser speed 5 down
@@ -1608,9 +1626,10 @@ void settingsFourPageTouched() {
         else if (display::touch_x >= 890 - startPosition && display::touch_x <= 978 - startPosition && display::touch_y >= 370 && display::touch_y <= 410) // doser speed 5 up
           user::doserFiveSpeed = adjustValue(user::doserFiveSpeed, 1, 1, 4096);
         else if (display::touch_x >= 828 - startPosition && display::touch_x <= 948 - startPosition && display::touch_y >= 310 && display::touch_y <= 350) // doser 5 prime
-          prime(5, pca9685Channel::doserFive, user::doserFiveSpeed);
-        else if (device::isPriming == 5)
-          prime(5, pca9685Channel::doserFive, 0);
+          if (!device::doserIsPriming[n] && millis() - device::primeTouchTime >= 1500UL)
+            prime(5, pca9685Channel::doserFive, user::doserFiveSpeed);
+          else if (millis() - device::primeTouchTime >= 1500UL)
+            prime(5, pca9685Channel::doserFive, 0);
       }
       else if (n == 5) {
         if (display::touch_x >= 991 - startPosition && display::touch_x <= 1058 - startPosition && display::touch_y >= 370 && display::touch_y <= 410) // doser speed 6 down
@@ -1618,9 +1637,10 @@ void settingsFourPageTouched() {
         else if (display::touch_x >= 1068 - startPosition && display::touch_x <= 1156 - startPosition && display::touch_y >= 370 && display::touch_y <= 410) // doser speed 6 up
           user::doserSixSpeed = adjustValue(user::doserSixSpeed, 1, 1, 4096);
         else if (display::touch_x >= 1006 - startPosition && display::touch_x <= 1126 - startPosition && display::touch_y >= 310 && display::touch_y <= 350) // doser 6 prime
-          prime(6, pca9685Channel::doserSix, user::doserSixSpeed);
-        else if (device::isPriming == 6)
-          prime(6, pca9685Channel::doserSix, 0);
+          if (!device::doserIsPriming[n] && millis() - device::primeTouchTime >= 1500UL)
+            prime(6, pca9685Channel::doserSix, user::doserSixSpeed);
+          else if (millis() - device::primeTouchTime >= 1500UL)
+            prime(6, pca9685Channel::doserSix, 0);
       }
     }
     if (display::touch_x >= 400 && display::touch_x <= 500 && display::touch_y >= 410 && display::touch_y <= 460) { // exit
@@ -1727,6 +1747,13 @@ void ecTdsPageTouched() {
       user::targetMaxTds = adjustValue(user::targetMaxTds, 1, user::targetMinTds + 1, 999);
       device::settingsAdjusted = true;
     }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 0;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
+    }
   }
   else {
     if (display::touch_x >= 210 && display::touch_x <= 260 && display::touch_y >= 400 && display::touch_y <= 450) {  // min target ec down
@@ -1744,6 +1771,13 @@ void ecTdsPageTouched() {
     else if (display::touch_x >= 680 && display::touch_x <= 730 && display::touch_y >= 400 && display::touch_y <= 450) {  // max target ec up
       user::targetMaxEc = adjustValue(user::targetMaxEc, 0.01, user::targetMinEc + 0.1, 6);
       device::settingsAdjusted = true;
+    }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 1;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
     }
   }
 }
@@ -1765,6 +1799,13 @@ void phPageTouched() {
     user::targetMaxPh = adjustValue(user::targetMaxPh, 0.01, user::targetMinPh + 0.1, 14);
     device::settingsAdjusted = true;
   }
+  else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+    message::infoPos = 2;
+    display::showingDialog = true;
+    display::showInfoDialog = true;
+    display::refreshPage = true;
+    display::infoDialogDisplayTime = millis();
+  }
 }
 
 void co2PageTouched() {
@@ -1784,6 +1825,13 @@ void co2PageTouched() {
     else if (display::touch_x >= 680 && display::touch_x <= 730 && display::touch_y >= 400 && display::touch_y <= 450) { // co2 tolerance up
       user::co2Offset = adjustValue(user::co2Offset, 1, 0, 100);
       device::settingsAdjusted = true;
+    }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 3;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
     }
   }
   else if (display::co2PageScrollPos == 1) {
@@ -1828,6 +1876,13 @@ void co2PageTouched() {
       else
         user::roomHeightCm = adjustValue(user::roomHeightCm, 1, 1, 9999);
       device::settingsAdjusted = true;
+    }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 4;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
     }
   }
   else if (display::co2PageScrollPos == 2) {
@@ -1881,6 +1936,13 @@ void co2PageTouched() {
       user::disableFansTimer = adjustValue(user::disableFansTimer, 1, 0, 999);
       device::settingsAdjusted = true;
     }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 5;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
+    }
   }
   else {
     if (display::touch_x >= 140 && display::touch_x <= 290 && display::touch_y >= 310 && display::touch_y <= 350) { // Enable Co2 manual duration
@@ -1900,6 +1962,13 @@ void co2PageTouched() {
       user::disableCo2Control = !user::disableCo2Control;
       device::settingsAdjusted = true;
       beep();
+    }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 6;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
     }
   }
 }
@@ -1934,6 +2003,13 @@ void waterPageTouched() {
         user::targetMaxWaterHeight = adjustValue(user::targetMaxWaterHeight, 0.1, user::targetMinWaterHeight + 1, 99);
       device::settingsAdjusted = true;
     }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 7;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
+    }
   }
   else if (display::waterPageScrollPos == 1) {
     if (display::touch_x >= 210 && display::touch_x <= 260 && display::touch_y >= 400 && display::touch_y <= 450) { // min target temperature down
@@ -1963,6 +2039,13 @@ void waterPageTouched() {
       else
         user::targetMaxWaterTemp = adjustValue(user::targetMaxWaterTemp, 0.1, user::targetMinWaterTemp + 0.1, 99);
       device::settingsAdjusted = true;
+    }
+    else if (display::touch_x >= 770 && display::touch_x <= 800 && display::touch_y >= 120 && display::touch_y <= 140) { // show info dialog
+      message::infoPos = 8;
+      display::showingDialog = true;
+      display::showInfoDialog = true;
+      display::refreshPage = true;
+      display::infoDialogDisplayTime = millis();
     }
   }
   else if (display::waterPageScrollPos == 2) {
@@ -2119,6 +2202,7 @@ void waterPageTouched() {
 }
 
 void dosersPageTouched() {
+  static unsigned long prevPrimeTouchTime = 0;
   int startPosition = display::doserPageScrollPos * 178;
   for (uint8_t n = display::doserPageScrollPos; n < display::doserPageScrollPos + 4; n++) {
     if (n == 0) {
@@ -2131,7 +2215,10 @@ void dosersPageTouched() {
         device::settingsAdjusted = true;
       }
       else if (display::touch_x >= (130 - startPosition) && display::touch_x <= (250 - startPosition) && display::touch_y >= 420 && display::touch_y <= 470) { // doser 1 prime
-        prime(1, pca9685Channel::doserOne, user::doserOneSpeed);
+        if (!device::doserIsPriming[n] && millis() - device::primeTouchTime >= 1500UL)
+          prime(1, pca9685Channel::doserOne, user::doserOneSpeed);
+        else if (millis() - device::primeTouchTime >= 1500UL)
+          prime(1, pca9685Channel::doserOne, 0);
       }
       else if (display::touch_x >= (155 - startPosition) && display::touch_x <= (235 - startPosition) && display::touch_y >= 230 && display::touch_y <= 270) { // change doser 1 mode - OFF or EC or PH
         beep();
@@ -2147,8 +2234,6 @@ void dosersPageTouched() {
           user::doserOneMode = device::DOSER_OFF;
         device::settingsAdjusted = true;
       }
-      else if (device::isPriming == 1)
-        prime(1, pca9685Channel::doserOne, 0);
     }
     else if (n == 1) {
       if (display::touch_x >= (278 - startPosition) && display::touch_x <= (358 - startPosition) && display::touch_y >= 310 && display::touch_y <= 410) { // doser 2 down
@@ -2159,8 +2244,11 @@ void dosersPageTouched() {
         user::doserTwoMills = adjustValue(user::doserTwoMills, 1, 0, 999);
         device::settingsAdjusted = true;
       }
-      else if (display::touch_x >= (303 - startPosition) && display::touch_x <= (423 - startPosition) && display::touch_y >= 420 && display::touch_y <= 470) { // doser 2 prime
-        prime(2, pca9685Channel::doserTwo, user::doserTwoSpeed);
+      else if (display::touch_x >= (303 - startPosition) && display::touch_x <= (423 - startPosition) && display::touch_y >= 420 && display::touch_y <= 470) { // doser 2 prime       
+        if (!device::doserIsPriming[n] && millis() - device::primeTouchTime >= 1500UL)
+          prime(2, pca9685Channel::doserTwo, user::doserTwoSpeed);
+        else if (millis() - device::primeTouchTime >= 1500UL)
+          prime(2, pca9685Channel::doserTwo, 0);
       }
       else if (display::touch_x >= (335 - startPosition) && display::touch_x <= (415 - startPosition) && display::touch_y >= 230 && display::touch_y <= 270) { // change doser 2 mode - OFF or EC or PH
         beep();
@@ -2176,8 +2264,6 @@ void dosersPageTouched() {
           user::doserTwoMode = device::DOSER_OFF;
         device::settingsAdjusted = true;
       }
-      else if (device::isPriming == 2)
-        prime(2, pca9685Channel::doserTwo, 0);
     }
     else if (n == 2) {
       if (display::touch_x >= (458 - startPosition) && display::touch_x <= (538 - startPosition) && display::touch_y >= 310 && display::touch_y <= 410) { // doser 3 down
@@ -2189,7 +2275,10 @@ void dosersPageTouched() {
         device::settingsAdjusted = true;
       }
       else if (display::touch_x >= (483 - startPosition) && display::touch_x <= (603 - startPosition) && display::touch_y >= 420 && display::touch_y <= 470) { // doser 3 prime
-        prime(3, pca9685Channel::doserThree, user::doserThreeSpeed);
+        if (!device::doserIsPriming[n] && millis() - device::primeTouchTime >= 1500UL)
+          prime(3, pca9685Channel::doserThree, user::doserThreeSpeed);
+        else if (millis() - device::primeTouchTime >= 1500UL)
+          prime(3, pca9685Channel::doserThree, 0);
       }
       else if (display::touch_x >= (500 - startPosition) && display::touch_x <= (580 - startPosition) && display::touch_y >= 230 && display::touch_y <= 270) { // change doser 3 mode - OFF or EC or PH
         beep();
@@ -2205,8 +2294,6 @@ void dosersPageTouched() {
           user::doserThreeMode = device::DOSER_OFF;
         device::settingsAdjusted = true;
       }
-      else if (device::isPriming == 3)
-        prime(3, pca9685Channel::doserThree, 0);
     }
     else if (n == 3) {
       if (display::touch_x >= (635 - startPosition) && display::touch_x <= (702 - startPosition) && display::touch_y >= 310 && display::touch_y <= 410) { // doser 4 down
@@ -2218,7 +2305,10 @@ void dosersPageTouched() {
         device::settingsAdjusted = true;
       }
       else if (display::touch_x >= (660 - startPosition) && display::touch_x <= (780 - startPosition) && display::touch_y >= 420 && display::touch_y <= 470) { // doser 4 prime
-        prime(4, pca9685Channel::doserFour, user::doserFourSpeed);
+        if (!device::doserIsPriming[n] && millis() - device::primeTouchTime >= 1500UL)
+          prime(4, pca9685Channel::doserFour, user::doserFourSpeed);
+        else if (millis() - device::primeTouchTime >= 1500UL)
+          prime(4, pca9685Channel::doserFour, 0);
       }
       else if (display::touch_x >= (678 - startPosition) && display::touch_x <= (758 - startPosition) && display::touch_y >= 230 && display::touch_y <= 270) { // change doser 4 mode - OFF or EC or PH
         beep();
@@ -2234,8 +2324,6 @@ void dosersPageTouched() {
           user::doserFourMode = device::DOSER_OFF;
         device::settingsAdjusted = true;
       }
-      else if (device::isPriming == 4)
-        prime(4, pca9685Channel::doserFour, 0);
     }
     else if (n == 4) {
       if (display::touch_x >= (813 - startPosition) && display::touch_x <= (880 - startPosition) && display::touch_y >= 310 && display::touch_y <= 410) { // doser 5 down
@@ -2247,7 +2335,10 @@ void dosersPageTouched() {
         device::settingsAdjusted = true;
       }
       else if (display::touch_x >= (838 - startPosition) && display::touch_x <= (958 - startPosition) && display::touch_y >= 420 && display::touch_y <= 470) { // doser 5 prime
-        prime(5, pca9685Channel::doserFive, user::doserFiveSpeed);
+        if (!device::doserIsPriming[n] && millis() - device::primeTouchTime >= 1500UL)
+          prime(5, pca9685Channel::doserFive, user::doserFiveSpeed);
+        else if (millis() - device::primeTouchTime >= 1500UL)
+          prime(5, pca9685Channel::doserFive, 0);
       }
       else if (display::touch_x >= (856 - startPosition) && display::touch_x <= (936 - startPosition) && display::touch_y >= 230 && display::touch_y <= 270) { // change doser 5 mode - OFF or EC or PH
         beep();
@@ -2263,8 +2354,6 @@ void dosersPageTouched() {
           user::doserFiveMode = device::DOSER_OFF;
         device::settingsAdjusted = true;
       }
-      else if (device::isPriming == 5)
-        prime(5, pca9685Channel::doserFive, 0);
     }
     else if (n == 5) {
       if (display::touch_x >= (991 - startPosition) && display::touch_x <= (1058 - startPosition) && display::touch_y >= 310 && display::touch_y <= 410) { // doser 6 down
@@ -2276,7 +2365,10 @@ void dosersPageTouched() {
         device::settingsAdjusted = true;
       }
       else if (display::touch_x >= (1016 - startPosition) && display::touch_x <= (1136 - startPosition) && display::touch_y >= 420 && display::touch_y <= 470) { // doser 6 prime
-        prime(6, pca9685Channel::doserSix, user::doserSixSpeed);
+        if (!device::doserIsPriming[n] && millis() - device::primeTouchTime >= 1500UL)
+          prime(6, pca9685Channel::doserSix, user::doserSixSpeed);
+        else if (millis() - device::primeTouchTime >= 1500UL)
+          prime(6, pca9685Channel::doserSix, 0);
       }
       else if (display::touch_x >= (1034 - startPosition) && display::touch_x <= (1114 - startPosition) && display::touch_y >= 230 && display::touch_y <= 270) { // change doser 6 mode - OFF or EC or PH
         beep();
@@ -2292,8 +2384,6 @@ void dosersPageTouched() {
           user::doserSixMode = device::DOSER_OFF;
         device::settingsAdjusted = true;
       }
-      else if (device::isPriming == 6)
-        prime(6, pca9685Channel::doserSix, 0);
     }
   }
 }
