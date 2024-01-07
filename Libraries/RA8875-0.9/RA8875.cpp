@@ -1147,21 +1147,75 @@ void RA8875::setColor(uint16_t fcolor,uint16_t bcolor,bool bcolorTraspFlag)//0.6
 	}
 }
 
-
-
 //draw a bit map
-void RA8875::drawBMP(const uint16_t& a_x, const uint16_t& a_y, const uint16_t& a_width, const uint16_t& a_height, const uint16_t *a_data, const int8_t& a_scale) {
-	uint16_t color;
-	for (uint16_t h = 0; h < a_height; h++) {
-		for (uint16_t w = 0; w < a_width; w++) {
-			color = *(a_data + (h * a_width + w) * 1); //pgm_read_word(data + (row*sx + col)*1);
-			fillRect(a_x + w * a_scale, a_y + h * a_scale, a_scale, a_scale, color);
-		}
-	}
+void RA8875::drawBMP(const uint16_t& a_x, const uint16_t& a_y, const uint16_t& a_width, const uint16_t& a_height, const uint16_t *a_array, const int8_t& a_scale) {
+	writeToBlock(a_x, a_y, a_array, a_width, a_height, a_scale); 
 }
 
-void RA8875::drawXBMP(const uint16_t& a_X, const uint16_t& a_Y, const uint16_t& a_bmpWidth, const uint16_t& a_bmpHeight, const uint8_t* a_array, const uint16_t& a_arraySize, int16_t a_color, const int8_t& a_scale) {
-	drawXbmpArray(a_array, a_arraySize, a_X, a_Y, a_bmpWidth, a_bmpHeight, a_color, a_scale);
+void RA8875::drawXBMP(const uint16_t& a_x, const uint16_t& a_y, const uint16_t& a_width, const uint16_t& a_height, const uint8_t* a_array, const uint16_t& a_arraySize, int16_t a_color, int16_t a_color2, const int8_t& a_scale) {
+	writeToBlock(a_x, a_y, a_array, a_arraySize, a_width, a_height, a_color, a_color2, a_scale); 
+}
+
+// draw a xbmp using the least amount of rects possible (checks for matching rows)
+void RA8875::drawXbmpArray(const uint8_t* a_array, const uint16_t& a_arraySize, const uint16_t& a_x, const uint16_t& a_y,
+									 const uint16_t& a_width, const uint16_t& a_height, const uint16_t& a_color, const uint16_t& a_scale) {
+	if ((a_width * a_height / 8) > a_arraySize)
+		return;
+	uint8_t lineBuffer[a_width] {};
+	for (uint16_t h = 0; h < a_height; h++) {	
+		uint16_t bufferPos = 0, searchPos = 0;
+		bool isEmptySpace = true, matchFound = true;
+		// load current line into a buffer 
+		for (uint16_t w = 0; w < a_width; w++) {
+			uint16_t arrayPos = (w + 1 * (h * a_width)) / 8;
+			uint8_t bitPos = 7 - (w + 1 * (h * a_width)) % 8;
+			uint8_t arrayVal = a_array[arrayPos];
+			uint8_t pixelVal = bitRead(arrayVal, bitPos);
+			if (pixelVal)
+				isEmptySpace = false;
+			lineBuffer[bufferPos++] = pixelVal;
+		}
+		// check if the lines below match the current line, if so increase the rect height x amount
+		uint16_t drawY = a_y + (h * a_scale);
+		uint16_t h2 = h, rectHeight = 1;
+		while (h2 < a_height - 1) {
+			for (uint16_t w = 0; w < a_width; w++) {
+				uint16_t arrayPos = (w + 1 * ((h2 + 1) * a_width)) / 8;
+				uint8_t bitPos = 7 - (w + 1 * ((h2 + 1) * a_width)) % 8;
+				uint8_t arrayVal = a_array[arrayPos];
+				uint8_t pixelVal = bitRead(arrayVal, bitPos);
+				if (pixelVal != lineBuffer[searchPos++]) {
+					matchFound = false;
+					h2 = a_height;
+					break;
+				}
+			}
+			if (matchFound) {
+				rectHeight++;
+				searchPos = 0;
+				h = ++h2;
+			}
+		}
+		// work out the rect's width and height's and draw them
+		if (!isEmptySpace) {
+			int16_t startX = -1, endX = -1;
+			for (uint16_t i = 0; i < a_width; i++) {
+				uint8_t px = lineBuffer[i];
+				if (px == 1) {
+					if (startX == -1)
+						endX = startX = i;
+					else
+						endX = i;
+				}
+				if (px != 1 || i == a_width - 1) {
+					if (startX != -1) {
+						drawFilledRectQuick(a_x + (startX * a_scale), drawY, ((endX - startX) + 1) * a_scale, rectHeight * a_scale, a_color);
+						startX = -1;
+					}
+				}
+			}
+		}
+	}
 }
 /*
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1507,6 +1561,7 @@ void RA8875::drawFontChar(const int16_t& a_fontX, const int16_t& a_fontY, const 
 			m_fontX = m_fontStartX;
 		}
 	}    
+	//drawXBMP(a_fontX, a_fontY + (a_charYoffset * m_scale), a_charWidth, a_charHeight, a_array, a_arraySize, m_fontColor, m_fontBackColor, m_scale);
 	drawXbmpArray(a_array, a_arraySize, a_fontX, a_fontY + (a_charYoffset * m_scale), a_charWidth, a_charHeight, m_fontColor, m_scale);    
 }
 
@@ -1569,6 +1624,11 @@ uint16_t RA8875::getStringWidth(const char *a_chars) {
 	return t_charWidth * m_scale;
 }
 
+void RA8875::setTextColor(const uint16_t& a_fontColor, const uint16_t& a_fontBackColor) {
+	m_fontColor = a_fontColor;
+	m_fontBackColor = a_fontBackColor;
+}
+
 void RA8875::setTextColor(const uint16_t& a_fontColor) {
 	m_fontColor = a_fontColor;
 }
@@ -1602,69 +1662,6 @@ void RA8875::setCursor(const uint16_t& a_x, const uint16_t& a_y) {
 void RA8875::setLineHeight(const uint8_t& a_lineHeight) {
 	m_fontHeight = a_lineHeight;
 }
-
-// draw a xbmp using the least amount of rects possible (checks for matching rows)
-void RA8875::drawXbmpArray(const uint8_t* a_array, const uint16_t& a_arraySize, const uint16_t& a_x, const uint16_t& a_y,
-									 const uint16_t& a_width, const uint16_t& a_height, const uint16_t& a_color, const uint16_t& a_scale) {
-	if ((a_width * a_height / 8) > a_arraySize)
-		return;
-	uint8_t lineBuffer[a_width] {};
-	for (uint16_t h = 0; h < a_height; h++) {	
-		uint16_t bufferPos = 0, searchPos = 0;
-		bool isEmptySpace = true, matchFound = true;
-		// load current line into a buffer 
-		for (uint16_t w = 0; w < a_width; w++) {
-			uint16_t arrayPos = (w + 1 * (h * a_width)) / 8;
-			uint8_t bitPos = 7 - (w + 1 * (h * a_width)) % 8;
-			uint8_t arrayVal = a_array[arrayPos];
-			uint8_t pixelVal = bitRead(arrayVal, bitPos);
-			if (pixelVal)
-				isEmptySpace = false;
-			lineBuffer[bufferPos++] = pixelVal;
-		}
-		// check if the lines below match the current line, if so increase the rect height x amount
-		uint16_t drawY = a_y + (h * a_scale);
-		uint16_t h2 = h, rectHeight = 1;
-		while (h2 < a_height - 1) {
-			for (uint16_t w = 0; w < a_width; w++) {
-				uint16_t arrayPos = (w + 1 * ((h2 + 1) * a_width)) / 8;
-				uint8_t bitPos = 7 - (w + 1 * ((h2 + 1) * a_width)) % 8;
-				uint8_t arrayVal = a_array[arrayPos];
-				uint8_t pixelVal = bitRead(arrayVal, bitPos);
-				if (pixelVal != lineBuffer[searchPos++]) {
-					matchFound = false;
-					h2 = a_height;
-					break;
-				}
-			}
-			if (matchFound) {
-				rectHeight++;
-				searchPos = 0;
-				h = ++h2;
-			}
-		}
-		// work out the rect's width and height's and draw them
-		if (!isEmptySpace) {
-			int16_t startX = -1, endX = -1;
-			for (uint16_t i = 0; i < a_width; i++) {
-				uint8_t px = lineBuffer[i];
-				if (px == 1) {
-					if (startX == -1)
-						endX = startX = i;
-					else
-						endX = i;
-				}
-				if (px != 1 || i == a_width - 1) {
-					if (startX != -1) {
-						drawFilledRectQuick(a_x + (startX * a_scale), drawY, ((endX - startX) + 1) * a_scale, rectHeight * a_scale, a_color);
-						startX = -1;
-					}
-				}
-			}
-		}
-	}
-}
-
 /*
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 +								DRAW STUFF											 +
@@ -2209,10 +2206,109 @@ void RA8875::setPattern(uint8_t num, enum RA8875pattern p)
 }
 
 /**************************************************************************/
-/*! write pattern
+/*! write colors to memory block
 
 */
 /**************************************************************************/
+/*
+void RA8875::writeToBlock(int16_t a_x, int16_t a_y, const uint16_t *a_data, uint16_t a_width, uint16_t a_height)
+{
+	setActiveWindow(a_x, a_x + a_width-1, a_y, a_y + a_height-1);
+	setXY(a_x, a_y);	
+	writeCommand(RA8875_MRWC);
+	for (int i = 0; i < (a_width * a_height); i++) {
+		writeData16(a_data[i]);
+	}
+	_waitBusy(0x80);
+}
+*/
+void RA8875::writeToBlock(int16_t a_x, int16_t a_y, const uint16_t *a_data, uint16_t a_width, uint16_t a_height, uint16_t a_scale) {
+	int xPos = 0, linesDrawn = 0, startI = 0;
+	//int16_t a,b,c,d;
+	//getActiveWindow(a,b,c,d);
+	setActiveWindow(a_x, a_x + (a_width*a_scale)-1, a_y, a_y + (a_height*a_scale)-1);
+	setXY(a_x, a_y);
+    writeCommand(RA8875_MRWC);
+    _startSend();
+	SPI.transfer(RA8875_DATAWRITE);
+	for (int i = 0; i < a_width * a_height; i++) {
+		if (a_scale != 1 && xPos == 0 && linesDrawn == 0) {
+			 //printf("i:%d\n", i);
+			 startI = i;
+		}
+		for (int n = 0; n < a_scale; n++)
+			SPI.transfer16(a_data[i]);
+		if (a_scale != 1) {
+			// draw line again
+			if (xPos == a_width - 1 && linesDrawn != a_scale - 1) {
+				linesDrawn++;
+				i = startI;
+				xPos = 0;
+			}
+			else if (xPos == a_width - 1) {
+				linesDrawn = 0;
+				xPos = 0;
+			}
+			else
+				xPos++;
+		}	
+	}
+	_endSend();
+	//_waitBusy(0x80);
+	//setActiveWindow(a,b,c,d);//set as it was before
+	setActiveWindow();
+}
+/**************************************************************************/
+/*! write colors to memory block
+
+*/
+/**************************************************************************/
+void RA8875::writeToBlock(int16_t a_x, int16_t a_y, const uint8_t* a_data, uint16_t a_arraySize, uint16_t a_width, uint16_t a_height, uint16_t a_foreground, uint16_t a_background, uint16_t a_scale)
+{
+	int xPos = 0, linesDrawn = 0, startI = 0, startB = 0, pixelsDrawn = 0;
+	//int16_t a,b,c,d;
+	//getActiveWindow(a,b,c,d);
+	setActiveWindow(a_x, a_x + (a_width*a_scale)-1, a_y, a_y + (a_height*a_scale)-1);
+	setXY(a_x, a_y);
+    writeCommand(RA8875_MRWC);
+    _startSend();
+	SPI.transfer(RA8875_DATAWRITE);
+	for (int i = 0; i < a_arraySize; i++) {
+		for (int b = 7 ; b >= 0; b--) {
+		    if (a_scale != 1 && xPos == 0 && linesDrawn == 0) {
+				//printf("i:%d, b:%d\n", i, b);
+				startI = i; 
+				startB = b;
+			}
+			uint8_t val = bitRead(a_data[i], b);
+			for (int n = 0; n < a_scale; n++) {
+				pixelsDrawn++;
+			    SPI.transfer16(val ? a_foreground : a_background);
+				//val ? writeData16(a_foreground) : writeData16(a_background);
+			}
+			if (a_scale != 1) {
+				// draw line again
+				if (xPos == a_width - 1 && linesDrawn != a_scale - 1) {
+					linesDrawn++;
+					i = startI;
+					b = startB + 1;
+					xPos = 0;
+				}
+				else if (xPos == a_width - 1) {
+					linesDrawn = 0;
+					xPos = 0;
+				}
+				else
+					xPos++;
+			}
+		}
+	}
+	_endSend();
+	//_waitBusy(0x80);
+	//setActiveWindow(a,b,c,d);//set as it was before
+	setActiveWindow();
+}
+
 void RA8875::writePattern(int16_t x,int16_t y,const uint8_t *data,uint8_t size,bool setAW)
 {
 	int16_t i;
@@ -4831,19 +4927,19 @@ void RA8875::_writeData(uint8_t data)
 void  RA8875::writeData16(uint16_t data) 
 {
 	_startSend();
-	#if (defined(__AVR__) && defined(_FASTSSPORT)) || defined(SPARK)
-		_spiwrite(RA8875_DATAWRITE);
-	#else
-		#if defined(__MKL26Z64__)	
-			if (_altSPI){
-				SPI1.transfer(RA8875_DATAWRITE);
-			} else {
-				SPI.transfer(RA8875_DATAWRITE);
-			}
-		#else
-			SPI.transfer(RA8875_DATAWRITE);
-		#endif
-	#endif
+#if (defined(__AVR__) && defined(_FASTSSPORT)) || defined(SPARK)
+	_spiwrite(RA8875_DATAWRITE);
+#else
+#if defined(__MKL26Z64__)	
+	if (_altSPI)
+		SPI1.transfer(RA8875_DATAWRITE);
+	else 
+		SPI.transfer(RA8875_DATAWRITE);
+#else
+	SPI.transfer(RA8875_DATAWRITE);
+#endif
+#endif
+	
 	#if !defined(ENERGIA) && !defined(___DUESTUFF) && ((ARDUINO >= 160) || (TEENSYDUINO > 121))
 		#if defined(__MKL26Z64__)	
 			if (_altSPI){

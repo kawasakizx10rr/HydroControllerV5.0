@@ -381,8 +381,9 @@ class RA8875 {
 	inline uint16_t htmlTo565(int32_t color_) { return (uint16_t)(((color_ & 0xF80000) >> 8) | ((color_ & 0x00FC00) >> 5) | ((color_ & 0x0000F8) >> 3));}
 	inline void 	Color565ToRGB(uint16_t color, uint8_t &r, uint8_t &g, uint8_t &b){r = (((color & 0xF800) >> 11) * 527 + 23) >> 6; g = (((color & 0x07E0) >> 5) * 259 + 33) >> 6; b = ((color & 0x001F) * 527 + 23) >> 6;}
 	//----------BMPs -------------------------------------------------------------------------
-	void drawBMP(const uint16_t& a_x, const uint16_t& a_y, const uint16_t& a_width, const uint16_t& a_height, const uint16_t *a_data, const int8_t& a_scale = 1);
-	void drawXBMP(const uint16_t& a_X, const uint16_t& a_Y, const uint16_t& a_bmpWidth, const uint16_t& a_bmpHeight, const uint8_t* a_array, const uint16_t& a_arraySize, int16_t a_color, const int8_t& a_scale = 1);
+	void drawBMP(const uint16_t& a_x, const uint16_t& a_y, const uint16_t& a_width, const uint16_t& a_height, const uint16_t *a_array, const int8_t& a_scale = 1);
+	void drawXBMP(const uint16_t& a_x, const uint16_t& a_y, const uint16_t& a_width, const uint16_t& a_height, const uint8_t* a_array, const uint16_t& a_arraySize, int16_t a_color, int16_t a_color2, const int8_t& a_scale = 1);
+	void drawXbmpArray(const uint8_t* a_array, const uint16_t& a_arraySize, const uint16_t& a_x, const uint16_t& a_y,const uint16_t& a_width, const uint16_t& a_height, const uint16_t& a_color, const uint16_t& a_scale = 1);
 	//----------FONT -------------------------------------------------------------------------
 	void setFont(const font_returnStruct *font);	
 	void print(const int16_t& a_fontX, const int16_t& a_fontY, const String& a_val);
@@ -430,8 +431,8 @@ class RA8875 {
 	void print(const double &a_val, const uint8_t& a_precision = 2);
 	void println(const double &a_val, const uint8_t& a_precision = 2);				 
 	void drawFontChar(const int16_t& a_fontX, const int16_t& a_fontY, const int16_t& a_charYoffset, const uint8_t* a_array, const int16_t& a_arraySize, const int16_t& a_charWidth, const int16_t& a_charHeight);	
-	void drawXbmpArray(const uint8_t* a_array, const uint16_t& a_arraySize, const uint16_t& a_x, const uint16_t& a_y, const uint16_t& a_width, const uint16_t& a_height, const uint16_t& a_color, const uint16_t& a_scale = 1);
 	void setTextColor(const uint16_t& a_fontColor);
+	void setTextColor(const uint16_t& a_fontColor, const uint16_t& a_fontBackColor);
 	int16_t getFontX(const bool& a_withXMargin = false);
 	int16_t getFontY();
 	void setFontScale(const uint16_t& a_scale);
@@ -447,7 +448,7 @@ class RA8875 {
 	void setLineHeight(const uint8_t& a_lineHeight);
 	void disableFontOverFlow(const bool& a_option);
 //-------------- GRAPHIC POSITION --------------------------------------------------------------
-	void    setXY(int16_t x, int16_t y);//graphic set location
+	void        setXY(int16_t x, int16_t y);//graphic set location
 	void 		setX(int16_t x);
 	void 		setY(int16_t y) ;
 	//--------------- DRAW ---------------------------------------------------------------------
@@ -498,7 +499,7 @@ class RA8875 {
 	void 		layerTransparency(uint8_t layer1,uint8_t layer2);
 	uint8_t		getCurrentLayer(void); //return the current drawing layer. If layers are OFF, return 255
 //--------------- SCROLL --------------------------------------------------------------------------
-	void     setScrollMode(enum RA8875scrollMode mode); // The experimentalist
+	void        setScrollMode(enum RA8875scrollMode mode); // The experimentalist
 	void 		setScrollWindow(int16_t XL,int16_t XR ,int16_t YT ,int16_t YB);
 	void 		scroll(int16_t x,int16_t y);
 //-------------- DMA ------------------------------------------------------------------------------
@@ -519,6 +520,8 @@ class RA8875 {
 	//---------- PATTERN --------------------------------------------------------------------------
 	void 		setPattern(uint8_t num, enum RA8875pattern p=P8X8);
 	void 		writePattern(int16_t x,int16_t y,const uint8_t *data,uint8_t size,bool setAW=true);
+	void 		writeToBlock(int16_t a_x, int16_t a_y, const uint16_t *a_data, uint16_t a_width, uint16_t a_height, uint16_t a_scale = 1);
+	void		writeToBlock(int16_t a_x, int16_t a_y, const uint8_t* a_data, uint16_t a_arraySize, uint16_t a_width, uint16_t a_height, uint16_t a_foreground, uint16_t a_background, uint16_t a_scale = 1);
 //-------------- GPIO & PWM -------------------------
 	void    	GPIOX(boolean on);
 	void    	PWMout(uint8_t pw,uint8_t p);//1:backlight, 2:free
@@ -669,6 +672,7 @@ class RA8875 {
 	char m_startChar = 0;
 	uint8_t m_xMargin = 1;
 	uint16_t m_fontColor = RA8875_BLACK;
+	uint16_t m_fontBackColor = RA8875_WHITE;
 	int16_t m_fontX = 0, m_fontY = 0, m_fontStartX = 0;
 	uint16_t m_scale = 1;
 	bool m_disableFontOverFlow = true;
