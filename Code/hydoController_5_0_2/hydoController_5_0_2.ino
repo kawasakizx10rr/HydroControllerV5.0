@@ -1,5 +1,5 @@
 /*
-  Version V5.0.0 Updated on the 14th Dec 2023
+  Version V5.0.2 Updated on the 8th Jan 2024
 */
 
 // Library imports
@@ -302,7 +302,7 @@ uint8_t infoPos = 0;
 }
 
 namespace device {
-const char* versionNumber = "5.0.0"; // do not adjust !
+const char* versionNumber = "5.0.2"; // do not adjust !
 bool relayOffState = HIGH;
 const uint8_t slaveAddress = 9;
 int remotlyLoadUserProfile = -1;
@@ -617,14 +617,14 @@ unsigned long wifiPreviousMillis = 0;
 char ssid[16] = "HydroController";
 char password[16] = "Password1!";
 bool hiddenNetwork = false;
-char webData[4096] {};
+char webData[8192] {};
 enum connectionStatus {
   UNCONNECTED,
   CONNECTED,
   TIMEOUT,
   FAILED
 };
-uint8_t connectionState = UNCONNECTED;
+connectionStatus connectionState = UNCONNECTED;
 }
 
 // Class instances
@@ -649,9 +649,6 @@ void setup() {
   pinMode(pin::tdsTransistor, OUTPUT);
   pinMode(pin::phTransistor, OUTPUT);
   Wire.begin();
-  tft.begin(RA8875_800x480);
-  tft.touchBegin();
-  tft.touchEnable(true);
   initializeDevice();
 }
 
@@ -663,5 +660,4 @@ void loop() {
   if (wifi::wifiEnabled)
     server.handleClient();
   displayWarnings();
-  screenSaver();
 }

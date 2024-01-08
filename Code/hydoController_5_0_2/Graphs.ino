@@ -4,10 +4,10 @@ void drawGraph (
   const int& a_graphWidth, const int& a_numYLabels, float** a_data, 
   const int a_numArrays, const int& a_arrayNumber, const int& a_percision, const unsigned int* a_colors)
 {
-  float minArrayVal = 999, maxArrayVal = -999;
+  float minArrayVal = __FLT_MAX__, maxArrayVal = __FLT_MIN__; 
   tft.setFontScale(1);
   tft.setFont(&myriadPro_32px_Regular);
-  tft.setTextColor(RA8875_BLACK, user::backgroundColor);
+  tft.setTextColor(RA8875_BLACK, user::backgroundColor); 
 
   // work out the greatest number to display on the y axis.
   for (int i = 0; i < a_numArrays; i++) {
@@ -22,16 +22,16 @@ void drawGraph (
   bool redrawGraph = device::newGraphData;
   static float graphXstartPosition = a_xStartPos;
   static float xSpacing = 0;
-  static float prevMinArrayVal = 999, prevMaxArrayVal = -999;
+  static float prevMinArrayVal = 0, prevMaxArrayVal = 0;
   if (display::refreshPage || hasChanged(minArrayVal, prevMinArrayVal, 0.01) || hasChanged(maxArrayVal, prevMaxArrayVal, 0.01)) {
-    tft.fillRect(a_xStartPos, a_yStartPos, a_graphWidth, 480 - a_yStartPos, user::backgroundColor); //
+    tft.fillRect(a_xStartPos, a_yStartPos, a_graphWidth, tft.height() - a_yStartPos, user::backgroundColor); //
     // work out the x position to start the graph at, based on the width on the y axis numbers. while drawing the draw y line and numbers   
     float yIncrement = 0;
     if (!isEqual(maxArrayVal,  minArrayVal, 0.01))
       yIncrement = (maxArrayVal - minArrayVal) / a_numYLabels;
     else
       yIncrement = maxArrayVal / a_numYLabels;
-    //printf("minArrayVal %0.2f, maxArrayVal %0.2f, yIncrement %0.2f\n", minArrayVal, maxArrayVal, yIncrement);
+    //printf("numYLabels %d, minArrayVal %0.2f, maxArrayVal %0.2f, yIncrement %0.2f\n", a_numYLabels, minArrayVal, maxArrayVal, yIncrement);
     float yLablePosition = a_yStartPos - 6;
     float tempYmax = maxArrayVal;
     const float yLableGap = (a_graphHeight - 10) / a_numYLabels;
@@ -42,6 +42,8 @@ void drawGraph (
       tft.print(tempYmax, a_percision);
       yLablePosition += (a_graphHeight - 10) / a_numYLabels;
       tempYmax -= yIncrement;
+      if (minArrayVal > 0 && tempYmax < 0)
+        tempYmax = abs(tempYmax); // -0.00 is shown due to rounding issues close to 0
       if (tft.getFontX() > graphXstartPosition)
         graphXstartPosition = tft.getFontX();
     }   

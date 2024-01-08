@@ -823,6 +823,7 @@ void drawSensorSlide(const float & a_sensorData, const float & a_minTarget, cons
     tft.fillRect(98, 188, sensorDataPosition - 96, 90, user::backgroundColor);
     tft.print(sensorStartX, 190, a_sensorData, a_percision);
     sensorDataPosition = tft.getFontX();
+    previousSensorData = a_sensorData;
   }
   // draw targets
   static int minTargetPosition;
@@ -830,12 +831,14 @@ void drawSensorSlide(const float & a_sensorData, const float & a_minTarget, cons
   if (display::refreshPage || hasChanged(a_minTarget, previousMinTarget, a_percision)) {
     tft.setFont(&HallfeticaLargenum_42px_Regular);
     tft.setFontScale(1);
+    tft.setTextColor(RA8875_BLACK, user::backgroundColor);
     int minTargetStartX = 540 - (tft.getStringWidth(a_minTarget, a_percision) / 2);
     tft.fillRect(438, 228, minTargetPosition - 436, 50, user::backgroundColor);
     tft.print(minTargetStartX, 230, a_minTarget, a_percision); // a_minTarget
     minTargetPosition = tft.getFontX();
     tft.setFont(&myriadPro_32px_Regular);
     tft.print(minTargetStartX, 174, "Min");
+    previousMinTarget = a_minTarget;
   }
   //
   static int maxTargetPosition;
@@ -843,12 +846,14 @@ void drawSensorSlide(const float & a_sensorData, const float & a_minTarget, cons
   if (display::refreshPage || hasChanged(a_maxTarget, previousMaxTarget, a_percision)) {
     tft.setFont(&HallfeticaLargenum_42px_Regular);
     tft.setFontScale(1);
+    tft.setTextColor(RA8875_BLACK, user::backgroundColor);
     int maxTargetStartX = 710 - (tft.getStringWidth(a_maxTarget, a_percision) / 2);
     tft.fillRect(608, 228, maxTargetPosition - 606, 50, user::backgroundColor);
     tft.print(maxTargetStartX, 230, a_maxTarget, a_percision); // a_maxTarget
     maxTargetPosition = tft.getFontX();
     tft.setFont(&myriadPro_32px_Regular);
     tft.print(maxTargetStartX, 174, "Max");
+    previousMaxTarget = a_maxTarget;
   }
   // draw mini graph
   float* arrayData[1] {a_arrayData};
@@ -1082,6 +1087,7 @@ void drawTwoValues(
       tft.print(tft.getFontX() + 6, 250 + a_symbolOffset, a_symbol);
     }
     endX = tft.getFontX();
+    previousValue = a_value;
   }
   // val 2
   tft.setFont(&HallfeticaLargenum_42px_Regular);
@@ -1097,6 +1103,7 @@ void drawTwoValues(
       tft.print(tft.getFontX() + 6, 250 + a_symbolOffset, a_symbol);
     }
     endX2 = tft.getFontX();
+    previousValue2 = a_value2;
   }
 }
 

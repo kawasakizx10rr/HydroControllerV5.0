@@ -28,6 +28,7 @@ void drawPages() {
     warningsPage();
   if (display::showInfoDialog)
     infoMessage();
+  screenSaver();
   display::refreshPage = false;
   device::newGraphData = false;
 }
@@ -90,7 +91,7 @@ void homePage() {
     }
   }
   // Wifi symbol
-  static uint8_t previousConnectionState = wifi::UNCONNECTED;
+  static wifi::connectionStatus previousConnectionState = wifi::TIMEOUT;
   if (wifi::connectionState != previousConnectionState) {
     tft.fillRect(540, 90, 40, 40, user::backgroundColor);
     if (wifi::connectionState == wifi::CONNECTED) {
@@ -475,6 +476,7 @@ void co2Page() {
         tft.print(tft.getFontX() + 6, 250, "cm");
       }
       roomLengthEndPos = tft.getFontX();
+      previousRoomLength = roomLength;
     }
     // ROOM WIDTH
     tft.setFont(&HallfeticaLargenum_42px_Regular);
@@ -499,6 +501,7 @@ void co2Page() {
         tft.print(tft.getFontX() + 6, 250, "cm");
       }
       roomWidthEndPos = tft.getFontX();
+      previousRoomWidth = roomWidth;
     }
     // ROOM HEIGHT
     tft.setFont(&HallfeticaLargenum_42px_Regular);
@@ -523,6 +526,7 @@ void co2Page() {
         tft.print(tft.getFontX() + 6, 250, "cm");
       }
       roomHeightEndPos = tft.getFontX();
+      previousRoomHeight = roomHeight;
     }
   }
   else if (display::co2PageScrollPos == 2) {
@@ -542,9 +546,9 @@ void co2Page() {
     tft.setFontScale(1);
     // CO2 FLOW RATE LTR/MIN
     static int co2FlowrateStartPos = 0, co2FlowrateEndPos = 0;
-    static float previousco2Flowrate;
+    static float previousCo2Flowrate;
     float co2Flowrate = user::convertToInches ? user::co2FlowrateFeet3 : user::co2FlowrateLtrs;
-    if (display::refreshPage || hasChanged(co2Flowrate, previousco2Flowrate, 0.01)) {
+    if (display::refreshPage || hasChanged(co2Flowrate, previousCo2Flowrate, 0.01)) {
       tft.fillRect(co2FlowrateStartPos, 238, co2FlowrateEndPos - co2FlowrateStartPos, 50, user::backgroundColor);
       if (co2Flowrate < 10)
         co2FlowrateStartPos = 140;
@@ -566,6 +570,7 @@ void co2Page() {
         co2Flowrate == 1 ? tft.print("ltr") : tft.print("ltrs");
       }
       co2FlowrateEndPos = tft.getFontX();
+      previousCo2Flowrate = co2Flowrate;
     }
     // CO2 CHECK TIME
     tft.setFont(&HallfeticaLargenum_42px_Regular);

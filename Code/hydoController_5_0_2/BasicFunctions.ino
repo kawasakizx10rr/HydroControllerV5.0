@@ -1,9 +1,12 @@
 void initializeDevice() {
+  tft.begin(RA8875_800x480);
+  tft.touchBegin();
+  tft.touchEnable(true);
   printf("Hydro Master v%s started...\n", device::versionNumber);
   tft.fillWindow(RA8875_BLACK);
   tft.setFont(&akashi_36px_Regular);
   tft.setFontScale(2);
-  tft.setTextColor(RA8875_WHITE, user::backgroundColor);
+  tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
   tft.setCursor(120, 200);
   tft.print("Hydro master");
   tft.setFontScale(1);
@@ -119,11 +122,14 @@ void initializeDevice() {
     device::fanTwoSpeedArray[i] = random(0, 100);
   }
   device::graphArrayPos = device::maxGraphArrayValues;
+  buildArgs();
   // < ---- TO HERE
   
   tft.fillWindow(user::backgroundColor);
   frame();
   OuterMenuIcons();
+  drawPages();
+  tft.setTextColor(RA8875_WHITE, user::backgroundColor);
   display::lastTouchX = tft.width();
 }
 
