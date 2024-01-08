@@ -1561,8 +1561,8 @@ void RA8875::drawFontChar(const int16_t& a_fontX, const int16_t& a_fontY, const 
 			m_fontX = m_fontStartX;
 		}
 	}    
-	//drawXBMP(a_fontX, a_fontY + (a_charYoffset * m_scale), a_charWidth, a_charHeight, a_array, a_arraySize, m_fontColor, m_fontBackColor, m_scale);
-	drawXbmpArray(a_array, a_arraySize, a_fontX, a_fontY + (a_charYoffset * m_scale), a_charWidth, a_charHeight, m_fontColor, m_scale);    
+	drawXBMP(a_fontX, a_fontY + (a_charYoffset * m_scale), a_charWidth, a_charHeight, a_array, a_arraySize, m_fontColor, m_fontBackColor, m_scale);
+	//drawXbmpArray(a_array, a_arraySize, a_fontX, a_fontY + (a_charYoffset * m_scale), a_charWidth, a_charHeight, m_fontColor, m_scale);    
 }
 
 void RA8875::disableFontOverFlow(const bool& a_option) {
@@ -2224,8 +2224,6 @@ void RA8875::writeToBlock(int16_t a_x, int16_t a_y, const uint16_t *a_data, uint
 */
 void RA8875::writeToBlock(int16_t a_x, int16_t a_y, const uint16_t *a_data, uint16_t a_width, uint16_t a_height, uint16_t a_scale) {
 	int xPos = 0, linesDrawn = 0, startI = 0;
-	//int16_t a,b,c,d;
-	//getActiveWindow(a,b,c,d);
 	setActiveWindow(a_x, a_x + (a_width*a_scale)-1, a_y, a_y + (a_height*a_scale)-1);
 	setXY(a_x, a_y);
     writeCommand(RA8875_MRWC);
@@ -2254,8 +2252,6 @@ void RA8875::writeToBlock(int16_t a_x, int16_t a_y, const uint16_t *a_data, uint
 		}	
 	}
 	_endSend();
-	//_waitBusy(0x80);
-	//setActiveWindow(a,b,c,d);//set as it was before
 	setActiveWindow();
 }
 /**************************************************************************/
@@ -2266,8 +2262,6 @@ void RA8875::writeToBlock(int16_t a_x, int16_t a_y, const uint16_t *a_data, uint
 void RA8875::writeToBlock(int16_t a_x, int16_t a_y, const uint8_t* a_data, uint16_t a_arraySize, uint16_t a_width, uint16_t a_height, uint16_t a_foreground, uint16_t a_background, uint16_t a_scale)
 {
 	int xPos = 0, linesDrawn = 0, startI = 0, startB = 0, pixelsDrawn = 0;
-	//int16_t a,b,c,d;
-	//getActiveWindow(a,b,c,d);
 	setActiveWindow(a_x, a_x + (a_width*a_scale)-1, a_y, a_y + (a_height*a_scale)-1);
 	setXY(a_x, a_y);
     writeCommand(RA8875_MRWC);
@@ -2284,11 +2278,9 @@ void RA8875::writeToBlock(int16_t a_x, int16_t a_y, const uint8_t* a_data, uint1
 			for (int n = 0; n < a_scale; n++) {
 				pixelsDrawn++;
 			    SPI.transfer16(val ? a_foreground : a_background);
-				//val ? writeData16(a_foreground) : writeData16(a_background);
 			}
-			if (a_scale != 1) {
-				// draw line again
-				if (xPos == a_width - 1 && linesDrawn != a_scale - 1) {
+			if (a_scale != 1) {		
+				if (xPos == a_width - 1 && linesDrawn != a_scale - 1) { // draw line again
 					linesDrawn++;
 					i = startI;
 					b = startB + 1;
@@ -2304,8 +2296,6 @@ void RA8875::writeToBlock(int16_t a_x, int16_t a_y, const uint8_t* a_data, uint1
 		}
 	}
 	_endSend();
-	//_waitBusy(0x80);
-	//setActiveWindow(a,b,c,d);//set as it was before
 	setActiveWindow();
 }
 
