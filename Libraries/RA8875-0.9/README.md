@@ -1,4 +1,4 @@
-RA8875 library b11p10 [Testing gold release]
+RA8875 library [Testing gold release]
 ===========================================
 
 **Wiki added!** https://github.com/sumotoy/RA8875/wiki<br>
@@ -7,7 +7,15 @@ https://github.com/sumotoy/RA8875/tree/0.70<br>
 The development release normally contain bug fixes so it's almost safe to use but if you have problems you can switch back to the stable release (I try to keep as stable I can)<br>
 Moved a lot of 'bla bla' in the wiki, readme cleaned.
 
-##### Current version 0.70b11, Please read!!!.<br>
+##### Current version 0.9.0, Please read!!!.<br>
+
+**0.9** changes...<br>
+ - New ultra fast BMP and XBMP functions 
+ - 
+**0.8** changes...<br>
+ - Removed old font engine to be replaced with fonts created by the new font creation tool
+ - New optimized User Font Rendering engine.
+ 
 **0.70b11p1** changes...<br>
  - New optimized User Font Rendering engine, over 23 times faster.
  - Added template & stepByStep wiki for converting fonts with lcd-image-converter.
