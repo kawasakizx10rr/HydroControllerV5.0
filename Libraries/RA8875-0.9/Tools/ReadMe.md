@@ -1,4 +1,5 @@
-The GenerateFonts tool is built by mmyself and is used to create the fonts for my custom fork of the RA8875 library.
+The GenerateFonts tool is built by myself and is used to create the fonts for my custom fork of the RA8875 library.
+
 For a video guild on how to use the GenerateFonts tool vist my youtube page at "Add link here..."
 
 The basic instructions are:
