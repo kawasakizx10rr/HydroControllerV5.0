@@ -11,10 +11,10 @@ Moved a lot of 'bla bla' in the wiki, readme cleaned.
 
 **0.9.1** changes...<br>
  - Update the font engien to use the new XBMP function
- - 
+   
 **0.9** changes...<br>
  - New ultra fast BMP and XBMP functions
- - 
+   
 **0.8** changes...<br>
  - Removed old font engine to be replaced with fonts created by the new font creation tool
  - New optimized User Font Rendering engine.
