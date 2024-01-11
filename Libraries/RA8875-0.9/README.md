@@ -7,10 +7,13 @@ https://github.com/sumotoy/RA8875/tree/0.70<br>
 The development release normally contain bug fixes so it's almost safe to use but if you have problems you can switch back to the stable release (I try to keep as stable I can)<br>
 Moved a lot of 'bla bla' in the wiki, readme cleaned.
 
-##### Current version 0.9.0, Please read!!!.<br>
+##### Current version 0.9.1, Please read!!!.<br>
 
+**0.9.1** changes...<br>
+ - Update the font engien to use the new XBMP function
+ - 
 **0.9** changes...<br>
- - New ultra fast BMP and XBMP functions 
+ - New ultra fast BMP and XBMP functions
  - 
 **0.8** changes...<br>
  - Removed old font engine to be replaced with fonts created by the new font creation tool
