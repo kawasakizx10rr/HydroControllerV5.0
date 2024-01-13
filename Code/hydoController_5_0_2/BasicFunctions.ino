@@ -2,6 +2,8 @@ void initializeDevice() {
   tft.begin(RA8875_800x480);
   tft.touchBegin();
   tft.touchEnable(true);
+  tft.backlight(true);
+  tft.displayOn(true);
   printf("Hydro Master v%s started...\n", device::versionNumber);
   tft.fillWindow(RA8875_BLACK);
   tft.setFont(&akashi_36px_Regular);
@@ -19,6 +21,7 @@ void initializeDevice() {
     delay(500);
     startX += 38;
   }
+  printf("SPI max speed: %luMhz\n", MAXSPISPEED);
   //initializeEEPROM();
   //
   dallasTemperature.begin();
@@ -32,7 +35,7 @@ void initializeDevice() {
     printf("Failed to initialize ADS\n");
     delay(500);
   }
-  //
+  
   pwm.begin();
   //pwm.setOscillatorFrequency(27000000);
   pwm.setPWMFreq(1600);  // This is the maximum PWM frequency
@@ -79,56 +82,36 @@ void initializeDevice() {
     device::fanTwoSpeedArray[0] = 0.01;
     device::graphArrayPos = 1;
   }
-
+/*
   if (wifi::wifiEnabled) {
     // Connect to Wi-Fi network with SSID and password
     // Remove the password parameter, if you want the AP (Access Point) to be open
     WiFi.softAP(wifi::ssid, wifi::password, wifi::hiddenNetwork);
     // Print connection details
-    IPAddress IP = WiFi.softAPIP();
+    String IP = WiFi.softAPIP().toString();
     printf("Started AP on IP address: %s\n", IP);
     printf("AP SSID: %s\n", wifi::ssid);
     printf("AP password: %s\n", wifi::password);
     // HTML call back functions from user interactions
     server.on("/", handleRoot);  // This is display page
-    server.on("/getData", getData);
+    server.on("/getPageData", getPageData);
     server.on("/setValue", setValue);
     // Start the Wifi portal
     server.begin();  //Start web server
     delay(2000);
   }
-
+*/
   rtc.refresh();
   device::previousDosingMinute = rtc.minute();
   device::previousDosingHour = rtc.hour();
 
   // save log message, system started
   saveLogMessage(0);
-
-  // JUST FOR TESTING -->
-  for (int i = 0; i < device::maxGraphArrayValues; i++) {
-    device::phArray[i] = random(1, 14);
-    device::co2Array[i] = random(300, 1200);
-    device::ecArray[i] = random(100, 1400);
-    device::tdsArray[i] = random(50, 500);
-    device::waterTemperatureArray[i] = random(1, 40);
-    device::waterTemperatureArrayF[i] = random(1, 90);
-    device::waterLevelArray[i] = random(1, 30);
-    device::waterLevelArrayInInches[i] = random(1, 12);
-    device::airTemperatureArray[i] = random(5, 40);
-    device::airTemperatureArrayF[i] = random(40, 120);
-    device::humidityArray[i] = random(0, 100);
-    device::fanOneSpeedArray[i] = random(0, 100);
-    device::fanTwoSpeedArray[i] = random(0, 100);
-  }
-  device::graphArrayPos = device::maxGraphArrayValues;
-  buildArgs();
-  // < ---- TO HERE
   
   tft.fillWindow(user::backgroundColor);
   frame();
   OuterMenuIcons();
-  drawPages();
+  //drawPages();
   tft.setTextColor(RA8875_WHITE, user::backgroundColor);
   display::lastTouchX = tft.width();
 }
@@ -217,13 +200,15 @@ float adjustValue(float a_val, float a_increment, const float& a_min, const floa
 
   if (a_increment < 0) {
     if (a_val >= (a_min + abs(a_increment)))
-        a_val += a_increment;
+      a_val += a_increment;
     if (a_val < a_min)
       a_val = a_min;
   }    
   else if (a_increment > 0) {
     if (a_val <= (a_max - a_increment))
       a_val += a_increment;
+    else
+      a_val = a_min;
     if (a_val > a_max)
       a_val = a_max;
   }

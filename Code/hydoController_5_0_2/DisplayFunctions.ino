@@ -174,7 +174,7 @@ void OuterMenuIcons() {
   // left menu
   const unsigned long iconTime = millis();
   drawPageIcon(0, 17, 102, homeIcon, 462, 66, 56); // 377
-  drawPageIcon(1, 17, 187, graphIcon, 372, 66, 45);
+  drawPageIcon(1, 17, 187, graphIcon, 371, 66, 45);
   drawPageIcon(2, 16, 257, minMaxIcon, 310, 69, 36);
   drawPageIcon(3, 22, 324, presetsIcon, 245, 53, 37);
   drawPageIcon(4, 21, 389, settingsIcon, 450, 60, 60);
@@ -186,8 +186,8 @@ void OuterMenuIcons() {
   drawPageIcon(6, 126, 32, phIcon, 274, 61, 36);
   drawPageIcon(7, 227, 32, co2Icon, 369, 72, 41);
   drawPageIcon(8, 342, 19, waterTemperatureIcon, 418, 54, 62);
-  drawPageIcon(9, 437, 17, doserIcon, 467, 55, 68);
-  drawPageIcon(10, 527, 15, lightIcon, 344, 41, 67);
+  drawPageIcon(9, 437, 17, doserIcon, 468, 55, 68); 
+  drawPageIcon(10, 527, 15, lightIcon, 343, 41, 67);
   drawPageIcon(11, 604, 16, fanIcon, 512, 64, 64);
   drawPageIcon(12, 703, 20, warningsIcon, 510, 67, 61);
   display::previousPage = display::page;
@@ -205,20 +205,13 @@ void frame() {
 // Draw a menu icon
 void drawPageIcon(const uint8_t& a_page, const short& a_x, const short a_y, const uint8_t* a_icon, const int& a_arraySize, const uint8_t& a_width, const uint8_t& a_height) {
   if (display::page == a_page) {
-    tft.drawXBMP(a_x, a_y, a_width, a_height, a_icon, a_arraySize, RA8875_BLUE, user::backgroundColor, 1);
+    tft.writeToBlock(a_x, a_y, a_icon, a_arraySize, a_width, a_height, RA8875_BLUE, user::backgroundColor, 1);
   }
   else if (display::previousPage == a_page || display::refreshPage) {
-    tft.drawXBMP(a_x, a_y, a_width, a_height, a_icon, a_arraySize, display::RA8875_DARKGREY, user::backgroundColor, 1);
+    tft.writeToBlock(a_x, a_y, a_icon, a_arraySize, a_width, a_height, display::RA8875_DARKGREY, user::backgroundColor, 1);
   }
-}
-
-void drawPageIconQuick(const uint8_t& a_page, const short& a_x, const short a_y, const uint8_t* a_icon, const int& a_arraySize, const uint8_t& a_width, const uint8_t& a_height) {
-  if (display::page == a_page) {
-    tft.drawXBMP(a_x, a_y, a_width, a_height, a_icon, a_arraySize, RA8875_BLUE, user::backgroundColor, 1);
-  }
-  else {
-    tft.drawXBMP(a_x, a_y, a_width, a_height, a_icon, a_arraySize, display::RA8875_DARKGREY, user::backgroundColor, 1);
-  }
+  //delay(1);
+  //tft.drawPixel(1, 1, user::backgroundColor);
 }
 
 // draws the mini icons to swap between sensors on the graph page
@@ -452,13 +445,13 @@ void showResetMessage() {
   int startX = 136; // makes it eaiser to position
   int startY = 186;
   //Frame
-  tft.fillRoundRect(startX - 20, startY, 580, 130, 5, display::RA8875_SMOKE_WHITE);
+  tft.fillRoundRect(startX - 20, startY, 580, 130, 5, RA8875_WHITE);
   tft.drawRoundRect(startX - 22, startY - 2, 582, 134, 5, RA8875_BLACK);
   tft.drawRoundRect(startX - 22, startY - 1, 581, 132, 5, RA8875_BLACK);
   // Draw text
   tft.setFont(&akashi_36px_Regular);
   tft.setFontScale(1);
-  tft.setTextColor(RA8875_BLACK, display::RA8875_SMOKE_WHITE);
+  tft.setTextColor(RA8875_BLACK, RA8875_WHITE);
   tft.print(startX + 8, startY, "Please wait while the");
   tft.print(startX + 8, startY + 38, "system loads the settings");
   tft.print(startX + 8, startY + 76, "for the first time.");
@@ -474,13 +467,13 @@ void displayDosingNotification(const uint8_t& a_seconds, const float& a_outOfRan
     tft.setFont(&akashi_36px_Regular);
     tft.setFontScale(1);
     //Frame
-    tft.fillRoundRect(startX - 20, startY, 600, 250, 5, display::RA8875_SMOKE_WHITE); // RA8875_YELLOW
+    tft.fillRoundRect(startX - 20, startY, 600, 250, 5, RA8875_WHITE); // RA8875_YELLOW
     tft.drawRoundRect(startX - 22, startY - 2, 602, 254, 5, RA8875_BLACK);
     tft.drawRoundRect(startX - 22, startY - 1, 601, 252, 5, RA8875_BLACK);
     // Buttons
     cancelButton(startX + 108, startY + 200);
     continueButton(startX + 283, startY + 200);
-    tft.setTextColor(RA8875_BLACK, display::RA8875_SMOKE_WHITE);
+    tft.setTextColor(RA8875_BLACK, RA8875_WHITE);
     // =====================================
     tft.setCursor(startX + 118, startY + 8);
     tft.print("Alert adjusting ");
@@ -513,7 +506,7 @@ void displayDosingNotification(const uint8_t& a_seconds, const float& a_outOfRan
     tft.print("Do you want to continue?");
   }
   if (a_refreshDosingNotification || a_seconds != previousSeconds) {
-    tft.fillRect(startSecPos, startY + 90, endSecPos - startSecPos, 34, display::RA8875_SMOKE_WHITE); // RA8875_YELLOW
+    tft.fillRect(startSecPos, startY + 90, endSecPos - startSecPos, 34, RA8875_WHITE); // RA8875_YELLOW
     tft.setCursor(startSecPos + 2, startY + 88);
     tft.print(a_seconds);
     tft.print(" seconds.");
@@ -544,7 +537,7 @@ void continueMessage(const char* a_text, const float& a_num, const uint8_t a_pre
   uint16_t startX = 166, startY = 166;
   //Frame
   if (!a_refresh) {
-    tft.fillRoundRect(startX - 30, startY, 620, 250, 5, display::RA8875_SMOKE_WHITE);
+    tft.fillRoundRect(startX - 30, startY, 620, 250, 5, RA8875_WHITE);
     tft.drawRoundRect(startX - 31, startY - 1, 622, 252, 5, RA8875_BLACK);
     // Buttons
     if (a_showContiue && a_showCancel) {
@@ -561,7 +554,7 @@ void continueMessage(const char* a_text, const float& a_num, const uint8_t a_pre
   // Draw text
   tft.setFont(&akashi_36px_Regular);
   tft.setFontScale(1);
-  tft.setTextColor(RA8875_BLACK, display::RA8875_SMOKE_WHITE);
+  tft.setTextColor(RA8875_BLACK, RA8875_WHITE);
   tft.setCursor(startX - 8, startY);
   static int numX = 0, numY = 0;
   for (unsigned int i = 0; i < strlen(a_text); i++) {
@@ -570,7 +563,7 @@ void continueMessage(const char* a_text, const float& a_num, const uint8_t a_pre
       numX = tft.getFontX();
       numY = tft.getFontY();
       if (a_refresh)
-        tft.fillRect(numX, numY, 744 - numX, 36, display::RA8875_SMOKE_WHITE);
+        tft.fillRect(numX, numY, 744 - numX, 36, RA8875_WHITE);
       tft.print(a_num, a_precision);
     }
     if (c == '\n') {
@@ -586,14 +579,14 @@ void continueMessage(const char* a_text, const float& a_num, const uint8_t a_pre
 void abortMessage(const char *a_text, const char* a_str, const float& a_value, const int& a_doserNum, const uint8_t& a_precison) {
   uint16_t startX = 166, startY = 166;
   //Frame
-  tft.fillRoundRect(startX - 20, startY, 600, 250, 5, display::RA8875_SMOKE_WHITE);
+  tft.fillRoundRect(startX - 20, startY, 600, 250, 5, RA8875_WHITE);
   tft.drawRoundRect(startX - 21, startY - 1, 602, 252, 5, RA8875_BLACK);
   // Buttons
   cancelButton(startX + 200, startY + 200); // x was 178
   // Draw text
   tft.setFont(&akashi_36px_Regular);
   tft.setFontScale(1);
-  tft.setTextColor(RA8875_BLACK, display::RA8875_SMOKE_WHITE);
+  tft.setTextColor(RA8875_BLACK, RA8875_WHITE);
   tft.setCursor(startX - 8, startY);
   for (unsigned int i = 0; i < strlen(a_text); i++) {
     char c = a_text[i];
@@ -612,15 +605,16 @@ void abortMessage(const char *a_text, const char* a_str, const float& a_value, c
   }
 }
 
-
 void infoMessage() {
-  char charBuffer[32]{0};
+  char charBuffer[33]{0};
   uint16_t startX = 146, startY = 166;
   uint charPos = 0, fontX = 0, dialogHeight = 40;
+  static int prevInfoPos = -1;
   tft.setFont(&akashi_36px_Regular);
   tft.setFontScale(1);
-  tft.setTextColor(RA8875_BLACK, display::RA8875_SMOKE_WHITE);  
-  if (display::refreshPage) {
+  tft.setTextColor(RA8875_BLACK, RA8875_WHITE);  
+  if ((display::refreshPage || prevInfoPos != message::infoPos) && display::showInfoDialog) {
+    printf("Starting infoMessage [%d]\n", message::infoPos);
     // Work out the dialog height
     for (unsigned int i = 0; i < strlen(message::infoMessageArray[message::infoPos]); i++) {
       char c = message::infoMessageArray[message::infoPos][i];
@@ -631,21 +625,22 @@ void infoMessage() {
           dialogHeight += 40;
           fontX = 0;
         }
-        fontX += tft.getStringWidth(charBuffer);
-        memset(charBuffer, 0 , 32);
+        else
+          fontX += tft.getStringWidth(charBuffer);
+        memset(charBuffer, 0 , 33);
         charPos = 0;
       }
     }
-    if (fontX > 0)
+    if (charPos > 0 || fontX > 0)
       dialogHeight += 40;
     //Frame
-    tft.fillRoundRect(startX - 20, startY, 630, dialogHeight, 5, display::RA8875_SMOKE_WHITE);
+    tft.fillRoundRect(startX - 20, startY, 630, dialogHeight, 5, RA8875_WHITE);
     tft.drawRoundRect(startX - 21, startY - 1, 632, dialogHeight + 2, 5, RA8875_BLACK);
     //closeButton(startX + 200, startY + 250);
     tft.setCursor(startX - 8, startY);
     // Draw text
     charPos = 0;
-    memset(charBuffer, 0 , 32);
+    memset(charBuffer, 0 , 33);
     for (unsigned int i = 0; i < strlen(message::infoMessageArray[message::infoPos]); i++) {
       char c = message::infoMessageArray[message::infoPos][i];
       if (charPos < 32)
@@ -656,10 +651,11 @@ void infoMessage() {
           tft.setCursor(startX - 8, startY);
         }
         tft.print(charBuffer);
-        memset(charBuffer, 0 , 32);
+        memset(charBuffer, 0 , 33);
         charPos = 0;
       }
     }
+    prevInfoPos = message::infoPos;
   }
 }
 
@@ -803,7 +799,7 @@ void calibrateButton(const int& a_x, const int& a_y) {
 }
 
 // draw the slide show seen on the homepage, attributes seen below...
-void drawSensorSlide(const float & a_sensorData, const float & a_minTarget, const float & a_maxTarget, float * a_arrayData, const uint8_t & a_percision) {
+void drawSensorSlide(const float& a_sensorData, const float& a_minTarget, const float& a_maxTarget, float* a_arrayData, uint8_t a_percision) {
   if (display::refreshPage) {
     tft.setCursor(540, 140);
     tft.setFont(&akashi_36px_Regular);
@@ -812,47 +808,66 @@ void drawSensorSlide(const float & a_sensorData, const float & a_minTarget, cons
     tft.setFontScale(1);
     tft.print("Target");
   }
+  uint8_t percision = a_percision;
+  if (a_sensorData >= 1000 && a_percision > 0)
+    percision = 0;
   // draw sensor reading
   static float previousSensorData;
   static int sensorDataPosition;
-  if (display::refreshPage || hasChanged(a_sensorData, previousSensorData, a_percision)) {
+  if (display::refreshPage || hasChanged(a_sensorData, previousSensorData, percision)) {
     tft.setFont(&HallfeticaLargenum_42px_Regular);
     tft.setFontScale(2);
     tft.setTextColor(RA8875_BLACK, user::backgroundColor);
-    int sensorStartX = 290 - (tft.getStringWidth(a_sensorData, a_percision) / 2);
+    int sensorStartX = 290 - (tft.getStringWidth(a_sensorData, percision) / 2);
     tft.fillRect(98, 188, sensorDataPosition - 96, 90, user::backgroundColor);
-    tft.print(sensorStartX, 190, a_sensorData, a_percision);
+    tft.print(sensorStartX, 190, a_sensorData, percision);
     sensorDataPosition = tft.getFontX();
     previousSensorData = a_sensorData;
   }
   // draw targets
-  static int minTargetPosition;
+  percision = a_percision;
+  if (a_minTarget >= 100 && a_percision > 0)
+    percision = 0;
+  else if (a_minTarget >= 10 && a_percision > 1)
+    percision = 1;
+  static int minTargetStartPosition, minTargetEndPosition;
   static float previousMinTarget;
-  if (display::refreshPage || hasChanged(a_minTarget, previousMinTarget, a_percision)) {
+  if (display::refreshPage || hasChanged(a_minTarget, previousMinTarget, percision)) {
     tft.setFont(&HallfeticaLargenum_42px_Regular);
     tft.setFontScale(1);
     tft.setTextColor(RA8875_BLACK, user::backgroundColor);
-    int minTargetStartX = 540 - (tft.getStringWidth(a_minTarget, a_percision) / 2);
-    tft.fillRect(438, 228, minTargetPosition - 436, 50, user::backgroundColor);
-    tft.print(minTargetStartX, 230, a_minTarget, a_percision); // a_minTarget
-    minTargetPosition = tft.getFontX();
+    int minTargetStartX = 540 - (tft.getStringWidth(a_minTarget, percision) / 2);
+    tft.fillRect(minTargetStartPosition, 189, minTargetEndPosition - minTargetStartPosition, 85, user::backgroundColor);
+    tft.print(minTargetStartX, 230, a_minTarget, percision);
+    minTargetStartPosition = minTargetStartX;
+    minTargetEndPosition = tft.getFontX();
     tft.setFont(&myriadPro_32px_Regular);
-    tft.print(minTargetStartX, 174, "Min");
+    tft.print(minTargetStartX, 186, "Min");
+    if (tft.getFontX() > minTargetEndPosition)
+      minTargetEndPosition = tft.getFontX();
     previousMinTarget = a_minTarget;
   }
   //
-  static int maxTargetPosition;
+  percision = a_percision;
+  if (a_maxTarget >= 100 && a_percision > 0)
+    percision = 0;
+  else if (a_maxTarget >= 10 && a_percision > 1)
+    percision = 1;
+  static int maxTargetStartPosition, maxTargetEndPosition;
   static float previousMaxTarget;
-  if (display::refreshPage || hasChanged(a_maxTarget, previousMaxTarget, a_percision)) {
+  if (display::refreshPage || hasChanged(a_maxTarget, previousMaxTarget, percision)) {
     tft.setFont(&HallfeticaLargenum_42px_Regular);
     tft.setFontScale(1);
     tft.setTextColor(RA8875_BLACK, user::backgroundColor);
-    int maxTargetStartX = 710 - (tft.getStringWidth(a_maxTarget, a_percision) / 2);
-    tft.fillRect(608, 228, maxTargetPosition - 606, 50, user::backgroundColor);
-    tft.print(maxTargetStartX, 230, a_maxTarget, a_percision); // a_maxTarget
-    maxTargetPosition = tft.getFontX();
+    int maxTargetStartX = 710 - (tft.getStringWidth(a_maxTarget, percision) / 2);
+    tft.fillRect(maxTargetStartPosition, 189, maxTargetEndPosition - maxTargetStartPosition, 85, user::backgroundColor);
+    tft.print(maxTargetStartX, 230, a_maxTarget, percision);
+    maxTargetStartPosition = maxTargetStartX;
+    maxTargetEndPosition = tft.getFontX();
     tft.setFont(&myriadPro_32px_Regular);
-    tft.print(maxTargetStartX, 174, "Max");
+    tft.print(maxTargetStartX, 186, "Max");
+    if (tft.getFontX() > maxTargetEndPosition)
+      maxTargetEndPosition = tft.getFontX();
     previousMaxTarget = a_maxTarget;
   }
   // draw mini graph
@@ -872,12 +887,12 @@ void displaySetRTCTime() {
     drawUpDownButtons(495, 375, 585, 375, RA8875_BLUE);
     tft.setFont(&akashi_36px_Regular);
     tft.setFontScale(1);
-    tft.setTextColor(RA8875_BLACK, display::RA8875_SMOKE_WHITE);
-    tft.fillRoundRect(260, 420, 164, 42, 5, display::RA8875_SMOKE_WHITE);
+    tft.setTextColor(RA8875_BLACK, RA8875_WHITE);
+    tft.fillRoundRect(260, 420, 164, 42, 5, RA8875_WHITE);
     tft.drawRoundRect(258, 418, 167, 46, 5, RA8875_BLACK);
     tft.drawRoundRect(259, 419, 166, 44, 5, RA8875_BLACK);
     tft.print(280, 420, "Cancel");
-    tft.fillRoundRect(455, 420, 169, 42, 5, display::RA8875_SMOKE_WHITE);
+    tft.fillRoundRect(455, 420, 169, 42, 5, RA8875_WHITE);
     tft.drawRoundRect(453, 418, 172, 46, 5, RA8875_BLACK);
     tft.drawRoundRect(454, 419, 171, 44, 5, RA8875_BLACK);
     tft.print(480, 420, "Confirm");
@@ -1039,7 +1054,8 @@ void drawDoser(
     tft.setFont(&akashi_36px_Regular);
     tft.setFontScale(1);
     tft.setCursor(a_doserPosition + 4, a_y + a_yOffSet + 200);
-    a_symbol == 0 ? tft.print("ml") : tft.print("%");
+    if (a_doserPosition < 800 - tft.getStringWidth("ml"))
+      a_symbol == 0 ? tft.print("ml") : tft.print("%");
     a_doserPosition = tft.getFontX();
     tft.setCursor(a_x, a_y);
     tft.print(a_doserNum);
@@ -1060,11 +1076,10 @@ void drawSlideIcons(int a_x, const int& a_y, const uint8_t& a_page, const uint8_
 
 // draw 2 values in large text at give x and y's
 void drawTwoValues(
-  const int& a_startX, float a_value, const unsigned int& a_color, const uint8_t & a_precison,
-  const int& a_startX2, float a_vlaue2, const unsigned int& a_color2, const uint8_t & a_precison2,
+  const int& a_startX, float a_value, const unsigned int& a_color, uint8_t a_precison,
+  const int& a_startX2, float a_value2, const unsigned int& a_color2, uint8_t a_precison2,
   const char* a_symbol, const int& a_symbolOffset) {
 
-  // val 1
   static float previousValue = 0, previousValue2 = 0;
   static int startX = 0, endX = 0, startX2 = 0, endX2 = 0;
   tft.setFont(&akashi_36px_Regular);
@@ -1077,6 +1092,11 @@ void drawTwoValues(
   if (display::refreshPage) {
     startX = 0; endX = 0; startX2 = 0; endX2 = 0;
   }
+  // val 1
+  if (a_value >= 1000 && a_precison >= 1)
+    a_precison = 0;
+  else if (a_value >= 100 && a_precison >= 2)
+    a_precison = 1;
   if (display::refreshPage || hasChanged(a_value, previousValue, a_precison)) {
     tft.fillRect(startX, 248, endX - startX, 90, user::backgroundColor);
     startX = a_startX - (tft.getStringWidth(a_value, a_precison) + symbolWidth) / 2;
@@ -1090,13 +1110,17 @@ void drawTwoValues(
     previousValue = a_value;
   }
   // val 2
+  if (a_value2 >= 1000 && a_precison2 >= 1)
+    a_precison2 = 0;
+  else if (a_value2 >= 100 && a_precison2 >= 2)
+    a_precison2 = 1;
   tft.setFont(&HallfeticaLargenum_42px_Regular);
   tft.setFontScale(2);
   tft.setTextColor(a_color2, user::backgroundColor);
-  if (display::refreshPage || hasChanged(a_vlaue2, previousValue2, a_precison2)) {
+  if (display::refreshPage || hasChanged(a_value2, previousValue2, a_precison2)) {
     tft.fillRect(startX2, 248, endX2 - startX2, 90, user::backgroundColor);
-    startX2 = a_startX2 - (tft.getStringWidth(a_vlaue2, a_precison2) + symbolWidth) / 2;
-    tft.print(startX2, 250, a_vlaue2, a_precison2);
+    startX2 = a_startX2 - (tft.getStringWidth(a_value2, a_precison2) + symbolWidth) / 2;
+    tft.print(startX2, 250, a_value2, a_precison2);
     if (a_symbol != NULL) {
       tft.setFont(&akashi_36px_Regular);
       tft.setFontScale(1);
@@ -1414,11 +1438,11 @@ void displayWifiSsid() {
     tft.setFont(&akashi_36px_Regular);
     tft.setFontScale(1);
     tft.setTextColor(RA8875_BLACK, user::backgroundColor);
-    tft.fillRoundRect(260, 420, 164, 42, 5, display::RA8875_SMOKE_WHITE);
+    tft.fillRoundRect(260, 420, 164, 42, 5, RA8875_WHITE);
     tft.drawRoundRect(258, 418, 167, 46, 5, RA8875_BLACK);
     tft.drawRoundRect(259, 419, 166, 44, 5, RA8875_BLACK);
     tft.print(280, 420, "Cancel");
-    tft.fillRoundRect(455, 420, 169, 42, 5, display::RA8875_SMOKE_WHITE);
+    tft.fillRoundRect(455, 420, 169, 42, 5, RA8875_WHITE);
     tft.drawRoundRect(453, 418, 172, 46, 5, RA8875_BLACK);
     tft.drawRoundRect(454, 419, 171, 44, 5, RA8875_BLACK);
     tft.print(480, 420, "Confirm");
@@ -1450,11 +1474,11 @@ void displayWifiPassword() {
     tft.setFont(&akashi_36px_Regular);
     tft.setFontScale(1);
     tft.setTextColor(RA8875_BLACK, user::backgroundColor);
-    tft.fillRoundRect(260, 420, 164, 42, 5, display::RA8875_SMOKE_WHITE);
+    tft.fillRoundRect(260, 420, 164, 42, 5, RA8875_WHITE);
     tft.drawRoundRect(258, 418, 167, 46, 5, RA8875_BLACK);
     tft.drawRoundRect(259, 419, 166, 44, 5, RA8875_BLACK);
     tft.print(280, 420, "Cancel");
-    tft.fillRoundRect(455, 420, 169, 42, 5, display::RA8875_SMOKE_WHITE);
+    tft.fillRoundRect(455, 420, 169, 42, 5, RA8875_WHITE);
     tft.drawRoundRect(453, 418, 172, 46, 5, RA8875_BLACK);
     tft.drawRoundRect(454, 419, 171, 44, 5, RA8875_BLACK);
     tft.print(480, 420, "Confirm");

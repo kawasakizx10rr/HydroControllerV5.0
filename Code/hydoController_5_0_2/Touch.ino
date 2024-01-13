@@ -8,8 +8,13 @@ void touchEvent() {
       sliders();
       static unsigned long previousTouchMillis = 0;
       if (millis() - previousTouchMillis >= display::debounceTime) {       
-        mainMenuNavigation();
-        adjustPageValues();
+        if (display::touch_x >= 0 && display::touch_x <= 80 && display::touch_y >= 0 && display::touch_y <= 480
+        || display::touch_x >= 0 && display::touch_x <= 800 && display::touch_y >= 0 && display::touch_y <= 80) {
+          mainMenuNavigation();
+        }
+        else {
+          adjustPageValues();
+        }
         previousTouchMillis = millis();
       }      
       previousTouchX = display::touch_x;
@@ -470,6 +475,7 @@ void adjustPageValues() {
 void infoDialogTouched() {
   if (millis() - display::infoDialogDisplayTime > 3000UL) {
     if (display::touch_x >= 100 && display::touch_x <= 800 && display::touch_y >= 100 && display::touch_y <= 480) {
+      printf("Closing infoDialog...\n");
       clearPage();
       display::showingDialog = false;
       display::showInfoDialog = false;
@@ -914,9 +920,9 @@ void settingsZeroPageTouched() {
         user::convertToTds = !user::convertToTds;
         device::settingsAdjusted = true;
         if (user::convertToTds)
-          drawPageIconQuick(5, 23, 32, ppmIcon, 280, 64, 35);
+          drawPageIcon(5, 23, 32, ppmIcon, 280, 64, 35);
         else
-          drawPageIconQuick(5, 26, 32, ecIcon, 256, 57, 36);
+          drawPageIcon(5, 26, 32, ecIcon, 256, 57, 36);
       }
     }
     if (display::settingsPageZeroScrollPos >= 2 && display::settingsPageZeroScrollPos <= 7) {

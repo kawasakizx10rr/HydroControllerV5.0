@@ -1,4 +1,5 @@
 const char htmlText[] = R"=====(
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -331,8 +332,8 @@ display:block;width:42%;height:100%;float:left;background:lightgrey;border-radiu
 // LOCAL GUI VARIABLES
 // USER
 // sensor arrays
-let ecSenorArray = [];
-let tdsSenorArray = [];
+let ecSenorArray = [1.23, 3.45, 2.12, 4.67, 0.98, 3.01, 1.56, 0.45, 2.34, 4.12, 0.87, 3.78, 1.99, 0.76, 2.89, 4.54, 1.23, 3.45, 2.12, 4.67, 0.98, 3.01, 1.56, 0.45, 2.34, 4.12, 0.87, 3.78, 1.99, 0.76, 2.89, 4.54, 1.23, 3.45, 2.12, 4.67, 0.98, 3.01, 1.56, 0.45, 2.34, 4.12, 0.87, 3.78, 1.99, 0.76, 2.89, 4.54, 1.23, 3.45, 2.12, 4.67, 0.98, 3.01, 1.56, 0.45, 2.34, 4.12, 0.87, 3.78, 1.99, 0.76, 2.89, 4.54, 1.23, 3.45, 2.12, 4.67, 0.98, 3.01, 1.56, 0.45, 2.34, 4.12, 0.87, 3.78, 1.99, 0.76, 2.89, 4.54, 1.23, 3.45, 2.12, 4.67, 0.98, 3.01, 1.56, 0.45, 2.34, 4.12, 0.87, 3.78, 1.99, 0.76, 2.89, 4.54, 1.23, 3.45, 2.12, 4.67, 0.98, 3.01, 1.56, 0.45, 2.34, 4.12, 0.87, 3.78, 1.99, 0.76, 2.89, 4.54, 3.57, 2.98, 2.55, 3.14, 3.76, 3.21, 4.09, 4.59];
+let tdsSenorArray = [1.23, 3.45, 2.12, 4.67, 0.98, 3.01, 1.56, 0.45, 2.34, 4.12, 0.87, 3.78, 1.99, 0.76, 2.89, 4.54, 1.23, 3.45, 2.12, 4.67, 0.98, 3.01, 1.56, 0.45, 2.34, 4.12, 0.87, 3.78, 1.99, 0.76, 2.89, 4.54, 1.23, 3.45, 2.12, 4.67, 0.98, 3.01, 1.56, 0.45, 2.34, 4.12, 0.87, 3.78, 1.99, 0.76, 2.89, 4.54, 1.23, 3.45, 2.12, 4.67, 0.98, 3.01, 1.56, 0.45, 2.34, 4.12, 0.87, 3.78, 1.99, 0.76, 2.89, 4.54, 1.23, 3.45, 2.12, 4.67, 0.98, 3.01, 1.56, 0.45, 2.34, 4.12, 0.87, 3.78, 1.99, 0.76, 2.89, 4.54, 1.23, 3.45, 2.12, 4.67, 0.98, 3.01, 1.56, 0.45, 2.34, 4.12, 0.87, 3.78, 1.99, 0.76, 2.89, 4.54, 1.23, 3.45, 2.12, 4.67, 0.98, 3.01, 1.56, 0.45, 2.34, 4.12, 0.87, 3.78, 1.99, 0.76, 2.89, 4.54, 3.57, 2.98, 2.55, 3.14, 3.76, 3.21, 4.09, 4.59];
 let phSenorArray = [];
 let co2SenorArray = [];
 let waterTemperatureSenorArray = [];
@@ -342,7 +343,7 @@ let airHumiditySenorArray = [];
 let fanOneSpeedArray = [];
 let fanTwoSpeedArray = [];
 let autoFillDays = [];
-let arrayCount = 0;
+let arrayCount = 120;
 // profile names
 var profileOneName = "-";
 var profileTwoName = "-";
@@ -369,8 +370,8 @@ let fanOneSpeed = 0;
 let fantwoSpeed = 0;
 let fanOneMinSpeed = 0;
 let fanOneMaxSpeed = 0;
-let fanTwoMinSpeed = 0;
-let fanTwoMaxSpeed = 0;
+let targetFanTwoMinSpeed = 0;
+let targetFanTwoMaxSpeed = 0;
 var fansControlTemp = true;
 var fansControlHum = true;
 var fanOneFixedSpeed = false;
@@ -425,12 +426,12 @@ let minFanTwoSpeed = 0;
 let maxFanTwoSpeed = 0;
 // dosers
 let numDosers = 0;
-let doserOneMode = 0;// EC / PH + / Off
-let doserTwoMode = 0;// EC / PH + / Off
-let doserThreeMode = 0;// EC / PH + / Off
-let doserFourMode = 0; // EC / PH - / Off
-let doserFiveMode = 0;// EC / PH + / Off
-let doserSixMode = 0; // EC / PH - / Off
+let doserOneMode = 0;
+let doserTwoMode = 0;
+let doserThreeMode = 0;
+let doserFourMode = 0;
+let doserFiveMode = 0;
+let doserSixMode = 0;
 let doserOneMills = 0;
 let doserTwoMills = 0;
 let doserThreeMills = 0;
@@ -502,7 +503,7 @@ var userProfile = 0;
 let screenWidth = window.innerWidth;
 let screenHeight = window.innerHeight;
 let homePageScrollPosition = 0;
-let p2SPos = 0;
+let graphPageScrollPosition = 0;
 let maxMinPageScrollPosition = 0;
 let co2PageScrollPosition = 0;
 let waterPageScrollPosition = 0;
@@ -3874,6 +3875,9 @@ function setPage(pageNumber, refreshValues) {
       document.getElementById(currentPage).style.display = "none";
     }
   }
+  if (refreshValues)
+    getData(pageNumber);
+	
   if (pageNumber == 1) {
     homePageSlider(0);
   }
@@ -4025,10 +4029,12 @@ function homePageSlider(inc) {
   if (inc < 0) {
     if (homePageScrollPosition > 0) homePageScrollPosition--;
     else homePageScrollPosition = 9;
+	getData(1);
   }
   else if (inc > 0) {
     if (homePageScrollPosition < 9) homePageScrollPosition++;
     else homePageScrollPosition = 0;
+	getData(1);
   }
 
   var currentSlideIcon = "homeSlideIcon" + (homePageScrollPosition + 1);
@@ -4053,7 +4059,7 @@ function homePageSlider(inc) {
     document.getElementById('homePageSensorValue').innerHTML = parseFloat(ecSensor).toFixed(2);
     document.getElementById('homePageMinTargetValue').innerHTML = parseFloat(targetMinEc).toFixed(2);
     document.getElementById('homePageMaxTargetValue').innerHTML = parseFloat(targetMaxEc).toFixed(2);
-    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,true,ecSenorArray,arrayCount,1);
+    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,ecSenorArray,arrayCount,1);
   }
   else if (homePageScrollPosition == 1) {
     document.getElementById('homePageSensorTitle').innerHTML = "TDS Sensor";
@@ -4062,7 +4068,7 @@ function homePageSlider(inc) {
     document.getElementById('homePageSensorValue').innerHTML = tdsSensor;
     document.getElementById('homePageMinTargetValue').innerHTML = targetMinTds;
     document.getElementById('homePageMaxTargetValue').innerHTML = targetMaxTds;
-    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,true,tdsSenorArray,arrayCount,1);
+    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,tdsSenorArray,arrayCount,1);
   }
   else if (homePageScrollPosition == 2) {
     document.getElementById('homePageSensorTitle').innerHTML = "PH Sensor";
@@ -4071,7 +4077,7 @@ function homePageSlider(inc) {
     document.getElementById('homePageSensorValue').innerHTML = parseFloat(phSensor).toFixed(2);
     document.getElementById('homePageMinTargetValue').innerHTML = parseFloat(targetMinPh).toFixed(2);
     document.getElementById('homePageMaxTargetValue').innerHTML = parseFloat(targetMaxPh).toFixed(2);
-    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,true,phSenorArray,arrayCount,1);
+    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,phSenorArray,arrayCount,1);
   }
   else if (homePageScrollPosition == 3) {
     document.getElementById('homePageSensorTitle').innerHTML = "Co2 Sensor";
@@ -4080,7 +4086,7 @@ function homePageSlider(inc) {
     document.getElementById('homePageSensorValue').innerHTML = co2Sensor;
     document.getElementById('homePageMinTargetValue').innerHTML = targetCo2;
     document.getElementById('homePageMaxTargetValue').innerHTML = targetCo2;
-    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,true,co2SenorArray,arrayCount,1);
+    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,co2SenorArray,arrayCount,1);
   }
   else if (homePageScrollPosition == 4) {
     document.getElementById('homePageSensorTitle').innerHTML = "Water Temp Sensor";
@@ -4092,7 +4098,7 @@ function homePageSlider(inc) {
     else {
       document.getElementById('homePageIcon').innerHTML = "c";      
     }
-    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,true,waterTemperatureSenorArray,arrayCount,1);
+    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,waterTemperatureSenorArray,arrayCount,1);
     document.getElementById('homePageSensorValue').innerHTML = parseFloat(waterTemperatureSensor).toFixed(1);
     document.getElementById('homePageMinTargetValue').innerHTML = parseFloat(targetMinWaterTemp).toFixed(1);
     document.getElementById('homePageMaxTargetValue').innerHTML = parseFloat(targetMaxWaterTemp).toFixed(1);
@@ -4109,7 +4115,7 @@ function homePageSlider(inc) {
       document.getElementById('homePageIcon').innerHTML = "cm";
       document.getElementById('homePageIcon').style.verticalAlign = "text-bottom";
     }
-    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,true,waterLevelSenorArray,arrayCount,1);
+    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,waterLevelSenorArray,arrayCount,1);
     document.getElementById('homePageSensorValue').innerHTML = parseFloat(waterLevelSensor).toFixed(1);
     document.getElementById('homePageMinTargetValue').innerHTML = parseFloat(targetMinWaterHeight).toFixed(1);
     document.getElementById('homePageMaxTargetValue').innerHTML = parseFloat(targetMaxWaterHeight).toFixed(1);
@@ -4124,7 +4130,7 @@ function homePageSlider(inc) {
     else {
       document.getElementById('homePageIcon').innerHTML = "c";
     }
-    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,true,airTemperatureSenorArray,arrayCount,1);
+    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,airTemperatureSenorArray,arrayCount,1);
     document.getElementById('homePageSensorValue').innerHTML = parseFloat(airTemperatureSensor).toFixed(1);
     document.getElementById('homePageMinTargetValue').innerHTML = parseFloat(targetMinAirTemp).toFixed(1);
     document.getElementById('homePageMaxTargetValue').innerHTML = parseFloat(targetMaxAirTemp).toFixed(1);
@@ -4137,7 +4143,7 @@ function homePageSlider(inc) {
     document.getElementById('homePageSensorValue').innerHTML = parseFloat(airHumiditySensor).toFixed(1);
     document.getElementById('homePageMinTargetValue').innerHTML = parseFloat(targetMinHumidity).toFixed(1);
     document.getElementById('homePageMaxTargetValue').innerHTML = parseFloat(targetMaxHumidity).toFixed(1);
-    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,true,airHumiditySenorArray,arrayCount,1);
+    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,airHumiditySenorArray,arrayCount,1);
   }
   else if (homePageScrollPosition == 8) {
     document.getElementById('homePageSensorTitle').innerHTML = "Fan One Speed";
@@ -4147,7 +4153,7 @@ function homePageSlider(inc) {
     document.getElementById('homePageSensorValue').innerHTML = fanOneSpeed;
     document.getElementById('homePageMinTargetValue').innerHTML = fanOneMinSpeed;
     document.getElementById('homePageMaxTargetValue').innerHTML = fanOneMaxSpeed;
-    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,true,fanOneSpeedArray,arrayCount,0);
+    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,fanOneSpeedArray,arrayCount,0);
   }
   else if (homePageScrollPosition == 9) {
     document.getElementById('homePageSensorTitle').innerHTML = "Fan Two Speed";
@@ -4155,9 +4161,9 @@ function homePageSlider(inc) {
     document.getElementById('homePageIcon').innerHTML = "%";
     document.getElementById('homePageIcon').style.verticalAlign = "text-bottom";
     document.getElementById('homePageSensorValue').innerHTML = fantwoSpeed;
-    document.getElementById('homePageMinTargetValue').innerHTML = fanTwoMinSpeed;
-    document.getElementById('homePageMaxTargetValue').innerHTML = fanTwoMaxSpeed;
-    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,true,fanTwoSpeedArray,arrayCount,0);
+    document.getElementById('homePageMinTargetValue').innerHTML = targetFanTwoMinSpeed;
+    document.getElementById('homePageMaxTargetValue').innerHTML = targetFanTwoMaxSpeed;
+    drawGraph("graphCanvas",2,3,box.offsetHeight-5,box.offsetWidth-2,10,fanTwoSpeedArray,arrayCount,0);
   }
   clearTimeout(homePageTimer);
   homePageTimer = setTimeout(function() {
@@ -4168,15 +4174,17 @@ function homePageSlider(inc) {
 function graphSlider(inc) {
   setGraph2Size();
   if (inc < 0) {
-    if (p2SPos > 0) p2SPos--;
-    else p2SPos = 9;
+    if (graphPageScrollPosition > 0) graphPageScrollPosition--;
+    else graphPageScrollPosition = 9;
+	getData(2);
   }
   else if (inc > 0) {
-    if (p2SPos < 9) p2SPos++;
-    else p2SPos = 0;
+    if (graphPageScrollPosition < 9) graphPageScrollPosition++;
+    else graphPageScrollPosition = 0;
+	getData(2);
   }
 
-  var currentSlideIcon = "graphSlideIcon" + (p2SPos + 1);
+  var currentSlideIcon = "graphSlideIcon" + (graphPageScrollPosition + 1);
   for (i = 1;i < 11;i++) {
     var slideIcon = "graphSlideIcon" + i;
     document.getElementById(slideIcon).src = document.getElementById("slideIcon_blue").src;
@@ -4189,45 +4197,45 @@ function graphSlider(inc) {
   }
   
   let box2 = document.getElementById("graphPageGraph");
-  if (p2SPos == 0) {
+  if (graphPageScrollPosition == 0) {
     document.getElementById('graphPageSensorTitle').innerHTML = "EC Sensor";
-    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,true,ecSenorArray,arrayCount,1);
+    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,ecSenorArray,arrayCount,1);
   }
-  else if (p2SPos == 1) {
+  else if (graphPageScrollPosition == 1) {
     document.getElementById('graphPageSensorTitle').innerHTML = "TDS Sensor";
-    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,true,tdsSenorArray,arrayCount,0);
+    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,tdsSenorArray,arrayCount,0);
   }
-  else if (p2SPos == 2) {
+  else if (graphPageScrollPosition == 2) {
     document.getElementById('graphPageSensorTitle').innerHTML = "PH Sensor";
-    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,true,phSenorArray,arrayCount,1);
+    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,phSenorArray,arrayCount,1);
   }
-  else if (p2SPos == 3) {
+  else if (graphPageScrollPosition == 3) {
     document.getElementById('graphPageSensorTitle').innerHTML = "Co2 Sensor";
-    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,true,co2SenorArray,arrayCount,1);
+    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,co2SenorArray,arrayCount,1);
   }
-  else if (p2SPos == 4) {
+  else if (graphPageScrollPosition == 4) {
     document.getElementById('graphPageSensorTitle').innerHTML = "Water Temp Sensor";
-    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,true,waterTemperatureSenorArray,arrayCount,1);
+    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,waterTemperatureSenorArray,arrayCount,1);
   }
-  else if (p2SPos == 5) {
+  else if (graphPageScrollPosition == 5) {
     document.getElementById('graphPageSensorTitle').innerHTML = "Water Level Sensor";
-    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,true,waterLevelSenorArray,arrayCount,1);
+    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,waterLevelSenorArray,arrayCount,1);
   }
-  else if (p2SPos == 6) {
+  else if (graphPageScrollPosition == 6) {
     document.getElementById('graphPageSensorTitle').innerHTML = "Air Temp Sensor";
-    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,true,airHumiditySenorArray,arrayCount,1);
+    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,airHumiditySenorArray,arrayCount,1);
   }
-  else if (p2SPos == 7) {
+  else if (graphPageScrollPosition == 7) {
     document.getElementById('graphPageSensorTitle').innerHTML = "Air Hum Sensor";
-    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,true,airHumiditySenorArray,arrayCount,1);
+    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,airHumiditySenorArray,arrayCount,1);
   }
-  else if (p2SPos == 8) {
+  else if (graphPageScrollPosition == 8) {
     document.getElementById('graphPageSensorTitle').innerHTML = "Fan One Speed";
-    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,true,fanOneSpeedArray,arrayCount,0);
+    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,fanOneSpeedArray,arrayCount,0);
   }
-  else if (p2SPos == 9) {
+  else if (graphPageScrollPosition == 9) {
     document.getElementById('graphPageSensorTitle').innerHTML = "Fan Two Speed";
-    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,true,fanTwoSpeedArray,arrayCount,0);
+    drawGraph("graphCanvas2", 2,6,box2.offsetHeight-17,box2.offsetWidth-30,10,fanTwoSpeedArray,arrayCount,0);
   }
 }
 
@@ -4235,10 +4243,12 @@ function maxMinPageSlider(inc) {
   if (inc < 0) {
     if (maxMinPageScrollPosition > 0) maxMinPageScrollPosition--;
     else maxMinPageScrollPosition = 9;
+	getData(3);
   } 
   else if (inc > 0) {
     if (maxMinPageScrollPosition < 9) maxMinPageScrollPosition++;
     else maxMinPageScrollPosition = 0;
+	getData(3);
   }
   var currentSlideIcon = "maxMinSlideIcon" + (maxMinPageScrollPosition + 1);
   for (i = 1;i < 11;i++) {
@@ -5317,13 +5327,13 @@ function adjustFanOneMaxSpeed(inc) {
 }
 
 function adjustFanTwoMinSpeed(inc) {
-  if (inc != null) fanTwoMinSpeed = adjustValue(inc, fanTwoMinSpeed, 0, fanTwoMaxSpeed, 0, "fanTwoMinSpeed");
-  document.getElementById("fanTwoMinSpeed").innerHTML = fanTwoMinSpeed;
+  if (inc != null) targetFanTwoMinSpeed = adjustValue(inc, targetFanTwoMinSpeed, 0, targetFanTwoMaxSpeed, 0, "targetFanTwoMinSpeed");
+  document.getElementById("fanTwoMinSpeed").innerHTML = targetFanTwoMinSpeed;
 }
 
 function adjustFanTwoMaxSpeed(inc) {
-  if (inc != null) fanTwoMaxSpeed = adjustValue(inc, fanTwoMaxSpeed, fanTwoMinSpeed, 100, 0, "fanTwoMaxSpeed");
-  document.getElementById("fanTwoMaxSpeed").innerHTML = fanTwoMaxSpeed;
+  if (inc != null) targetFanTwoMaxSpeed = adjustValue(inc, targetFanTwoMaxSpeed, targetFanTwoMinSpeed, 100, 0, "targetFanTwoMaxSpeed");
+  document.getElementById("fanTwoMaxSpeed").innerHTML = targetFanTwoMaxSpeed;
 }
 
 function adjustMinAirTemp(inc) {
@@ -5877,8 +5887,18 @@ function adjustRefillTime(inc, minute, hour) {
   return ("Time " + strHour + ":" + strMin + timeSymbol);
 }
 
-function drawGraph(canvasID, a_xStartPos, a_yStartPos, a_graphHeight, a_graphWidth, a_numYLabels, a_displayQuadrant, a_data, a_arrayNumber, a_percision) {
-  var yMax = 0;
+function mapFloat(x, in_min, in_max, out_min, out_max) {
+  if (in_min == in_max || out_min == out_max)
+    return out_max;
+  else if (x < in_min)
+    return out_min;
+  else if (x > in_max)
+    return out_max;
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+function drawGraph(canvasID, a_xStartPos, a_yStartPos, a_graphHeight, a_graphWidth, a_numYLabels, a_data, a_arrayNumber, a_percision) {
+  var minArrayVal = 999, maxArrayVal = -999;
   var maxGraphArrayValues = 120;
   var canvas = document.getElementById(canvasID);
   var ctx = canvas.getContext("2d");
@@ -5888,287 +5908,479 @@ function drawGraph(canvasID, a_xStartPos, a_yStartPos, a_graphHeight, a_graphWid
   ctx.beginPath();
   // work out the greatest number to display on the y axis.
   for (var i = 0;i < a_arrayNumber;i++) {
-    if (a_data[i] > yMax)
-      yMax = a_data[i];
+    if (a_data[i] > maxArrayVal)
+      maxArrayVal = a_data[i];
+	if (a_data[i] < minArrayVal)
+      minArrayVal = a_data[i];
   }
 
   var graphXstartPosition = 0;
-  var yinc = yMax / a_numYLabels;
+  var yIncrement = 0;
   var YLablePosition = a_yStartPos + (canvasID == "graphCanvas2" ? (canvas.height/19) : 0);
-  var tempYmax = yMax;
-  var yLableGap = (a_graphHeight - 11) / a_numYLabels;
+  var tempYmax = maxArrayVal;
+  var yLableGap = (a_graphHeight - 11) / a_numYLabels - 1;
+  
+  if (maxArrayVal != minArrayVal)
+	yIncrement = (maxArrayVal - minArrayVal) / a_numYLabels;
+  else
+	yIncrement = maxArrayVal / a_numYLabels;
 
-  for (var i = 0;i < a_numYLabels;i++) {
+  for (var i = 0;i < a_numYLabels + 1;i++) {
     ctx.fillText(parseFloat(tempYmax).toFixed(1), a_xStartPos, YLablePosition);
     var textMaxWidth = ctx.measureText(parseFloat(tempYmax).toFixed(1)).width + a_xStartPos;
   if (parseFloat(textMaxWidth) > parseFloat(graphXstartPosition))
       graphXstartPosition = textMaxWidth;
     YLablePosition += yLableGap;// 33
-    tempYmax -= yinc;
+    tempYmax -= yIncrement;
   }
-
-  ctx.fillText(0, a_xStartPos, YLablePosition);
   ctx.moveTo(graphXstartPosition + 2, a_yStartPos + a_graphHeight - 10);
   ctx.lineTo(graphXstartPosition + 2, a_yStartPos);
   ctx.stroke();
 
   // draw x line and numbers
   ctx.textBaseline = "top";
-  var XSpacing = (a_graphWidth) / maxGraphArrayValues;
-  var xLablePosition = graphXstartPosition + 5;
+  let drawArea = a_graphWidth - (graphXstartPosition - a_xStartPos);
+  var xSpacing = drawArea / maxGraphArrayValues;
+  var xLablePosition = graphXstartPosition;
   for (var i = 1 ;i < a_arrayNumber + 1;i++) {
-    ctx.fillText(i, xLablePosition, a_yStartPos + a_graphHeight - 10);
-    xLablePosition += XSpacing;
+    ctx.fillText('|', xLablePosition, a_yStartPos + a_graphHeight - 10);
+    xLablePosition += xSpacing;
   }
 
   ctx.moveTo(graphXstartPosition + 2, a_yStartPos + a_graphHeight - 11);
-  ctx.lineTo(xLablePosition - (XSpacing / 1.5), a_yStartPos + a_graphHeight - 11);
+  ctx.lineTo(xLablePosition - (xSpacing / 1.5), a_yStartPos + a_graphHeight - 11);
   ctx.stroke();
 
   // draw line graph
-  XSpacing += 1;
-  var yGap = ((a_graphHeight - 12) / yMax);
-  var xGap = graphXstartPosition + 6;
-  var plotXstartPosition = 0, plotXendPosition = 0;
   if (a_arrayNumber >= 2) {
-    for (var i = 0;i < a_arrayNumber - 1;i++) {
-      plotYstartPosition = a_yStartPos + a_graphHeight - (yGap * a_data[i]);
-      plotYendPosition = a_yStartPos + a_graphHeight - (yGap * a_data[i + 1]);
-      ctx.moveTo(xGap, plotYstartPosition - 12);
-      ctx.lineTo(xGap + XSpacing, plotYendPosition - 12);
-      ctx.stroke();
 
-      if (a_displayQuadrant){
-        ctx.beginPath();
-        ctx.arc(xGap, plotYstartPosition - 12, 2, 0, 2 * Math.PI, false);
-        ctx.fillStyle = 'green';
-        ctx.fill();
-        ctx.stroke();
-      }
-      xGap += XSpacing;
+        let yGap = a_graphHeight / maxArrayVal;
+        let xGap = graphXstartPosition + 2;
+        for (let n = 0; n < a_arrayNumber - 1; n++) {
+		  //console.log(a_data[n]);
+          let plotYstartPosition = mapFloat(a_data[n], minArrayVal, maxArrayVal, a_yStartPos + a_graphHeight - 1, a_yStartPos);
+          let plotYendPosition = mapFloat(a_data[n+1], minArrayVal, maxArrayVal, a_yStartPos + a_graphHeight - 1, a_yStartPos);
+		  ctx.moveTo(xGap, plotYstartPosition - 12);
+		  xGap += xSpacing
+          ctx.lineTo(xGap, plotYendPosition - 12);
+          ctx.stroke();
+        }
+
     }
-    // Very end quadrant to display
-    if (a_displayQuadrant && a_arrayNumber >= 2){
-      ctx.beginPath();
-      ctx.arc(xGap, plotYendPosition - 12, 2, 0, 2 * Math.PI, false);
-      ctx.fillStyle = 'green';
-      ctx.fill();
-      ctx.stroke();
-    }
-  }
-}
+}  
 
-setInterval(function() {
-  getData();
-  var currentMillis = new Date().getTime();
-  if (currentMillis - connectionTime >= 3000) {
-    document.getElementById("deviceTitleWarning").style.display = "inline";
-    document.getElementById("deviceStatusTitle").style.color = "red";
-    document.getElementById("deviceStatusTitle").innerHTML = "<b>Device disconnected</b>";
-  }
-  else {
-    document.getElementById("deviceTitleWarning").style.display = "none";
-    document.getElementById("deviceStatusTitle").style.color = "green";
-    document.getElementById("deviceStatusTitle").innerHTML = "<b>Device connected</b>";
-  }
-},1000);   
-
-function getData() {
+function getData(pageNumber) {
+  var slide = 0;
+  if (pageNumber == 1)
+	slide = homePageScrollPosition;
+  else if (pageNumber == 2)
+	slide = graphPageScrollPosition;
+  else if (pageNumber == 3)
+	slide = maxMinPageScrollPosition;
+  else if (pageNumber == 3)
+	slide = maxMinPageScrollPosition;
+	
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       console.log(this.responseText);
       var values = this.responseText.split(",");
-      var cnt = 0;
-      if (values.length == 281) {
-        //Arrays
-        for (var i = 0; i < 120; i++) 
-          ecSenorArray[i] = values[cnt++];
-        for (var i = 0; i < 120; i++) 
-          tdsSenorArray[i] = values[cnt++];
-        for (var i = 0; i < 120; i++) 
-          phSenorArray[i] = values[cnt++];
-        for (var i = 0; i < 120; i++) 
-          co2SenorArray[i] = values[cnt++];  
-        for (var i = 0; i < 120; i++) 
-          waterTemperatureSenorArray[i] = values[cnt++];
-        for (var i = 0; i < 120; i++) 
-          waterLevelSenorArray[i] = values[cnt++];
-        for (var i = 0; i < 120; i++) 
-          airTemperatureSenorArray[i] = values[cnt++];
-        for (var i = 0; i < 120; i++) 
-          airHumiditySenorArray[i] = values[cnt++];
-        for (var i = 0; i < 120; i++) 
-          fanOneSpeedArray[i] = values[cnt++];
-        for (var i = 0; i < 120; i++) 
-          fanTwoSpeedArray[i] = values[cnt++];
-        for (var i = 0; i < 31; i++) 
-          autoFillDays[i] = values[cnt++];
-        arrayCount = values[cnt++]; // 130 cnt
-        // profile names
-        profileOneName = values[cnt++];
-        profileTwoName = values[cnt++];
-        profileThreeName = values[cnt++];
-        profileFourName = values[cnt++];
-        profileFiveName = values[cnt++];
-        // Light page
-        onTimeHour = values[cnt++];
-        onTimeMin = values[cnt++];
-        offTimeHour = values[cnt++];
-        offTimeMin = values[cnt++];
-        lightMode = values[cnt++];
-        // sensors
-        ecSensor = values[cnt++];
-        tdsSensor = values[cnt++];
-        phSensor = values[cnt++];
-        co2Sensor = values[cnt++];
-        waterTemperatureSensor = values[cnt++];
-        waterLevelSensor = values[cnt++];
-        airTemperatureSensor = values[cnt++];
-        airHumiditySensor = values[cnt++];
-        // fans
-        fanOneSpeed = values[cnt++];
-        fantwoSpeed = values[cnt++];
-        fanOneMinSpeed = values[cnt++];
-        fanOneMaxSpeed = values[cnt++];
-        fanTwoMinSpeed = values[cnt++];
-        fanTwoMaxSpeed = values[cnt++];
-        fansControlTemp = (values[cnt++] == "0" ? false : true);
-        fansControlHum = (values[cnt++] == "0" ? false : true);
-        fanOneFixedSpeed = (values[cnt++] == "0" ? false : true);
-        fanTwoFixedSpeed = (values[cnt++] == "0" ? false : true);
-        // user targets
-        targetMinAirTemp = values[cnt++];
-        targetMaxAirTemp = values[cnt++];
-        targetMinHumidity = values[cnt++];
-        targetMaxHumidity = values[cnt++];
-        targetMinTds = values[cnt++];
-        targetMaxTds = values[cnt++];
-        targetCo2 = values[cnt++];
-        co2Offset = values[cnt++];
-        roomWidth = values[cnt++];
-        roomLength = values[cnt++];
-        roomHeight = values[cnt++];
-        co2Flowrate = values[cnt++];// // to do note:"in liters per minute"
-        co2CheckTimeMinute = values[cnt++];
-        co2CheckTimeHour = values[cnt++];
-        disableFansTimer = values[cnt++];
-        manGasTimeEnabled = (values[cnt++] == "0" ? false : true);
-        manualGasDurationTime = values[cnt++];
-        co2ControlDisabled = (values[cnt++] == "0" ? false : true);
-        targetMinPh = values[cnt++];
-        targetMaxPh = values[cnt++];
-        targetMinEc = values[cnt++];
-        targetMaxEc = values[cnt++];
-        targetMinWaterTemp = values[cnt++];
-        targetMaxWaterTemp = values[cnt++];
-        targetMinWaterHeight = values[cnt++];
-        targetMaxWaterHeight = values[cnt++];
-        // max mins
-        minPh = values[cnt++];
-        maxPh = values[cnt++];
-        minCo2 = values[cnt++];
-        maxCo2 = values[cnt++];
-        minEc = values[cnt++];
-        maxEc = values[cnt++];
-        minWaterTemp = values[cnt++];
-        maxWaterTemp = values[cnt++];
-        minWaterLevel = values[cnt++];
-        maxWaterLevel = values[cnt++];
-        minTds = values[cnt++];
-        maxTds = values[cnt++];
-        minAirTemp = values[cnt++];
-        maxAirTemp = values[cnt++];
-        minHumidity = values[cnt++];
-        maxHumidity = values[cnt++];
-        minFanOneSpeed = values[cnt++];
-        maxFanOneSpeed = values[cnt++];
-        minFanTwoSpeed = values[cnt++];
-        maxFanTwoSpeed = values[cnt++];
-        // dosers
-        numDosers = values[cnt++];
-        doserOneMode = values[cnt++];// EC / PH + / Off
-        doserTwoMode = values[cnt++];// EC / PH + / Off
-        doserThreeMode = values[cnt++];// EC / PH + / Off
-        doserFourMode = values[cnt++]; // EC / PH - / Off
-        doserFiveMode = values[cnt++];// EC / PH + / Off
-        doserSixMode = values[cnt++]; // EC / PH - / Off
-        doserOneMills = values[cnt++];
-        doserTwoMills = values[cnt++];
-        doserThreeMills = values[cnt++];
-        doserFourMills = values[cnt++];
-        doserFiveMills = values[cnt++];
-        doserSixMills = values[cnt++];
-        //doserOneSpeed = values[cnt++];
-        //doserTwoSpeed = values[cnt++];
-        //doserThreeSpeed = values[cnt++];
-        //doserFourSpeed = values[cnt++];
-        //doserFiveSpeed = values[cnt++];
-        //doserSixSpeed = values[cnt++];
-        dosingInt = values[cnt++];
-        swapInterval = values[cnt++];
-        refillDoserOneMills = values[cnt++];
-        refillDoserTwoMills = values[cnt++];
-        refillDoserThreeMills = values[cnt++];
-        refillDoserFourMills = values[cnt++];
-        refillDoserFiveMills = values[cnt++];
-        refillDoserSixMills = values[cnt++];
-        autoFillHour = values[cnt++];
-        autoFillMinute = values[cnt++];
-        // warnings
-        tdsErrorMargin = values[cnt++];
-        ecErrorMargin = values[cnt++];
-        phErrorMargin = values[cnt++];
-        co2ErrorMargin = values[cnt++];
-        waterTempErrorMargin = values[cnt++];
-        waterHeightErrorMargin = values[cnt++];
-        airTempErrorMargin = values[cnt++];
-        humidityErrorMargin = values[cnt++];
-        disablePpmWarn = (values[cnt++] == "0" ? false : true);
-        disableEcWarn = (values[cnt++] == "0" ? false : true);
-        disableCo2Warn = (values[cnt++] == "0" ? false : true);
-        disablePhWarn = (values[cnt++] == "0" ? false : true);
-        disableWaterTempWarn = (values[cnt++] == "0" ? false : true);
-        disableWaterHeightWarn = (values[cnt++] == "0" ? false : true);
-        disableAirTempWarn = (values[cnt++] == "0" ? false : true);
-        disableHumidityWarn = (values[cnt++] == "0" ? false : true);
-        // envriomental control
-        disableDrainAndRefill = (values[cnt++] == "0" ? false : true);
-        // DEVICE
-        convertToF = (values[cnt++] == "0" ? false : true);
-        convertToInchs = (values[cnt++] == "0" ? false : true);
-        convertToTds = (values[cnt++] == "0" ? false : true);
-        // system
-        ppmErrorState = values[cnt++];
-        ecErrorState = values[cnt++];
-        phErrorState = values[cnt++];
-        co2ErrorState = values[cnt++];;
-        waterTempErrorState = values[cnt++];
-        waterLevelErrorState = values[cnt++];
-        airTempErrorState = values[cnt++];
-        humidityErrorState = values[cnt++];        
-        userProfile = values[cnt++];
-        systemStatus = values[cnt++];
-        
-        loadProfileNum = userProfile;
-        saveProfileNum = userProfile; 
-
-        setPage(guiPageNumber, true);  
-        connectionTime = new Date().getTime();
-      }
-      else {
-        console.log("Error: expected 281 variables, received " + values.length);
-        console.log("Variables string: " + this.responseText);
-      }
+	  var valLen = values.length;
+      var cnt = 0;	  
+	  // Page 1 slide 0
+	  if (pageNumber == 1) {
+		if (valLen == 125) {	
+			convertToF = (values[cnt++] == "0" ? false : true);	
+			convertToInchs = (values[cnt++] == "0" ? false : true);
+			if (homePageScrollPosition == 0) {		
+				ecSensor = values[cnt++];
+				targetMinEc = values[cnt++];
+				targetMaxEc = values[cnt++];
+				for (var i = 0; i < 120; i++) 
+				  ecSenorArray[i] = values[cnt++];
+			}
+			else if (homePageScrollPosition == 1) {	
+				tdsSensor = values[cnt++];
+				targetMinTds = values[cnt++];
+				targetMaxTds = values[cnt++];
+				for (var i = 0; i < 120; i++) 
+				  tdsSenorArray[i] = values[cnt++];
+			}
+			else if (homePageScrollPosition == 2) {	
+				phSensor = values[cnt++];
+				targetMinPh = values[cnt++];
+				targetMaxPh = values[cnt++];
+				for (var i = 0; i < 120; i++) 
+				  phSenorArray[i] = values[cnt++];			
+			}
+			else if (homePageScrollPosition == 3) {	
+				co2Sensor = values[cnt++];
+				targetMinCo2 = values[cnt++];
+				targetMaxCo2 = values[cnt++];
+				for (var i = 0; i < 120; i++) 
+				  co2SenorArray[i] = values[cnt++];	
+			}
+			else if (homePageScrollPosition == 4) {	
+				waterTemperatureSensor = values[cnt++];
+				targetMinWaterTemp = values[cnt++];
+				targetMaxWaterTemp = values[cnt++];
+				for (var i = 0; i < 120; i++) 
+				  waterTemperatureSenorArray[i] = values[cnt++];
+			}
+			else if (homePageScrollPosition == 5) {	
+				waterLevelSensor = values[cnt++];
+				targetMinWaterHeight = values[cnt++];
+				targetMaxWaterHeight = values[cnt++];
+				for (var i = 0; i < 120; i++) 
+				  waterLevelSenorArray[i] = values[cnt++];
+			}
+			else if (homePageScrollPosition == 6) {
+				convertToF = (values[cnt++] == "0" ? false : true);
+				airTemperatureSensor = values[cnt++];
+				targetMinAirTemp = values[cnt++];
+				targetMaxAirTemp = values[cnt++];
+				for (var i = 0; i < 120; i++) 
+				  airTemperatureSenorArray[i] = values[cnt++];
+			}
+			else if (homePageScrollPosition == 7) {	
+				airHumiditySensor = values[cnt++];
+				targetMinHumidity = values[cnt++];
+				targetMaxHumidity = values[cnt++];
+				for (var i = 0; i < 120; i++) 
+				  airHumiditySenorArray[i] = values[cnt++];
+			}
+			else if (homePageScrollPosition == 8) {	
+				fanOneSpeed = values[cnt++];
+				fanOneMinSpeed = values[cnt++];
+				fanOneMaxSpeed = values[cnt++];
+				for (var i = 0; i < 120; i++) 
+				  fanOneSpeedArray[i] = values[cnt++];
+			}
+			else if (homePageScrollPosition == 9) {	
+				fantwoSpeed = values[cnt++];
+				targetFanTwoMinSpeed = values[cnt++];
+				targetFanTwoMaxSpeed = values[cnt++];
+				for (var i = 0; i < 120; i++) 
+				  fanTwoSpeedArray[i] = values[cnt++];
+			}
+		}
+		else
+			console.log("error expected 125, received " + valLen);
+	  }
+	  ///////////////////////////////////////////////////////////////////
+	  else if (pageNumber == 2) {
+		if (valLen == 122) {		
+			convertToF = (values[cnt++] == "0" ? false : true);		
+			convertToInchs = (values[cnt++] == "0" ? false : true);
+			if (graphPageScrollPosition == 0) {
+				for (var i = 0; i < 120; i++) 
+				  ecSenorArray[i] = values[cnt++];
+			}
+			else if (graphPageScrollPosition == 1) {
+				for (var i = 0; i < 120; i++) 
+				  tdsSenorArray[i] = values[cnt++];
+			}
+			else if (graphPageScrollPosition == 2) {
+				for (var i = 0; i < 120; i++) 
+				  phSenorArray[i] = values[cnt++];	
+			}
+			else if (graphPageScrollPosition == 3) {
+				for (var i = 0; i < 120; i++) 
+				  co2SenorArray[i] = values[cnt++];
+			}
+			else if (graphPageScrollPosition == 4) {
+				for (var i = 0; i < 120; i++) 
+				  waterTemperatureSenorArray[i] = values[cnt++];
+			}
+			else if (graphPageScrollPosition == 5) {
+				for (var i = 0; i < 120; i++) 
+				  waterLevelSenorArray[i] = values[cnt++];
+			}
+			else if (graphPageScrollPosition == 6) {
+				for (var i = 0; i < 120; i++) 
+				  airTemperatureSenorArray[i] = values[cnt++];
+			}
+			else if (graphPageScrollPosition == 7) {
+				for (var i = 0; i < 120; i++) 
+				  airHumiditySenorArray[i] = values[cnt++];
+			}
+			else if (graphPageScrollPosition == 8) {
+				for (var i = 0; i < 120; i++) 
+				  fanOneSpeedArray[i] = values[cnt++];
+			}
+			else if (graphPageScrollPosition == 9) {
+				for (var i = 0; i < 120; i++) 
+				  fanTwoSpeedArray[i] = values[cnt++];
+			}
+		}
+		else
+		  console.log("error expected 122, received " + valLen);
+	  }
+	  ///////////////////////////////////////////////////////////////////
+	  else if (pageNumber == 3) {
+		if (valLen == 4) {	
+			convertToF = (values[cnt++] == "0" ? false : true);
+			convertToInchs = (values[cnt++] == "0" ? false : true);
+			if (maxMinPageScrollPosition == 0) {			       	
+				minEc = values[cnt++];
+				maxEc = values[cnt++];
+			}
+			else if (maxMinPageScrollPosition == 1) {	
+				minTds = values[cnt++];
+				maxTds = values[cnt++];
+			}
+			else if (maxMinPageScrollPosition == 2) {	
+				minPh = values[cnt++];
+				maxPh = values[cnt++];		
+			}
+			else if (maxMinPageScrollPosition == 3) {	
+				minCo2 = values[cnt++];
+				maxCo2 = values[cnt++];
+			}
+			else if (maxMinPageScrollPosition == 4) {	
+				minWaterTemp = values[cnt++];
+				maxWaterTemp = values[cnt++];
+			}
+			else if (maxMinPageScrollPosition == 5) {	
+				minWaterHeight = values[cnt++];
+				maxWaterHeight = values[cnt++];
+			}
+			else if (maxMinPageScrollPosition == 6) {
+				minAirTemp = values[cnt++];
+				maxAirTemp = values[cnt++];
+			}
+			else if (maxMinPageScrollPosition == 7) {	
+				minHumidity = values[cnt++];
+				maxHumidity = values[cnt++];
+			}
+			else if (maxMinPageScrollPosition == 8) {	
+				minFanOneSpeed = values[cnt++];
+				maxFanOneSpeed = values[cnt++];
+			}
+			else if (maxMinPageScrollPosition == 9) {	
+				minFanTwoSpeed = values[cnt++];
+				maxFanMaxSpeed = values[cnt++];
+			}
+		}
+		else
+		  console.log("error expected 4, received " + valLen);
+	  }
+	  ///////////////////////////////////////////////////////////////////
+	  else if (pageNumber == 4) {
+		if (valLen == 5) {		       
+			profileOneName = values[cnt++];
+			profileTwoName = values[cnt++];
+			profileThreeName = values[cnt++];
+			profileFourName = values[cnt++];
+			profileFiveName = values[cnt++];
+		}
+		else
+		  console.log("Profiles page: error expected 5, received " + valLen);
+	  }
+	  ///////////////////////////////////////////////////////////////////
+	  else if (pageNumber == 5) {
+		if (valLen == 13) {		 
+			numDosers = values[cnt++];
+			dosingInt = values[cnt++];
+			convertToF = (values[cnt++] == "0" ? false : true);
+			convertToInchs = (values[cnt++] == "0" ? false : true);
+			convertToTds = (values[cnt++] == "0" ? false : true);
+			disablePpmWarn = (values[cnt++] == "0" ? false : true);
+			disableEcWarn = (values[cnt++] == "0" ? false : true);
+			disableCo2Warn = (values[cnt++] == "0" ? false : true);
+			disablePhWarn = (values[cnt++] == "0" ? false : true);
+			disableWaterTempWarn = (values[cnt++] == "0" ? false : true);
+			disableWaterHeightWarn = (values[cnt++] == "0" ? false : true);
+			disableAirTempWarn = (values[cnt++] == "0" ? false : true);
+			disableHumidityWarn = (values[cnt++] == "0" ? false : true);
+		}
+		else
+		  console.log("Settings page: error expected 10, received " + valLen);
+	  }
+	  ///////////////////////////////////////////////////////////////////
+	  else if (pageNumber == 6) {
+		if (valLen == 5) {	
+			convertToTds = (values[cnt++] == "0" ? false : true);
+		    targetMinTds = values[cnt++];
+			targetMaxTds = values[cnt++];
+		    targetMinEc = values[cnt++];
+            targetMaxEc = values[cnt++];
+		}
+		else
+		  console.log("EC\TDS page: error expected 5, received " + valLen);
+	  }
+	  ///////////////////////////////////////////////////////////////////
+	  else if (pageNumber == 7) {
+		if (valLen == 2) {		       
+		    targetMinPh = values[cnt++];
+			targetMaxPh = values[cnt++];
+		}
+		else
+		  console.log("PH page: error expected 2, received " + valLen);
+	  }
+	  ///////////////////////////////////////////////////////////////////
+	  else if (pageNumber == 8) {
+		if (valLen == 11) {		       
+			convertToInchs = (values[cnt++] == "0" ? false : true);
+			roomLength = values[cnt++];
+		    roomWidth = values[cnt++];
+			roomHeight = values[cnt++];
+			co2Flowrate = values[cnt++];// // to do note:"in liters per minute"
+			co2CheckTimeMinute = values[cnt++];
+			co2CheckTimeHour = values[cnt++];
+			disableFansTimer = values[cnt++];
+			manGasTimeEnabled = (values[cnt++] == "0" ? false : true);
+			co2ControlDisabled = (values[cnt++] == "0" ? false : true);
+			manualGasDurationTime = values[cnt++];    
+		}
+		else
+		  console.log("Co2 page: error expected 11, received " + valLen);
+	  }
+	  ///////////////////////////////////////////////////////////////////
+	  else if (pageNumber == 9) {
+		if (valLen == 45) {		       
+			convertToInchs = (values[cnt++] == "0" ? false : true);
+			convertToF = (values[cnt++] == "0" ? false : true);
+			targetMinWaterHeight = values[cnt++];
+			targetMaxWaterHeight = values[cnt++];
+			targetMinWaterTemp = values[cnt++];
+			targetMaxWaterTemp = values[cnt++];
+			// tank Length
+			// tank Width
+			for (var i = 0; i < 31; i++) 
+				autoFillDays[i] = values[cnt++];
+			autoFillMinute = values[cnt++];
+			autoFillHour = values[cnt++];
+			disableDrainAndRefill = (values[cnt++] == "0" ? false : true);
+			refillDoserOneMills = values[cnt++];
+			refillDoserTwoMills = values[cnt++];
+			refillDoserThreeMills = values[cnt++];
+			refillDoserFourMills = values[cnt++];
+			refillDoserFiveMills = values[cnt++];
+			refillDoserSixMills = values[cnt++];
+		}
+		else
+		  console.log("waterPage: error expected 45, received " + valLen);
+	  }
+	  ///////////////////////////////////////////////////////////////////
+	  else if (pageNumber == 10) {
+		if (valLen == 13) {		       
+	        numDosers = values[cnt++];
+			doserOneMode = values[cnt++];
+			doserTwoMode = values[cnt++];
+			doserThreeMode = values[cnt++];
+			doserFourMode = values[cnt++];
+			doserFiveMode = values[cnt++];
+			doserSixMode = values[cnt++];
+			doserOneMills = values[cnt++];
+			doserTwoMills = values[cnt++];
+			doserThreeMills = values[cnt++];
+			doserFourMills = values[cnt++];
+			doserFiveMills = values[cnt++];
+			doserSixMills = values[cnt++];
+			//doserOneSpeed = values[cnt++];
+			//doserTwoSpeed = values[cnt++];
+			//doserThreeSpeed = values[cnt++];
+			//doserFourSpeed = values[cnt++];
+			//doserFiveSpeed = values[cnt++];
+			//doserSixSpeed = values[cnt++];
+		}
+		else
+		  console.log("Doser page: error expected 13, received " + valLen);
+	  }
+	  ///////////////////////////////////////////////////////////////////
+	  else if (pageNumber == 11) {
+		if (valLen == 5) {		       
+	        onTimeHour = values[cnt++];
+			onTimeMin = values[cnt++];
+			offTimeHour = values[cnt++];
+			offTimeMin = values[cnt++];
+			lightMode = values[cnt++];
+		}
+		else
+		  console.log("Lighting page: error expected 5, received " + valLen);
+	  }
+	  ///////////////////////////////////////////////////////////////////
+	  else if (pageNumber == 12) {
+		if (valLen == 12) {	
+			convertToF = (values[cnt++] == "0" ? false : true);		
+	        fanOneMinSpeed = values[cnt++];
+			fanOneMaxSpeed = values[cnt++];
+			fanTwoMinSpeed = values[cnt++];
+			fanTwoMaxSpeed = values[cnt++];
+			targetMinAirTemp = values[cnt++];
+			targetMaxAirTemp = values[cnt++];
+			targetMinHumidity = values[cnt++];
+			targetMaxHumidity = values[cnt++];
+			fansControlTemp = (values[cnt++] == "0" ? false : true);
+			fansControlHum = (values[cnt++] == "0" ? false : true);
+			fanOneFixedSpeed = (values[cnt++] == "0" ? false : true);
+			fanTwoFixedSpeed = (values[cnt++] == "0" ? false : true);
+		}
+		else
+		  console.log("Fans page: error expected 12, received " + valLen);
+	  }
+	  ///////////////////////////////////////////////////////////////////
+	  else if (pageNumber == 13) {
+		if (valLen == 36) {	
+			convertToInchs = (values[cnt++] == "0" ? false : true);
+			convertToF = (values[cnt++] == "0" ? false : true);
+			
+			tdsSensor = values[cnt++];		
+			targetMinTds = values[cnt++];
+			targetMaxTds = values[cnt++];
+			tdsErrorMargin = values[cnt++];
+			
+			ecSensor = values[cnt++];
+			targetMinEc = values[cnt++];
+			targetMaxEc = values[cnt++];
+			ecErrorMargin = values[cnt++];
+			
+			phSensor = values[cnt++];
+			targetMinPh = values[cnt++];
+			targetMaxPh = values[cnt++];
+			phErrorMargin = values[cnt++];
+			
+			co2Sensor = values[cnt++];
+			targetMinCo2 = values[cnt++];
+			targetMaxCo2 = values[cnt++];
+			co2ErrorMargin = values[cnt++];
+			
+			waterTemperatureSensor = values[cnt++];
+			targetMinWaterTemp = values[cnt++];
+			targetMaxWaterTemp = values[cnt++];
+			waterTempErrorMargin = values[cnt++];
+			
+			waterLevelSensor = values[cnt++];
+			targetMinWaterHeight = values[cnt++];
+			targetMaxWaterHeight = values[cnt++];
+			waterHeightErrorMargin = values[cnt++];
+			
+			airTemperatureSensor = values[cnt++];
+			targetMinAirTemp = values[cnt++];
+			targetMaxAirTemp = values[cnt++];
+			airTempErrorMargin = values[cnt++];
+			
+			airHumiditySensor = values[cnt++];
+			targetMinHumidity = values[cnt++];
+			targetMaxHumidity = values[cnt++];
+			humidityTempErrorMargin = values[cnt++];
+		}
+		else
+		  console.log("Warnings page: error expected 36, received " + valLen);
+	  }
+      connectionTime = new Date().getTime();
     }
   };
-  xhttp.open("GET", "getData", true);
+  var command = "/getPageData?page=" + (pageNumber-1) + "&slide=" + slide;
+  console.log("Sending command: " + command);
+  xhttp.open("GET", command, true);
   xhttp.send();
 }
 
 function setVal(cmd, val) {
-  console.log("Sending command: /setValue?cmd="+cmd+"&val="+ val);
   var command = "/setValue?cmd="+cmd+"&val="+val;
+  console.log("Sending command: " + command);
   var xhr = new XMLHttpRequest();
   xhr.open("GET", command, false);
   xhr.send();

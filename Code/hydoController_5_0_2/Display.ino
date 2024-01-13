@@ -1,6 +1,8 @@
 // Draw the given page
 void drawPages() {
-  if (display::page == 0)
+  if (display::showInfoDialog)
+    infoMessage();
+  else if (display::page == 0)
     homePage();
   else if (display::page == 1)
     graphsPage();
@@ -26,9 +28,6 @@ void drawPages() {
     fansPage();
   else if (display::page == 12)
     warningsPage();
-  if (display::showInfoDialog)
-    infoMessage();
-  screenSaver();
   display::refreshPage = false;
   device::newGraphData = false;
 }
@@ -90,21 +89,6 @@ void homePage() {
       tft.print(180, 140, "Humidity");
     }
   }
-  // Wifi symbol
-  static wifi::connectionStatus previousConnectionState = wifi::TIMEOUT;
-  if (wifi::connectionState != previousConnectionState) {
-    tft.fillRect(540, 90, 40, 40, user::backgroundColor);
-    if (wifi::connectionState == wifi::CONNECTED) {
-      tft.drawXBMP(540, 90, 40, 40, miniWifiIcon, 137, RA8875_GREEN, user::backgroundColor, 1);
-    }
-    else if (wifi::connectionState == wifi::TIMEOUT) {
-      tft.drawXBMP(540, 90, 40, 40, miniWifiIcon, 137, RA8875_YELLOW, user::backgroundColor, 1);
-    }
-    else if (wifi::connectionState == wifi::FAILED) {
-      tft.drawXBMP(540, 90, 40, 40, miniWifiIcon, 137, RA8875_RED, user::backgroundColor, 1);
-    }
-    previousConnectionState = wifi::connectionState;
-  }
   // RTC clock
   static uint8_t previousRTCMinute;
   rtc.refresh();
@@ -112,12 +96,20 @@ void homePage() {
     tft.setFont(&akashi_36px_Regular);
     tft.setFontScale(1);
     tft.setTextColor(RA8875_BLACK, user::backgroundColor);
-    tft.fillRect(594, 92, 202, 34, user::backgroundColor);
+    static int statusBarStartX = 0, statusBarWidth = 0;
+    tft.fillRect(statusBarStartX, 92, statusBarWidth, 34, user::backgroundColor);
     char timeStr[16]{0};
     strcpy(timeStr, rtc.getTimeStr());
     strcat(timeStr, (rtc.hour() <= 12 ? " AM" : " PM"));
     int timeStrOffset = tft.getStringWidth(timeStr);
     tft.print(795-timeStrOffset, 92, timeStr);
+    // Wifi symbol
+    tft.drawXBMP(795 - (timeStrOffset + 45), 99, 30, 26, miniWifiIcon, 97, wifi::wifiEnabled ? RA8875_BLUE : display::RA8875_DARKGREY, user::backgroundColor, 1);
+    // Warning symbol
+    //if (device::globalErrorState != device::NO_WARNING)
+      tft.drawXBMP(795 - (timeStrOffset + 90), 95, 31, 30, miniWarningIcon, 116, device::globalErrorState == device::MAJOR_WARNING ? RA8875_RED : RA8875_YELLOW, user::backgroundColor, 1);
+    statusBarStartX = 795 - (timeStrOffset + 90);
+    statusBarWidth = tft.width() - (timeStrOffset + 90);
     previousRTCMinute = rtc.minute();
   }
   // draw values and graph
@@ -266,10 +258,10 @@ void maxminsPage() {
     if (display::refreshPage)
       tft.print(234, 126, "Water height history");
     if (user::convertToInches) {
-      drawTwoValues(285, convertToInch(device::minWaterLevel), RA8875_BLACK, 1, 650, convertToInch(device::maxWaterLevel), RA8875_BLACK, 1, "\"", 0);
+      drawTwoValues(285, convertToInch(device::minWaterLevel), RA8875_BLACK, 0, 650, convertToInch(device::maxWaterLevel), RA8875_BLACK, 0, "\"", 0);
     }
     else {
-      drawTwoValues(285, device::minWaterLevel, RA8875_BLACK, 1, 650, device::maxWaterLevel, RA8875_BLACK, 1, "CM", 50);
+      drawTwoValues(285, device::minWaterLevel, RA8875_BLACK, 0, 650, device::maxWaterLevel, RA8875_BLACK, 0, "CM", 50);
     }
   }
   else if (display::maxMinsPage == 6) {
@@ -714,9 +706,9 @@ void waterPage() {
       infoButton(770, 120);
     }
     if (user::convertToInches)
-      drawTwoValues(285, user::targetMinWaterHeightInches, RA8875_BLACK, 1, 650, user::targetMaxWaterHeightInches, RA8875_BLACK, 1, "\"", 0);
+      drawTwoValues(285, user::targetMinWaterHeightInches, RA8875_BLACK, 1, 650, user::targetMaxWaterHeightInches, RA8875_BLACK, 0, "\"", 0);
     else
-      drawTwoValues(285, user::targetMinWaterHeight, RA8875_BLACK, 1, 650, user::targetMaxWaterHeight, RA8875_BLACK, 1, "CM", 50);
+      drawTwoValues(285, user::targetMinWaterHeight, RA8875_BLACK, 1, 650, user::targetMaxWaterHeight, RA8875_BLACK, 0, "CM", 50);
   }
   else if (display::waterPageScrollPos == 1) {
     if (display::refreshPage) {
@@ -748,9 +740,9 @@ void waterPage() {
       infoButton(770, 120);
     }
     if (user::convertToInches)
-      drawTwoValues(285, user::waterTankLength, RA8875_BLACK, 1, 650, user::waterTankWidth, RA8875_BLACK, 1, "\"", 0);    
+      drawTwoValues(285, user::waterTankLengthInches, RA8875_BLACK, 1, 650, user::waterTankWidthInches, RA8875_BLACK, 0, "CM", 50); 
     else
-      drawTwoValues(285, user::waterTankLengthInches, RA8875_BLACK, 1, 650, user::waterTankWidthInches, RA8875_BLACK, 1, "CM", 50); 
+      drawTwoValues(285, user::waterTankLength, RA8875_BLACK, 1, 650, user::waterTankWidth, RA8875_BLACK, 0, "\"", 0);    
   }
   else if (display::waterPageScrollPos == 3) {
     if (display::refreshPage) {
@@ -767,7 +759,7 @@ void waterPage() {
     if (display::refreshPage || display::refreshCalander) {
       tft.setFont(&akashi_36px_Regular);
       tft.setFontScale(1);
-      tft.setTextColor(RA8875_BLACK, user::backgroundColor);
+      tft.setTextColor(RA8875_BLACK, RA8875_WHITE);
       int calanderX = 110, calanderY = 205;
       for (uint8_t i = 1; i < 32; i++) {
         if (i < 10)
@@ -1335,11 +1327,11 @@ void drawSettingsPageOne() {
       tft.print(110, 130, "System");
       int scrollPercentage = map(display::settingsPageOneScrollPos, 0, 5, 0, 100);
       drawVerticalSlider(760, 100, 370, scrollPercentage);
-      tft.setTextColor(RA8875_BLACK, user::backgroundColor);
     }
     int scrollMargin = display::settingsPageOneScrollPos * 50;
     if (display::settingsPageOneScrollPos == 0) {
       if (display::refreshPage) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
         tft.print(110, 170 - scrollMargin, "Show system logs");
         drawMiniConfirmButton(672, 170 - scrollMargin);
       }
@@ -1347,30 +1339,39 @@ void drawSettingsPageOne() {
     if (display::settingsPageOneScrollPos <= 1) {
       static bool previousEnableWifi;
       if (display::refreshPage || wifi::wifiEnabled != previousEnableWifi) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
         tft.print(110, 220 - scrollMargin, "Enable Wifi");
         drawMiniRadioButton(652, 220 - scrollMargin, wifi::wifiEnabled);
         previousEnableWifi = wifi::wifiEnabled;
       }
     }
     if (display::settingsPageOneScrollPos <= 2) {
-      tft.print(110, 270 - scrollMargin, "Set WiFi SSID");
-      drawMiniConfirmButton(672, 270 - scrollMargin);
+      if (display::refreshPage) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
+        tft.print(110, 270 - scrollMargin, "Set WiFi SSID");
+        drawMiniConfirmButton(672, 270 - scrollMargin);
+      }
     }
     if (display::settingsPageOneScrollPos <= 3) {
-      tft.print(110, 320 - scrollMargin, "Set WiFi password");
-      drawMiniConfirmButton(672, 320 - scrollMargin);
+      if (display::refreshPage) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
+        tft.print(110, 320 - scrollMargin, "Set WiFi password");
+        drawMiniConfirmButton(672, 320 - scrollMargin);
+      }
     }
     if (display::settingsPageOneScrollPos <= 4) {
-      static bool previousDisableLED;
-      if (display::refreshPage || user::disableLED != previousDisableLED) {
+      static bool previousHiddenNetwork;
+      if (display::refreshPage || wifi::hiddenNetwork != previousHiddenNetwork) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
         tft.print(110, 370 - scrollMargin, "Hide WiFi network");
-        drawMiniRadioButton(652, 370 - scrollMargin, user::disableLED);
-        previousDisableLED = user::disableLED;
+        drawMiniRadioButton(652, 370 - scrollMargin, wifi::hiddenNetwork);
+        previousHiddenNetwork = wifi::hiddenNetwork;
       }
     }
     if (display::settingsPageOneScrollPos <= 5) {
       static bool previousDisableLED;
       if (display::refreshPage || user::disableLED != previousDisableLED) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
         tft.print(110, 420 - scrollMargin, "Disable LED");
         drawMiniRadioButton(652, 420 - scrollMargin, user::disableLED);
         previousDisableLED = user::disableLED;
@@ -1379,6 +1380,7 @@ void drawSettingsPageOne() {
     if (display::settingsPageOneScrollPos >= 1 && display::settingsPageOneScrollPos <= 6) {
       static bool previousDisableBeeper;
       if (display::refreshPage || user::disableBeeper != previousDisableBeeper) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
         tft.print(110, 470 - scrollMargin, "Disable speaker");
         drawMiniRadioButton(652, 470 - scrollMargin, user::disableBeeper);
         previousDisableBeeper = user::disableBeeper;
@@ -1386,24 +1388,28 @@ void drawSettingsPageOne() {
     }
     if (display::settingsPageOneScrollPos >= 2 && display::settingsPageOneScrollPos <= 6) {
       if (display::refreshPage) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
         tft.print(110, 520 - scrollMargin, "Clear graph history");
         drawMiniConfirmButton(672, 520 - scrollMargin);
       }
     }
     if (display::settingsPageOneScrollPos >= 3 && display::settingsPageOneScrollPos <= 7) {
       if (display::refreshPage) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
         tft.print(110, 570 - scrollMargin, "Clear max mins");
         drawMiniConfirmButton(672,570 - scrollMargin);
       }
     }
     if (display::settingsPageOneScrollPos >= 4 && display::settingsPageOneScrollPos <= 8) {
       if (display::refreshPage) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
         tft.print(110, 620 - scrollMargin, "Clear system logs");
         drawMiniConfirmButton(672, 620 - scrollMargin);
       }
     }
     if (display::settingsPageOneScrollPos >= 5 && display::settingsPageOneScrollPos <= 10) {
       if (display::refreshPage) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
         tft.print(110, 670 - scrollMargin, "Factory reset");
         drawMiniConfirmButton(672, 670 - scrollMargin);
       }
@@ -1440,40 +1446,45 @@ void drawSettingsPageTwo() {
       tft.print(110, 130, "Enviroment");
       int scrollPercentage = map(display::settingsPageTwoScrollPos, 0, 1, 0, 100);
       drawVerticalSlider(760, 100, 370, scrollPercentage);
-      tft.setTextColor(RA8875_BLACK, user::backgroundColor);
     }
     if (display::settingsPageTwoScrollPos <= 0) {
       if (display::refreshPage) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
         tft.print(110, 170 - scrollMargin, "Set number of dosers");
         drawMiniConfirmButton(672, 170 - scrollMargin);
       }
     }
     if (display::settingsPageTwoScrollPos <= 1) {
       if (display::refreshPage) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
         tft.print(110, 220 - scrollMargin, "Set dosing interval");
         drawMiniConfirmButton(672, 220 - scrollMargin);
       }
     }
     if (display::settingsPageTwoScrollPos <= 2) {
       if (display::refreshPage) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
         tft.print(110, 270 - scrollMargin, "Set EC dosing mode");
         drawMiniConfirmButton(672, 270 - scrollMargin);
       }
     }
     if (display::settingsPageTwoScrollPos <= 3) {
       if (display::refreshPage) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
         tft.print(110, 320 - scrollMargin, "Set PH dosing mode");
         drawMiniConfirmButton(672, 320 - scrollMargin);
       }
     }
     if (display::settingsPageTwoScrollPos <= 4) {
       if (display::refreshPage) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
         tft.print(110, 370 - scrollMargin, "Set EC/TDS value");
         drawMiniConfirmButton(672, 370 - scrollMargin);
       }
     }
     if (display::settingsPageTwoScrollPos <= 5) {
       if (display::refreshPage) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
         tft.print(110, 420 - scrollMargin, "Set PH down/up value");
         drawMiniConfirmButton(672, 420 - scrollMargin);
       }
@@ -1481,6 +1492,7 @@ void drawSettingsPageTwo() {
     if (display::settingsPageTwoScrollPos >= 1 && display::settingsPageTwoScrollPos <= 2) {
       static bool previousUseEtapeSensor;
       if (display::refreshPage || user::useEtapeSensor != previousUseEtapeSensor) {
+        tft.setTextColor(RA8875_BLACK, user::backgroundColor);
         tft.print(110, 470 - scrollMargin, "Water height sensor");
         drawMiniEtapeButton(612, 470 - scrollMargin, user::useEtapeSensor);
         previousUseEtapeSensor = user::useEtapeSensor;
@@ -1498,12 +1510,12 @@ void drawSettingsPageThree() {
     tft.print(110, 130, "Warnings");
     int scrollPercentage = map(display::settingsPageThreeScrollPos, 0, 2, 0, 100);
     drawVerticalSlider(760, 100, 370, scrollPercentage);
-    tft.setTextColor(RA8875_BLACK, user::backgroundColor);
   }
   int scrollMargin = display::settingsPageThreeScrollPos * 50;
   if (display::settingsPageThreeScrollPos == 0) {
     static bool previousDisablePpmWarnings;
     if (display::refreshPage || user::disablePpmWarnings != previousDisablePpmWarnings) {
+      tft.setTextColor(RA8875_BLACK, user::backgroundColor);
       setTextWarningColor(device::ppmErrorState);
       tft.print(110, 170 - scrollMargin, "Disable PPM");
       drawMiniRadioButton(652, 170 - scrollMargin, user::disablePpmWarnings);
@@ -1513,6 +1525,7 @@ void drawSettingsPageThree() {
   if (display::settingsPageThreeScrollPos <= 1) {
     static bool previousDisableEcWarnings;
     if (display::refreshPage || user::disableEcWarnings != previousDisableEcWarnings) {
+      tft.setTextColor(RA8875_BLACK, user::backgroundColor);
       setTextWarningColor(device::ecErrorState);
       tft.print(110, 220 - scrollMargin, "Disable EC");
       drawMiniRadioButton(652, 220 - scrollMargin, user::disableEcWarnings);
@@ -1522,6 +1535,7 @@ void drawSettingsPageThree() {
   if (display::settingsPageThreeScrollPos <= 2) {
     static bool previousDisablePhWarnings;
     if (display::refreshPage || user::disablePhWarnings != previousDisablePhWarnings) {
+      tft.setTextColor(RA8875_BLACK, user::backgroundColor);
       setTextWarningColor(device::phErrorState);
       tft.print(110, 270 - scrollMargin, "Disable PH");
       drawMiniRadioButton(652, 270 - scrollMargin, user::disablePhWarnings);
@@ -1531,6 +1545,7 @@ void drawSettingsPageThree() {
   if (display::settingsPageThreeScrollPos <= 3) {
     static bool previousDisableCo2Warnings;
     if (display::refreshPage || user::disableCo2Warnings != previousDisableCo2Warnings) {
+      tft.setTextColor(RA8875_BLACK, user::backgroundColor);
       setTextWarningColor(device::co2ErrorState);
       tft.print(110, 320 - scrollMargin, "Disable Co2");
       drawMiniRadioButton(652, 320 - scrollMargin, user::disableCo2Warnings);
@@ -1540,6 +1555,7 @@ void drawSettingsPageThree() {
   if (display::settingsPageThreeScrollPos <= 4) {
     static bool previousDisableWaterTempWarnings;
     if (display::refreshPage || user::disableWaterTempWarnings != previousDisableWaterTempWarnings) {
+      tft.setTextColor(RA8875_BLACK, user::backgroundColor);
       setTextWarningColor(device::waterTempErrorState);
       tft.print(110, 370 - scrollMargin, "Disable water temp");
       drawMiniRadioButton(652, 370 - scrollMargin, user::disableWaterTempWarnings);
@@ -1549,6 +1565,7 @@ void drawSettingsPageThree() {
   if (display::settingsPageThreeScrollPos <= 5) {
     static bool previousDisableWaterHeightWarnings;
     if (display::refreshPage || user::disableWaterHeightWarnings != previousDisableWaterHeightWarnings) {
+      tft.setTextColor(RA8875_BLACK, user::backgroundColor);
       setTextWarningColor(device::waterLevelErrorState);
       tft.print(110, 420 - scrollMargin, "Disable water height");
       drawMiniRadioButton(652, 420 - scrollMargin, user::disableWaterHeightWarnings);
@@ -1558,6 +1575,7 @@ void drawSettingsPageThree() {
   if (display::settingsPageThreeScrollPos >= 1 && display::settingsPageThreeScrollPos <= 6) {
     static bool previousDisableAirTempWarnings;
     if (display::refreshPage || user::disableAirTempWarnings != previousDisableAirTempWarnings) {
+      tft.setTextColor(RA8875_BLACK, user::backgroundColor);
       setTextWarningColor(device::airTempErrorState);
       tft.print(110, 470 - scrollMargin, "Disable air temp");
       drawMiniRadioButton(652, 470 - scrollMargin, user::disableAirTempWarnings);
@@ -1567,6 +1585,7 @@ void drawSettingsPageThree() {
   if (display::settingsPageThreeScrollPos >= 2 && display::settingsPageThreeScrollPos <= 7) {
     static bool previousDisableHumidityWarnings;
     if (display::refreshPage || user::disableHumidityWarnings != previousDisableHumidityWarnings) {
+      tft.setTextColor(RA8875_BLACK, user::backgroundColor);
       setTextWarningColor(device::humidityErrorState);
       tft.print(110, 520 - scrollMargin, "Disable humidity");
       drawMiniRadioButton(652, 520 - scrollMargin, user::disableHumidityWarnings);

@@ -159,7 +159,7 @@ const unsigned int RA8875_DARKGREY     = 0x8C51;
 const unsigned int RA8875_LIGHTGREY    = 0xE71C;
 const unsigned int RA8875_MIDGREY      = 0x8410;
 const unsigned int RA8875_ORANGE       = 0xFD06;
-const unsigned int RA8875_SMOKE_WHITE  = 0xF79E;
+//const unsigned int RA8875_SMOKE_WHITE  = 0xF79E;
 const unsigned int RA8875_LIGHT_BLUE   = 0xA67E;
 const unsigned int RA8875_LIGHT_GREEN  = 0x87F0;
 const unsigned int RA8875_LIGHT_YELLOW = 0xFFF0;
@@ -617,14 +617,7 @@ unsigned long wifiPreviousMillis = 0;
 char ssid[16] = "HydroController";
 char password[16] = "Password1!";
 bool hiddenNetwork = false;
-char webData[8192] {};
-enum connectionStatus {
-  UNCONNECTED,
-  CONNECTED,
-  TIMEOUT,
-  FAILED
-};
-connectionStatus connectionState = UNCONNECTED;
+char webData[1024] {};
 }
 
 // Class instances
@@ -654,10 +647,12 @@ void setup() {
 
 void loop() {
   touchEvent();
-  readSensors();
+  //readSensors();
+  adjustScreenValuesTest();
   drawPages();
-  envriomentalControl();
-  if (wifi::wifiEnabled)
-    server.handleClient();
-  displayWarnings();
+  //screenSaver();
+  //envriomentalControl();
+  //if (wifi::wifiEnabled)
+  //  server.handleClient();
+  //displayWarnings();
 }

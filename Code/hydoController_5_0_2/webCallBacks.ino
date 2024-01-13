@@ -1,4 +1,6 @@
+// TO DO: remotlyLoadUserProfile, remotlySaveUserProfile, SETTINGS send vars, replace getData in javascript !
 void handleRoot() {
+  printf("handleRoot: Executing on core %d\n", xPortGetCoreID());
   server.setContentLength(CONTENT_LENGTH_UNKNOWN);
   server.sendHeader("Content-Length", (String)sizeof(htmlText));
   server.send(200, "text/html", "");
@@ -32,13 +34,8 @@ void handleRoot() {
   printf("Packets sent!\n");
 }
 
-void getData() {
-  buildArgs();
-  server.send(200, "text/plane", wifi::webData);
-  yield();
-}
-
 void setValue() {
+  printf("setValue: Executing on core %d\n", xPortGetCoreID());
   yield();
   String cmd = server.arg("cmd");
   char val[64] {0};
@@ -421,336 +418,424 @@ void setValue() {
   server.send(200, "text/plane", "OK");
 }
 
-void buildArgs() {
-  printf("Building web args...\n");
-  memset(wifi::webData, 0, sizeof(wifi::webData));
-  delay(1);
-  // ec array val 0
-  char buffer[8] {0, 0, 0, 0, 0, 0, 0, 0};
-  dtostrf(device::ecArray[0], 0, 2, buffer);
-  strcpy(wifi::webData, buffer); // val 0
-  strcat(wifi::webData, ",");
-  // ec array 120 floats (vals 1 - 120)
-  for (uint8_t i = 1; i < device::maxGraphArrayValues; i++) {
-    copyFloatToArray(device::ecArray[i], 2);
-  }
-  // tds array 120 ints (vals 121 - 241)
-  for (uint8_t i = 0; i < device::maxGraphArrayValues; i++) {
-    copyIntToArrray(device::tdsArray[i]);
-  }
-  // ph array 120 floats (vals 222 - 342)
-  for (uint8_t i = 0; i < device::maxGraphArrayValues; i++) {
-    copyFloatToArray(device::phArray[i], 2);
-  }
-  // co2 array 120 floats (vals 343 - 463)
-  for (uint8_t i = 0; i < device::maxGraphArrayValues; i++) {
-    copyIntToArrray(device::co2Array[i]);
-  }
-  // water Level array 120 ints (vals 464 - 584)
-  for (uint8_t i = 0; i < device::maxGraphArrayValues; i++) {
-    copyFloatToArray(user::convertToF ? convertToF(device::waterTemperatureArray[i]) : device::waterTemperatureArray[i], 1);
-  }
-    // air temperature array 120 floats (vals 585 - 705)
-  for (uint8_t i = 0; i < device::maxGraphArrayValues; i++) {
-    copyFloatToArray(user::convertToInches ? convertToInch(device::waterLevelArray[i]) : device::waterLevelArray[i], 1);
-  }
- // humidity array 120 ints (vals 706 - 826)
-  for (uint8_t i = 0; i < device::maxGraphArrayValues; i++) {
-    copyFloatToArray(user::convertToF ? convertToF(device::airTemperatureArray[i]) : device::airTemperatureArray[i], 1);
-  }
-   // fan one speed array 120 ints (vals 827 - 947)
-  for (uint8_t i = 0; i < device::maxGraphArrayValues; i++) {
-    copyFloatToArray(device::humidityArray[i], 1);
-  }
- // fan two speed array 120 ints (vals 948 - 1068)
-  for (uint8_t i = 0; i < device::maxGraphArrayValues; i++) {
-    copyIntToArrray(device::fanOneSpeedArray[i]);
-  }
- // fan two speed array 120 ints (vals 1069 - 1189)
-  for (uint8_t i = 0; i < device::maxGraphArrayValues; i++) {
-    copyIntToArrray(device::fanTwoSpeedArray[i]);
-  }
-  // auto fill days array 31 ints (vals 1190 - 1290)
-  for (uint8_t i = 0; i < 31; i++) {
-    copyIntToArrray(user::autoFillDays[i]);
-  }
-  // graph array position (val 1291)
-  copyIntToArrray(device::graphArrayPos);
-  // profile 1 name (val 1292)
-  strcat(wifi::webData, user::profileOneName);
-  strcat(wifi::webData, ",");
-  // profile 2 name (val 1293)
-  strcat(wifi::webData, user::profileTwoName);
-  strcat(wifi::webData, ",");
-  // profile 3 name (vals 1294)
-  strcat(wifi::webData, user::profileThreeName);
-  strcat(wifi::webData, ",");
-  // profile 4 name (vals 1295)
-  strcat(wifi::webData, user::profileFourName);
-  strcat(wifi::webData, ",");
-  // profile 5 name (vals 1296)
-  strcat(wifi::webData, user::profileFiveName);
-  strcat(wifi::webData, ",");
-  // Light on time hour (val 1297)
-  copyIntToArrray(user::lightOnTimeHour);
-  // Light on time min (val 1298)
-  copyIntToArrray(user::lightOnTimeMin);
-  // Light off time hour (val 1299)
-  copyIntToArrray(user::lightOffTimeHour);
-  // Light off time min (val 1300)
-  copyIntToArrray(user::lightOffTimeMin);
-  // Light mode (val 1301)
-  copyIntToArrray(user::lightMode);
-  // ec sensor (val 1302)
-  copyFloatToArray(sensor::ec, 2);
-  // tds sensor (val 1303)
-  copyIntToArrray(sensor::tds);
-  // ph sensor (val 1304)
-  copyFloatToArray(sensor::ph, 2);
-  // co2 sensor (val 1305)
-  copyIntToArrray(sensor::co2);
-  // water temp sensor (val 1306)
-  copyFloatToArray(user::convertToF ? convertToF(sensor::waterTemp) : sensor::waterTemp, 1);
-  // water level sensor (val 1307)
-  copyFloatToArray(user::convertToInches ? convertToInch(sensor::waterLevel) : sensor::waterLevel, 1);
-  // air temp sensor (val 1308)
-  copyFloatToArray(user::convertToF ? convertToF(sensor::airTemp) : sensor::airTemp, 1);
-  // humidity sensor (val 1309)
-  copyFloatToArray(sensor::humidity, 1);
-  // fan One Speed (val 1310)
-  copyIntToArrray(device::fanOneSpeed);
-  // fan two Speed (val 1311)
-  copyIntToArrray(device::fanTwoSpeed);
-  // fan One Min Speed (val 1312)
-  copyIntToArrray(user::targetMinFanOneSpeed);
-  // fan One Max Speed (val 1313)
-  copyIntToArrray(user::targetMaxFanOneSpeed);
-  // fan Two Min Speed (val 1314)
-  copyIntToArrray(user::targetMinFanTwoSpeed);
-  // fan Two Max Speed (val 1315)
-  copyIntToArrray(user::targetMaxFanTwoSpeed);
-  // fans Control Temp (val 1316)
-  copyIntToArrray(user::fansControlTemperature);
-  // fans Control Hum (val 1317)
-  copyIntToArrray(user::fansControlHumidity);
-  // fan One Fixed Speed (val 1318)
-  copyIntToArrray(user::fanOneFixedSpeed);
-  // fan Two Fixed Speed (val 1319)
-  copyIntToArrray(user::fanTwoFixedSpeed);
-  // target Min Air Temp (val 1320)
-  copyFloatToArray(user::convertToF ? user::targetMinAirTempF : user::targetMinAirTemp, 1); 
-  // target Max Air Temp (val 1321)
-  copyFloatToArray(user::convertToF ? user::targetMaxAirTempF : user::targetMaxAirTemp, 1); 
-  // target Min Humidity (val 1322)
-  copyFloatToArray(user::targetMinHumidity, 1);
-  // target Max Humidity (val 1323)
-  copyFloatToArray(user::targetMaxHumidity, 1);
-  // target Min Tds (val 1324)
-  copyIntToArrray(user::targetMinTds);
-  // target Max Tds (val 1325)
-  copyIntToArrray(user::targetMaxTds);
-  // target Co2 (val 1326)
-  copyIntToArrray(user::targetCo2);
-  // co2 Offset (val 1327)
-  copyIntToArrray(user::co2Offset);
-  // room Width (val 1328)
-  copyIntToArrray(user::convertToInches ? user::roomWidthInches : user::roomWidthCm); 
-  // room Length (val 1329)
-  copyIntToArrray(user::convertToInches ? user::roomLengthInches : user::roomLengthCm); 
-  // room Height (val 1330)
-  copyIntToArrray(user::convertToInches ? user::roomHeightInches : user::roomHeightCm); 
-  // co2 Flow rate (val 1331)
-  copyFloatToArray(user::convertToInches ? user::co2FlowrateFeet3 :user::co2FlowrateLtrs, 1); 
-  // co2 Check Time Minute (val 1332)
-  copyIntToArrray(user::co2CheckTimeMinute);
-  // co2 Check Time Hour (val 1333)
-  copyIntToArrray(user::co2CheckTimeHour);
-  // disable Fans Timer (val 1334)
-  copyIntToArrray(user::disableFansTimer);
-  // manual Co2 Gas Time Enabled (val 1335)
-  copyIntToArrray(user::enableManualCo2Duration);
-  // manual Gas Duration Time (val 1336)
-  copyIntToArrray(user::manualCo2GasDuration);
-  // co2 Control Disabled (val 1337)
-  copyIntToArrray(user::disableCo2Control);
-  // target Min Ph (val 1338)
-  copyFloatToArray(user::targetMinPh, 2);
-  // target Max Ph (val 1339)
-  copyFloatToArray(user::targetMaxPh, 2);
-  // target Min Ec (val 1340)
-  copyFloatToArray(user::targetMinEc, 2);
-  // target Max Ec (val 1341)
-  copyFloatToArray(user::targetMaxEc, 2);
-  // target Min Water Temp (val 1342)
-  copyFloatToArray(user::convertToF ? user::targetMinWaterTempF : user::targetMinWaterTemp, 1);
-  // target Max Water Temp (val 1343)
-  copyFloatToArray(user::convertToF ? user::targetMaxWaterTempF : user::targetMaxWaterTemp, 1);
-  // target Min Water Height (val 1344)
-  copyFloatToArray(user::convertToInches ? user::targetMinWaterHeightInches : user::targetMinWaterHeight, 1);
-  // target Max Water Height (val 1346)
-  copyFloatToArray(user::convertToInches ? user::targetMaxWaterHeightInches : user::targetMaxWaterHeight, 1);
-  // min Ph (val 1347)
-  copyFloatToArray(device::minPh, 2);
-  // max Ph (val 1348)
-  copyFloatToArray(device::maxPh, 2);
-  // min Co2 (val 1349)
-  copyIntToArrray(device::minCo2);
-  // max Co2 (val 1350)
-  copyIntToArrray(device::maxCo2);
-  // min Ec (val 1351)
-  copyFloatToArray(device::minEc, 2);
-  // max Ec (val 1352)
-  copyFloatToArray(device::maxEc, 2);
-  // min Water Temp (val 1353)
-  copyFloatToArray(user::convertToF ? convertToF(device::minWaterTemp) : device::minWaterTemp, 1);
-  // max Water Temp (val 1354)
-  copyFloatToArray(user::convertToF ? convertToF(device::maxWaterTemp) : device::maxWaterTemp, 1); 
-  // min Water Level (val 1355)
-  copyFloatToArray(user::convertToInches ? convertToInch(device::minWaterLevel) : device::minWaterLevel, 1); 
-  // max Water Level (val 1356)
-  copyFloatToArray(user::convertToInches ? convertToInch(device::maxWaterLevel) : device::maxWaterLevel, 1); 
-  // min Tds (val 1357)
-  copyIntToArrray(device::minTds);
-  // max Tds (val 1358)
-  copyIntToArrray(device::maxTds);
-  // min Air Temp (val 1359)
-  copyFloatToArray(user::convertToF ? convertToF(device::minAirTemp) : device::minAirTemp, 1); 
-  // max Air Temp (val 1360)
-  copyFloatToArray(user::convertToF ? convertToF(device::maxAirTemp) : device::maxAirTemp, 1); 
-  // min Humidity (val 1361)
-  copyFloatToArray(device::minHumidity, 1);
-  // max Humidity (val 1362)
-  copyFloatToArray(device::maxHumidity, 1);
-  // min Fan One Speed (val 1363)
-  copyIntToArrray(device::minFanOneSpeed);
-  // max Fan One Speed (val 1364)
-  copyIntToArrray(device::maxFanOneSpeed);
-  // min Fan Two Speed (val 1365)
-  copyIntToArrray(device::minFanTwoSpeed);
-  // max Fan Two Speed (val 1366)
-  copyIntToArrray(device::maxFanTwoSpeed);
-  // num Dosers (val 1367)
-  copyIntToArrray(user::numberOfDosers);
-  // doser One Mode (val 1368)
-  copyIntToArrray(user::doserOneMode);
-  // doser Two Mode (val 1369)
-  copyIntToArrray(user::doserTwoMode);
-  // doser Three Mode (val 1370)
-  copyIntToArrray(user::doserThreeMode);
-  // doser Four Mode (val 1371)
-  copyIntToArrray(user::doserFourMode);
-  // doser Five Mode (val 1372)
-  copyIntToArrray(user::doserFiveMode);
-  // doser Six Mode (val 1373)
-  copyIntToArrray(user::doserSixMode);
-  // doser One Mills (val 1374)
-  copyIntToArrray(user::doserOneMills);
-  // doser Two Mills (val 1374)
-  copyIntToArrray(user::doserTwoMills);
-  // doser Three Mills (val 1376)
-  copyIntToArrray(user::doserThreeMills);
-  // doser Four Mills (val 1377)
-  copyIntToArrray(user::doserFourMills);
-  // doser Five Mills (val 1378)
-  copyIntToArrray(user::doserFiveMills);
-  // doser Six Mills (val 1379)
-  copyIntToArrray(user::doserSixMills);
-  // doser One Speed
-  //copyIntToArrray(user::doserOneSpeed);
-  // doser TwoSpeed
-  //copyIntToArrray(user::doserTwoSpeed);
-  // doser ThreeSpeed
-  //copyIntToArrray(user::doserThreeSpeed);
-  // doser FourSpeed
-  //copyIntToArrray(user::doserFourSpeed);
-  // doser Five Speed
-  //copyIntToArrray(user::doserFiveSpeed);
-  // doser Six Speed
-  //copyIntToArrray(user::doserSixSpeed);
-  // dosing Interval (val 1380)
-  copyIntToArrray(user::dosingInterval);
-  // swap Interval (val 1381)
-  copyIntToArrray(0);
-  // refill Doser One Mills (val 1382)
-  copyIntToArrray(user::refillDoserOneMills);
-  // refill Doser Two Mills (val 1383)
-  copyIntToArrray(user::refillDoserTwoMills);
-  // refill Doser Three Mills (val 1384)
-  copyIntToArrray(user::refillDoserThreeMills);
-  // refill Doser Four Mills (val 1385)
-  copyIntToArrray(user::refillDoserFourMills);
-  // refill Doser Five Mills (val 1386)
-  copyIntToArrray(user::refillDoserFiveMills);
-  // refill Doser Six Mills (val 1387)
-  copyIntToArrray(user::refillDoserSixMills);
-  // auto Fill Hour (val 1388)
-  copyIntToArrray(user::autoFillHour);
-  // auto Fill Minute (val 1389)
-  copyIntToArrray(user::autoFillMinute);
-  // tds Error Margin (val 1390)
-  copyIntToArrray(user::tdsErrorMargin);
-  // ec Error Margin (val 1391)
-  copyFloatToArray(user::ecErrorMargin, 2);
-  // ph Error Margin (val 1392)
-  copyFloatToArray(user::phErrorMargin, 2);
-  // co2 Error Margin (val 1393)
-  copyIntToArrray(user::co2ErrorMargin);
-  // water Temp Error Margin (val 1394)
-  copyFloatToArray(user::convertToF ? user::waterTempErrorMarginF : user::waterTempErrorMargin, 1);
-  // water Height Error Margin (val 1395)
-  copyFloatToArray(user::convertToInches ? user::waterHeightErrorMarginInches : user::waterHeightErrorMargin, 1); 
-  // air Temp Error Margin (val 1396)
-  copyFloatToArray(user::airTempErrorMargin, 1);
-  // humidity Error Margin (val 1397)
-  copyFloatToArray(user::humidityErrorMargin, 1);
-  // disable Ppm Warning (val 1398)
-  copyIntToArrray(user::disablePpmWarnings);
-  // disable Ec Warnings (val 1399)
-  copyIntToArrray(user::disableEcWarnings);
-  // disable Co2 Warnings (val 1400)
-  copyIntToArrray(user::disableCo2Warnings);
-  // disable Ph Warnings (val 1401)
-  copyIntToArrray(user::disablePhWarnings);
-  // disable Water Temp Warnings (val 1402)
-  copyIntToArrray(user::disableWaterTempWarnings);
-  // disable Water Height Warnings (val 1403)
-  copyIntToArrray(user::disableWaterHeightWarnings);
-  // disable Air Temp Warnings (val 1404)
-  copyIntToArrray(user::disableAirTempWarnings);
-  // disable Humidity Warnings (val 1405)
-  copyIntToArrray(user::disableHumidityWarnings);
-  // disable Drain And Refill (val 1406)
-  copyIntToArrray(user::disableDrainAndRefill);
-  // convert Celcius To Farenheit (val 1407)
-  copyIntToArrray(user::convertToF);
-  // convert cm To Inchs (val 1408)
-  copyIntToArrray(user::convertToInches);
-  // convert To Tds (val 1409)
-  copyIntToArrray(user::convertToTds);
-  // ppm Error State (val 1410)
-  copyIntToArrray(device::ppmErrorState);
-  // ec Error State (val 1411)
-  copyIntToArrray(device::ecErrorState);
-  // ph Error State (val 1412)
-  copyIntToArrray(device::phErrorState);
-  // co2 Error State (val 1413)
-  copyIntToArrray(device::co2ErrorState);
-  // water Level Error State (val 1414)
-  copyIntToArrray(device::waterTempErrorState);
-  // water Level Error State (val 1415)
-  copyIntToArrray(device::waterLevelErrorState);
-  // air Temp Error State (val 1416)
-  copyIntToArrray(device::airTempErrorState);
-  // humidity Error State (val 1417)
-  copyIntToArrray(device::humidityErrorState);
-  // user Profile (val 1418)
-  copyIntToArrray(device::userProfile);
-   // user Profile (val 1419)
-  copyIntToArrray(device::systemStatus);
-  delay(1);
+void getPageData() {
+  printf("getPagedata: Executing on core %d\n", xPortGetCoreID());
   yield();
-  printf("webData Length = %d\n", strlen(wifi::webData));
-  //printf("built wifi::webData array: %s\n", wifi::webData);
+  String page = server.arg("page");
+  String slide = server.arg("slide");
+  printf("Received web request for page %s and slide %s\n", page, slide);
+  memset(wifi::webData, 0, sizeof(wifi::webData));
+    // Page 0 (Home page)
+  if (page == "0") {
+    copyIntToArray(user::convertToF); 
+    copyIntToArray(user::convertToInches); 
+    if (slide == "0") { // home page slide 0
+      copyFloatToArray(sensor::ec, 2);
+      copyFloatToArray(user::targetMinEc, 2); 
+      copyFloatToArray(user::targetMaxEc, 2); 
+      copyFloatArrayToArray(device::ecArray, 120, 2);   
+    }
+    else if (slide == "1") { // home page slide 1
+      copyIntToArray(sensor::tds);
+      copyIntToArray(user::targetMinTds); 
+      copyIntToArray(user::targetMaxTds); 
+      copyFloatArrayToArray(device::tdsArray, 120, 0);   
+    }
+    else if (slide == "2") { // home page slide 2
+      copyFloatToArray(sensor::ph, 2); 
+      copyFloatToArray(user::targetMinPh, 2); 
+      copyFloatToArray(user::targetMaxPh, 2); 
+      copyFloatArrayToArray(device::phArray, 120, 2);
+    }
+    else if (slide == "3") { // home page slide 3
+      copyIntToArray(sensor::co2); 
+      copyIntToArray(user::targetCo2); 
+      copyIntToArray(user::targetCo2); 
+      copyFloatArrayToArray(device::co2Array, 120, 0);
+    }
+    else if (slide == "4") { // home page slide 4
+      if (user::convertToF) {
+        copyFloatToArray(convertToF(sensor::waterTemp), 1); 
+        copyFloatToArray(user::targetMinWaterTempF, 1); 
+        copyFloatToArray(user::targetMaxWaterTempF, 1); 
+        copyFloatArrayToArray(device::waterTemperatureArrayF, 120, 1);
+      }
+      else {
+        copyFloatToArray(sensor::waterTemp, 1); 
+        copyFloatToArray(user::targetMinWaterTemp, 1); 
+        copyFloatToArray(user::targetMaxWaterTemp, 1); 
+        copyFloatArrayToArray(device::waterTemperatureArray, 120, 1);
+      }
+    }
+    else if (slide == "5") { // home page slide 5
+      if (user::convertToInches) {
+        copyFloatToArray(sensor::waterLevelInches, 1); 
+        copyFloatToArray(user::targetMinWaterHeightInches, 1); 
+        copyFloatToArray(user::targetMaxWaterHeightInches, 1); 
+        copyFloatArrayToArray(device::waterLevelArrayInInches, 120, 1);
+      }
+      else {
+        copyFloatToArray(sensor::waterLevel, 1); 
+        copyFloatToArray(user::targetMinWaterHeight, 1); 
+        copyFloatToArray(user::targetMaxWaterHeight, 1); 
+        copyFloatArrayToArray(device::waterLevelArray, 120, 1);
+      }
+    }
+    else if (slide == "6") { // home page slide 6
+      if (user::convertToF) {
+        copyFloatToArray(convertToF(sensor::airTemp), 1); 
+        copyFloatToArray(user::targetMinAirTempF, 1); 
+        copyFloatToArray(user::targetMaxAirTempF, 1); 
+        copyFloatArrayToArray(device::airTemperatureArrayF, 120, 1);
+      }
+      else {
+        copyFloatToArray(sensor::airTemp, 1); 
+        copyFloatToArray(user::targetMinAirTemp, 1); 
+        copyFloatToArray(user::targetMaxAirTemp, 1); 
+        copyFloatArrayToArray(device::airTemperatureArray, 120, 1);
+      }
+    }
+    else if (slide == "7") { // home page slide 7
+      copyFloatToArray(sensor::humidity, 1); 
+      copyFloatToArray(user::targetMinHumidity, 1); 
+      copyFloatToArray(user::targetMaxHumidity, 1); 
+      copyFloatArrayToArray(device::humidityArray, 120, 1);
+    }
+    else if (slide == "8") { // home page slide 8
+      copyIntToArray(device::fanOneSpeed); 
+      copyIntToArray(user::targetMinFanOneSpeed); 
+      copyIntToArray(user::targetMaxFanOneSpeed); 
+      copyFloatArrayToArray(device::fanOneSpeedArray, 120, 0);
+    }
+    else if (slide == "9") { // home page slide 9
+      copyIntToArray(device::fanTwoSpeed); 
+      copyIntToArray(user::targetMinFanTwoSpeed); 
+      copyIntToArray(user::targetMaxFanTwoSpeed); 
+      copyFloatArrayToArray(device::fanTwoSpeedArray, 120, 0);
+    }
+  }
+  // Page 1 (Graphs page)
+  else if (page == "1") {
+    copyIntToArray(user::convertToF); 
+    copyIntToArray(user::convertToInches); 
+    if (slide == "0") {
+      copyFloatArrayToArray(device::ecArray, 120, 2);     
+    }
+    else if (slide == "1") {
+       copyFloatArrayToArray(device::tdsArray, 120, 0); 
+    }
+    else if (slide == "2") {
+      copyFloatArrayToArray(device::phArray, 120, 2);
+    }
+    else if (slide == "3") {
+      copyFloatArrayToArray(device::co2Array, 120, 0);
+    }
+    else if (slide == "4") {
+      if (user::convertToF)
+        copyFloatArrayToArray(device::waterTemperatureArrayF, 120, 1);
+      else
+        copyFloatArrayToArray(device::waterTemperatureArray, 120, 1);
+    }
+    else if (slide == "5") {
+      if (user::convertToInches) 
+        copyFloatArrayToArray(device::waterLevelArrayInInches, 120, 1);
+      else
+        copyFloatArrayToArray(device::waterLevelArray, 120, 1);
+    }
+    else if (slide == "6") {
+      if (user::convertToF)
+        copyFloatArrayToArray(device::airTemperatureArrayF, 120, 1);
+      else
+        copyFloatArrayToArray(device::airTemperatureArray, 120, 1);
+    }
+    else if (slide == "7") {
+      copyFloatArrayToArray(device::humidityArray, 120, 1);
+    }
+    else if (slide == "8") {
+      copyFloatArrayToArray(device::fanOneSpeedArray, 120, 0);
+    }
+    else if (slide == "9") {
+      copyFloatArrayToArray(device::fanTwoSpeedArray, 120, 0);
+    }
+  }
+   // Page 2 (Max mins page)
+  else if (page == "2") {
+    copyIntToArray(user::convertToF); 
+    copyIntToArray(user::convertToInches); 
+    if (slide == "0") {
+      copyFloatToArray(device::minEc, 2); 
+      copyFloatToArray(device::maxEc, 2); 
+    }
+    else if (slide == "1") {
+      copyIntToArray(device::minTds); 
+      copyIntToArray(device::maxTds); 
+    }
+    else if (slide == "2") {
+      copyFloatToArray(device::minPh, 2); 
+      copyFloatToArray(device::maxPh, 2); 
+    }
+    else if (slide == "3") {
+      copyIntToArray(device::minCo2); 
+      copyIntToArray(device::maxCo2); 
+    }
+    else if (slide == "4") {
+      if (user::convertToF) {
+        copyFloatToArray(convertToF(device::minWaterTemp), 1); 
+        copyFloatToArray(convertToF(device::maxWaterTemp), 1); 
+      }
+      else {
+        copyFloatToArray(device::minWaterTemp, 1); 
+        copyFloatToArray(device::maxWaterTemp, 1); 
+      }
+    }
+    else if (slide == "5") {
+      if (user::convertToInches) {
+        copyFloatToArray(convertToInch(device::minWaterLevel), 1); 
+        copyFloatToArray(convertToInch(device::maxWaterLevel), 1); 
+      }
+      else {
+        copyFloatToArray(device::minWaterLevel, 1); 
+        copyFloatToArray(device::maxWaterLevel, 1); 
+      }
+    }
+    else if (slide == "6") {
+      if (user::convertToF) {
+        copyFloatToArray(convertToF(device::minAirTemp), 1); 
+        copyFloatToArray(convertToF(device::maxAirTemp), 1); 
+      }
+      else {
+        copyFloatToArray(device::minAirTemp, 1); 
+        copyFloatToArray(device::maxAirTemp, 1); 
+      }
+    }
+    else if (slide == "7") {
+      copyFloatToArray(device::minHumidity, 1); 
+      copyFloatToArray(device::maxHumidity, 1); 
+    }
+    else if (slide == "8") {
+      copyIntToArray(device::minFanOneSpeed); 
+      copyIntToArray(device::maxFanOneSpeed); 
+    }
+    else if (slide == "9") {
+      copyFloatToArray(device::minFanTwoSpeed, 1); 
+      copyFloatToArray(device::maxFanTwoSpeed, 1); 
+    }
+  }
+  // Page 3 (Profiles page)
+  else if (page == "3") {
+    strcpy(wifi::webData, user::profileOneName);
+    strcat(wifi::webData, user::profileTwoName);
+    strcat(wifi::webData, user::profileThreeName);
+    strcat(wifi::webData, user::profileFourName);
+    strcat(wifi::webData, user::profileOneName);
+  }
+  // Page 4 (Settings page)
+  else if (page == "4") {
+    copyIntToArray(user::numberOfDosers); 
+    copyIntToArray(user::dosingInterval); 
+    copyIntToArray(user::convertToF); 
+    copyIntToArray(user::convertToInches); 
+    copyIntToArray(user::convertToTds); 
+    copyIntToArray(user::disablePpmWarnings);
+    copyIntToArray(user::disableEcWarnings);
+    copyIntToArray(user::disableCo2Warnings);
+    copyIntToArray(user::disablePhWarnings);
+    copyIntToArray(user::disableWaterTempWarnings);
+    copyIntToArray(user::disableWaterHeightWarnings);
+    copyIntToArray(user::disableAirTempWarnings);
+    copyIntToArray(user::disableHumidityWarnings);
+  }
+  // Page 5 (EC\TDS page)
+  else if (page == "5") {
+    copyIntToArray(user::targetMinTds); 
+    copyIntToArray(user::targetMaxTds); 
+    copyFloatToArray(user::targetMinEc, 2); 
+    copyFloatToArray(user::targetMaxEc, 2); 
+  }
+  // Page 6 (PH page)
+  else if (page == "6") {
+    copyFloatToArray(user::targetMinPh, 2); 
+    copyFloatToArray(user::targetMaxPh, 2); 
+  }
+  // Page 7 (Co2 page) 
+  else if (page == "7") { // small amount of data so no need to segment based on slider 
+    copyIntToArray(user::convertToInches); 
+    if (user::convertToInches) {
+      copyFloatToArray(user::roomLengthInches, 1);
+      copyFloatToArray(user::roomWidthInches, 1);
+      copyFloatToArray(user::roomHeightInches, 1);
+      copyFloatToArray(user::co2FlowrateFeet3, 1);
+    }
+    else {
+      copyFloatToArray(user::roomLengthCm, 1);
+      copyFloatToArray(user::roomWidthCm, 1);
+      copyFloatToArray(user::roomHeightCm, 1);
+      copyFloatToArray(user::co2FlowrateLtrs, 1);
+    }
+    copyIntToArray(user::co2CheckTimeMinute);
+    copyIntToArray(user::co2CheckTimeHour);
+    copyIntToArray(user::disableFansTimer);
+    copyIntToArray(user::enableManualCo2Duration);
+    copyIntToArray(user::disableCo2Control);
+    copyIntToArray(user::manualCo2GasDuration);
+  }
+  // Page 8 (Water page)
+  else if (page == "8") { // small amount of data so no need to segment based on slider
+    copyIntToArray(user::convertToF); 
+    copyIntToArray(user::convertToInches); 
+    if (user::convertToInches) {
+      copyFloatToArray(user::targetMinWaterHeightInches, 1);
+      copyFloatToArray(user::targetMaxWaterHeightInches, 1);
+    }
+    else {
+      copyFloatToArray(user::targetMinWaterHeight, 1);
+      copyFloatToArray(user::targetMaxWaterHeight, 1);
+    }
+    if (user::convertToF) {
+      copyFloatToArray(user::targetMinWaterTempF, 1);
+      copyFloatToArray(user::targetMaxWaterTempF, 1);
+    }
+    else {
+      copyFloatToArray(user::targetMinWaterTemp, 1);
+      copyFloatToArray(user::targetMaxWaterTemp, 1);
+    }
+    if (user::convertToInches) {
+      copyFloatToArray(user::waterTankLengthInches, 1);
+      copyFloatToArray(user::waterTankWidthInches, 1);
+    }
+    else {
+      copyFloatToArray(user::waterTankLength, 1);
+      copyFloatToArray(user::waterTankWidth, 1);
+    }
+    copyBoolArrayToArray(user::autoFillDays, 31);
+    copyIntToArray(user::autoFillMinute);
+    copyIntToArray(user::autoFillHour);
+    copyIntToArray(user::disableDrainAndRefill);
+    copyIntToArray(user::refillDoserOneMills);
+    copyIntToArray(user::refillDoserTwoMills);
+    copyIntToArray(user::refillDoserThreeMills);
+    copyIntToArray(user::refillDoserFourMills);
+    copyIntToArray(user::refillDoserFiveMills);
+    copyIntToArray(user::refillDoserSixMills);
+  }
+  // Page 9 (Doser page) 
+  else if (page == "9") {
+    copyIntToArray(user::numberOfDosers); 
+    copyIntToArray(user::doserOneMode);
+    copyIntToArray(user::doserTwoMode);
+    copyIntToArray(user::doserThreeMode);
+    copyIntToArray(user::doserFourMode);
+    copyIntToArray(user::doserFiveMode);
+    copyIntToArray(user::doserSixMode);
+    copyIntToArray(user::doserOneMills);
+    copyIntToArray(user::doserTwoMills);
+    copyIntToArray(user::doserThreeMills);
+    copyIntToArray(user::doserFourMills);
+    copyIntToArray(user::doserFiveMills);
+    copyIntToArray(user::doserSixMills);
+    //doserOneSpeed = values[cnt++];
+    //doserTwoSpeed = values[cnt++];
+    //doserThreeSpeed = values[cnt++];
+    //doserFourSpeed = values[cnt++];
+    //doserFiveSpeed = values[cnt++];
+    //doserSixSpeed = values[cnt++];
+  }
+  // Page 10 (Lighting page) 
+  else if (page == "10") {
+    copyIntToArray(user::lightOnTimeMin);
+    copyIntToArray(user::lightOnTimeHour);
+    copyIntToArray(user::lightOffTimeMin);
+    copyIntToArray(user::lightOffTimeHour);
+    copyIntToArray(user::lightMode);
+  }
+  // Page 11 (Fans page)
+  else if (page == "11") { // small amount of data so no need to segment based on slider
+    copyIntToArray(user::convertToF); 
+    copyIntToArray(user::targetMinFanOneSpeed);
+    copyIntToArray(user::targetMaxFanOneSpeed);
+    copyIntToArray(user::targetMinFanTwoSpeed);
+    copyIntToArray(user::targetMaxFanTwoSpeed);
+    if (user::convertToF) {
+      copyFloatToArray(user::targetMinAirTempF, 1);
+      copyFloatToArray(user::targetMaxAirTempF, 1);
+    }
+    else {
+      copyFloatToArray(user::targetMinAirTemp, 1);
+      copyFloatToArray(user::targetMaxAirTemp, 1);
+    }
+    copyFloatToArray(user::targetMinHumidity, 1);
+    copyFloatToArray(user::targetMaxHumidity, 1);
+    copyIntToArray(user::fansControlTemperature);
+    copyIntToArray(user::fansControlHumidity);
+    copyIntToArray(user::fanOneFixedSpeed);
+    copyIntToArray(user::fanTwoFixedSpeed);
+  }
+  // Page 12 (Warnings page)
+  else if (page == "12") {  // small amount of data so no need to segment based on slider
+    copyIntToArray(user::convertToF); 
+    copyIntToArray(user::convertToInches); 
+    copyIntToArray(sensor::tds);
+    copyIntToArray(user::targetMinTds);
+    copyIntToArray(user::targetMaxTds);
+    copyIntToArray(user::tdsErrorMargin);
+    copyFloatToArray(sensor::ec, 2);
+    copyFloatToArray(user::targetMinEc, 2);
+    copyFloatToArray(user::targetMaxEc, 2);
+    copyFloatToArray(user::ecErrorMargin, 2);
+    copyFloatToArray(sensor::ph, 2);
+    copyFloatToArray(user::targetMinPh, 2);
+    copyFloatToArray(user::targetMaxPh, 2);
+    copyFloatToArray(user::phErrorMargin, 2);
+    copyIntToArray(sensor::co2);
+    copyIntToArray(user::targetCo2);
+    copyIntToArray(user::targetCo2);
+    copyIntToArray(user::co2ErrorMargin);
+    if (user::convertToF) {
+      copyFloatToArray(convertToF(sensor::waterTemp), 1);
+      copyFloatToArray(user::targetMinWaterTempF, 1);
+      copyFloatToArray(user::targetMaxWaterTempF, 1);
+      copyFloatToArray(user::waterTempErrorMarginF, 1);
+    }
+    else {
+      copyFloatToArray(sensor::waterTemp, 1);
+      copyFloatToArray(user::targetMinWaterTemp, 1);
+      copyFloatToArray(user::targetMaxWaterTemp, 1);
+      copyFloatToArray(user::waterTempErrorMargin, 1);
+    }
+    if (user::convertToInches) {
+      copyFloatToArray(sensor::waterLevelInches, 1);
+      copyFloatToArray(user::targetMinWaterHeightInches, 1);
+      copyFloatToArray(user::targetMaxWaterHeightInches, 1);
+      copyFloatToArray(user::waterHeightErrorMarginInches, 1);
+    }
+    else {
+      copyFloatToArray(sensor::waterLevel, 1);
+      copyFloatToArray(user::targetMinWaterHeight, 1);
+      copyFloatToArray(user::targetMaxWaterHeight, 1);
+      copyFloatToArray(user::waterHeightErrorMargin, 1);
+    }
+    if (user::convertToF) {
+      copyFloatToArray(convertToF(sensor::airTemp), 1);
+      copyFloatToArray(user::targetMinAirTempF, 1);
+      copyFloatToArray(user::targetMaxAirTempF, 1);
+      copyFloatToArray(user::airTempErrorMarginF, 1);
+    }
+    else {
+      copyFloatToArray(sensor::airTemp, 1);
+      copyFloatToArray(user::targetMinAirTemp, 1);
+      copyFloatToArray(user::targetMaxAirTemp, 1);
+      copyFloatToArray(user::airTempErrorMargin, 1);
+    }
+    copyFloatToArray(sensor::humidity, 1);
+    copyFloatToArray(user::targetMinHumidity, 1);
+    copyFloatToArray(user::targetMaxHumidity, 1);
+    copyFloatToArray(user::humidityErrorMargin, 1);
+  }
+  else {
+    printf("Page not found!\n");
+  }
+  server.send(200, "text/plane", wifi::webData);
+  yield();
 }
 
 bool strBool(const char* buffer) {
@@ -760,7 +845,13 @@ bool strBool(const char* buffer) {
     return false;
 }
 
-void copyIntToArrray(const int& a_value) {
+void copyBoolArrayToArray(const bool* a_array, const int& a_len) {
+  for (int i = 0; i < a_len; i++) {
+    copyIntToArray(a_array[i]);
+  }
+}
+
+void copyIntToArray(const int a_value) {
   char buffer[8] {0, 0, 0, 0, 0, 0, 0, 0};
   itoa(a_value, buffer, 10);
   strcat(wifi::webData, buffer);
@@ -769,7 +860,13 @@ void copyIntToArrray(const int& a_value) {
   yield();
 }
 
-void copyFloatToArray(const float& a_value, const uint8_t& a_precison) {
+void copyFloatArrayToArray(const float* a_array, const int& a_len, const uint8_t& a_precison) {
+  for (int i = 0; i < a_len; i++) {
+    copyFloatToArray(a_array[i], a_precison);
+  }
+}
+
+void copyFloatToArray(const float a_value, const uint8_t& a_precison) {
   char buffer[8] {0, 0, 0, 0, 0, 0, 0, 0};
   dtostrf(a_value, 0, a_precison, buffer);
   strcat(wifi::webData, buffer);
