@@ -1152,7 +1152,7 @@ void RA8875::drawBMP(const uint16_t& a_x, const uint16_t& a_y, const uint16_t& a
 	writeToBlock(a_x, a_y, a_array, a_width, a_height, a_scale); 
 }
 
-void RA8875::drawXBMP(const uint16_t& a_x, const uint16_t& a_y, const uint16_t& a_width, const uint16_t& a_height, const uint8_t* a_array, const uint16_t& a_arraySize, int16_t a_color, int16_t a_color2, const int8_t& a_scale) {
+void RA8875::drawXBMP(const uint16_t& a_x, const uint16_t& a_y, const uint16_t& a_width, const uint16_t& a_height, const uint8_t* a_array, const uint16_t& a_arraySize, const uint16_t a_color, const uint16_t a_color2, const int8_t& a_scale) {
 	writeToBlock(a_x, a_y, a_array, a_arraySize, a_width, a_height, a_color, a_color2, a_scale); 
 }
 
@@ -1631,6 +1631,14 @@ void RA8875::setTextColor(const uint16_t& a_fontColor, const uint16_t& a_fontBac
 
 void RA8875::setTextColor(const uint16_t& a_fontColor) {
 	m_fontColor = a_fontColor;
+}
+
+uint16_t RA8875::getTextColor() {
+	return m_fontColor;
+}
+
+uint16_t RA8875::getTextBackColor() {
+	return m_fontBackColor;
 }
 
 int16_t RA8875::getFontX(const bool& a_withXMargin) {
@@ -2259,7 +2267,8 @@ void RA8875::writeToBlock(int16_t a_x, int16_t a_y, const uint16_t *a_data, uint
 
 */
 /**************************************************************************/
-void RA8875::writeToBlock(int16_t a_x, int16_t a_y, const uint8_t* a_data, uint16_t a_arraySize, uint16_t a_width, uint16_t a_height, uint16_t a_foreground, uint16_t a_background, uint16_t a_scale)
+/**************************************************************************/
+void RA8875::writeToBlock(int16_t a_x, int16_t a_y, const uint8_t* a_data, const uint16_t a_arraySize, const uint16_t a_width, const uint16_t a_height, const uint16_t a_foreground, const uint16_t a_background, const uint16_t a_scale)
 {
 	int xPos = 0, linesDrawn = 0, startI = 0, startB = 0, pixelsDrawn = 0;
 	setActiveWindow(a_x, a_x + (a_width*a_scale)-1, a_y, a_y + (a_height*a_scale)-1);
@@ -2278,6 +2287,11 @@ void RA8875::writeToBlock(int16_t a_x, int16_t a_y, const uint8_t* a_data, uint1
 			for (int n = 0; n < a_scale; n++) {
 				pixelsDrawn++;
 			    SPI.transfer16(val ? a_foreground : a_background);
+				if (pixelsDrawn == (a_width*a_scale) * (a_height*a_scale)) {
+					_endSend();
+					setActiveWindow();
+					return;
+				}
 			}
 			if (a_scale != 1) {		
 				if (xPos == a_width - 1 && linesDrawn != a_scale - 1) { // draw line again
