@@ -102,30 +102,28 @@ void DallasTemperature::setOneWire(OneWire* _oneWire) {
 }
 
 // initialise the bus
-void DallasTemperature::begin(void) {
+bool DallasTemperature::begin(void) {
 
 	DeviceAddress deviceAddress;
 
 	_wire->reset_search();
 	devices = 0; // Reset the number of devices when we enumerate wire devices
 	ds18Count = 0; // Reset number of DS18xxx Family devices
-
-	while (_wire->search(deviceAddress)) {
-
+	unsigned long startTime = millis();
+	while (_wire->search(deviceAddress) && millis() - startTime < 5000UL) {
 		if (validAddress(deviceAddress)) {
 			devices++;
-
 			if (validFamily(deviceAddress)) {
 				ds18Count++;
-
 				if (!parasite && readPowerSupply(deviceAddress))
 					parasite = true;
-
 				uint8_t b = getResolution(deviceAddress);
 				if (b > bitResolution) bitResolution = b;
 			}
+			return true;
 		}
 	}
+	return false;
 }
 
 // returns the number of devices found on the bus

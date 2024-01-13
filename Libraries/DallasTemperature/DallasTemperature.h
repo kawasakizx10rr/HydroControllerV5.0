@@ -74,7 +74,7 @@ public:
     void setPullupPin(uint8_t);
 
 	// initialise bus
-	void begin(void);
+	bool begin(void);
 
 	// returns the number of devices found on the bus
 	uint8_t getDeviceCount(void);
