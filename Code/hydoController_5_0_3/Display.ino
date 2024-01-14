@@ -1298,7 +1298,7 @@ void drawSettingsPageZero() {
         tft.setFont(&akashi_36px_Regular);
         tft.setTextColor(RA8875_BLACK, user::backgroundColor);
         tft.print(110, 520 - scrollMargin, "Set EC to TDS conversion");
-        drawEcConversionButton(682, 520 - scrollMargin);
+        drawEcConversionButton(672, 520 - scrollMargin);
         previousConversionType = device::conversionType;
       }
     }

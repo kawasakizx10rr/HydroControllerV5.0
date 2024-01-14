@@ -1414,7 +1414,7 @@ void settingsTwoPageTouched() {
       }
       lastTouchTime = millis();
     }
-    int scrollMargin = display::settingsPageOneScrollPos * 50;  // spacing is 50px
+    int scrollMargin = display::settingsPageTwoScrollPos * 50;  // spacing is 50px
     if (display::settingsPageTwoScrollPos <= 0) {
       if (display::touch_x >= 680 && display::touch_x <= 750 && display::touch_y >= 170 - scrollMargin && display::touch_y <= 200 - scrollMargin) { // NumberOfDosers
         beep();

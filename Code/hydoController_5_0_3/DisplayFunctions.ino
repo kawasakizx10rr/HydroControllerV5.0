@@ -885,17 +885,8 @@ void displaySetRTCTime() {
     tft.print(270, 116, "Set RTC time");
     drawLeftRightButtons(295, 375, 385, 375, RA8875_BLUE);
     drawUpDownButtons(495, 375, 585, 375, RA8875_BLUE);
-    tft.setFont(&akashi_36px_Regular);
-    tft.setFontScale(1);
-    tft.setTextColor(RA8875_BLACK, RA8875_WHITE);
-    tft.fillRoundRect(260, 420, 164, 42, 5, RA8875_WHITE);
-    tft.drawRoundRect(258, 418, 167, 46, 5, RA8875_BLACK);
-    tft.drawRoundRect(259, 419, 166, 44, 5, RA8875_BLACK);
-    tft.print(280, 420, "Cancel");
-    tft.fillRoundRect(455, 420, 169, 42, 5, RA8875_WHITE);
-    tft.drawRoundRect(453, 418, 172, 46, 5, RA8875_BLACK);
-    tft.drawRoundRect(454, 419, 171, 44, 5, RA8875_BLACK);
-    tft.print(480, 420, "Confirm");
+    cancelButton(260, 420);
+    continueButton(455, 420);
     infoButton(770, 120);
     tft.setTextColor(RA8875_BLACK, user::backgroundColor);
   }
@@ -1441,26 +1432,20 @@ void displaySetPhDownUpValue() {
 
 void displayWifiSsid() {
   if (display::refreshPage && !display::showKeyboard) {
+    tft.setFont(&akashi_36px_Regular);
+    tft.setFontScale(1);
+    tft.setTextColor(RA8875_BLACK, user::backgroundColor);
     tft.print(270, 116, "Set WiFi SSID");
-    tft.setFont(&akashi_36px_Regular);
-    tft.setFontScale(1);
-    tft.setTextColor(RA8875_BLACK, user::backgroundColor);
-    tft.fillRoundRect(260, 420, 164, 42, 5, RA8875_WHITE);
-    tft.drawRoundRect(258, 418, 167, 46, 5, RA8875_BLACK);
-    tft.drawRoundRect(259, 419, 166, 44, 5, RA8875_BLACK);
-    tft.print(280, 420, "Cancel");
-    tft.fillRoundRect(455, 420, 169, 42, 5, RA8875_WHITE);
-    tft.drawRoundRect(453, 418, 172, 46, 5, RA8875_BLACK);
-    tft.drawRoundRect(454, 419, 171, 44, 5, RA8875_BLACK);
-    tft.print(480, 420, "Confirm");
+    cancelButton(260, 420);
+    continueButton(455, 420);
     infoButton(770, 120);
-    // input box
     tft.setFont(&akashi_36px_Regular);
     tft.setFontScale(1);
-    tft.setTextColor(RA8875_BLACK, user::backgroundColor);
+    tft.setTextColor(RA8875_BLACK, RA8875_WHITE);
     tft.fillRect(237, 250, 346, 42, RA8875_WHITE);
     tft.drawRect(235, 248, 350, 46, RA8875_BLACK);
     tft.drawRect(236, 249, 348, 44, RA8875_BLACK);
+    tft.setTextColor(RA8875_BLACK, user::backgroundColor);
     tft.print(242, 250, wifi::ssid);
     tft.setFont(&myriadPro_32px_Regular);
     tft.print(330, 295, "Press to edit");
@@ -1478,28 +1463,22 @@ void displayWifiSsid() {
 
 void displayWifiPassword() {
   if (display::refreshPage && !display::showKeyboard) {
+    tft.setFont(&akashi_36px_Regular);
+    tft.setFontScale(1);
+    tft.setTextColor(RA8875_BLACK, user::backgroundColor);
     tft.print(230, 116, "Set WiFi password");
-    tft.setFont(&akashi_36px_Regular);
-    tft.setFontScale(1);
-    tft.setTextColor(RA8875_BLACK, user::backgroundColor);
-    tft.fillRoundRect(260, 420, 164, 42, 5, RA8875_WHITE);
-    tft.drawRoundRect(258, 418, 167, 46, 5, RA8875_BLACK);
-    tft.drawRoundRect(259, 419, 166, 44, 5, RA8875_BLACK);
-    tft.print(280, 420, "Cancel");
-    tft.fillRoundRect(455, 420, 169, 42, 5, RA8875_WHITE);
-    tft.drawRoundRect(453, 418, 172, 46, 5, RA8875_BLACK);
-    tft.drawRoundRect(454, 419, 171, 44, 5, RA8875_BLACK);
-    tft.print(480, 420, "Confirm");
+    cancelButton(260, 420);
+    continueButton(455, 420);
     infoButton(770, 120);
-    // preview input box
     tft.setFont(&akashi_36px_Regular);
     tft.setFontScale(1);
-    tft.setTextColor(RA8875_BLACK, user::backgroundColor);
+    tft.setTextColor(RA8875_BLACK, RA8875_WHITE);
     tft.fillRect(237, 250, 346, 42, RA8875_WHITE);
     tft.drawRect(235, 248, 350, 46, RA8875_BLACK);
     tft.drawRect(236, 249, 348, 44, RA8875_BLACK);
     tft.print(242, 250, wifi::password);
     tft.setFont(&myriadPro_32px_Regular);
+    tft.setTextColor(RA8875_BLACK, user::backgroundColor);
     tft.print(330, 295, "Press to edit");
   }
   else if (display::refreshPage && display::showKeyboard) {
