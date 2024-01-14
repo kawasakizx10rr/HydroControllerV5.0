@@ -98,12 +98,7 @@ void readSensors() {
       else {
         float voltage = analogReadChnlToVolts(ads1115Channel::tdsSensor);    
         sensor::ec = ec.readEC(voltage, sensor::waterTemp);
-        if (device::conversionType == device::EU) // European 1 ms/cm (EC 1.0 or CF 10) = 640 ppm
-          sensor::tds = sensor::ec / 640.0;
-        else if (device::conversionType == device::US) // USA 1 ms/cm (EC 1.0 or CF 10) = 500 ppm
-          sensor::tds = sensor::ec / 500.0;
-        else if (device::conversionType == device::AU) // Australian 1 ms/cm (EC 1.0 or CF 10) = 700 ppm
-          sensor::tds = sensor::ec / 700.0;      
+        sensor::tds = convertEcToTds(sensor::ec);  
         //printf("TDS: %.2f\n", sensor::tds);
         if (sensor::tds > 9999)
           sensor::tds = 9999;

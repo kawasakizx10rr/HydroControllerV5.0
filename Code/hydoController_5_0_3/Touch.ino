@@ -538,7 +538,7 @@ void profilesPageTouched() {
       saveSystemEEPROM();
       device::settingsAdjusted = true;
       delay(20);
-      EEPROM.put(7, device::userProfile);
+      externalEEPROM.put(7, device::userProfile);
       delay(20);
       device::lockSaveButtons = true;
       device::keyBoardClosedTime = millis();
@@ -615,7 +615,7 @@ void profilesPageTouched() {
       device::lockSaveButtons = true;
       device::keyBoardClosedTime = millis();
       loadUserEEPROM(device::userProfile);
-      EEPROM.put(7, device::userProfile);
+      externalEEPROM.put(7, device::userProfile);
       delay(20);
     }
     else if (display::touch_x >= 630 && display::touch_x <= 760 && display::touch_y >= 222 && display::touch_y <= 262) {
@@ -626,7 +626,7 @@ void profilesPageTouched() {
       device::lockSaveButtons = true;
       device::keyBoardClosedTime = millis();
       loadUserEEPROM(device::userProfile);
-      EEPROM.put(7, device::userProfile);
+      externalEEPROM.put(7, device::userProfile);
       delay(20);
     }
     else if (display::touch_x >= 630 && display::touch_x <= 760 && display::touch_y >= 284 && display::touch_y <= 326) {
@@ -637,7 +637,7 @@ void profilesPageTouched() {
       device::lockSaveButtons = true;
       device::keyBoardClosedTime = millis();
       loadUserEEPROM(device::userProfile);
-      EEPROM.put(7, device::userProfile);
+      externalEEPROM.put(7, device::userProfile);
       delay(20);
     }
     else if (display::touch_x >= 630 && display::touch_x <= 760 && display::touch_y >= 346 && display::touch_y <= 388) {
@@ -648,7 +648,7 @@ void profilesPageTouched() {
       device::lockSaveButtons = true;
       device::keyBoardClosedTime = millis();
       loadUserEEPROM(device::userProfile);
-      EEPROM.put(7, device::userProfile);
+      externalEEPROM.put(7, device::userProfile);
       delay(20);
     }
     else if (display::touch_x >= 630 && display::touch_x <= 760 && display::touch_y >= 408 && display::touch_y <= 450) {
@@ -659,7 +659,7 @@ void profilesPageTouched() {
       device::lockSaveButtons = true;
       device::keyBoardClosedTime = millis();
       loadUserEEPROM(device::userProfile);
-      EEPROM.put(7, device::userProfile);
+      externalEEPROM.put(7, device::userProfile);
       delay(20);
     }
   }
@@ -1083,7 +1083,7 @@ void settingsOnePageTouched() {
     }
     else if (display::touch_x >= 460 && display::touch_x <= 638 && display::touch_y >= 368 && display::touch_y <= 414) { // continue with factory reset
       beep();
-      EEPROM.put(6, true); // set the stored device::systemReset to true for next boot
+      externalEEPROM.erase();
       delay(100);
       ESP.restart();
     }
@@ -1245,11 +1245,11 @@ void settingsTwoPageTouched() {
   }
   else if (display::showDosingInterval) {
     if (display::touch_x >= 370 && display::touch_x <= 420 && display::touch_y >= 350 && display::touch_y <= 400) {// dosingInterval time down
-      user::dosingInterval = adjustValue(user::dosingInterval, -1, 0, 240);
+      user::dosingInterval = adjustValue(user::dosingInterval, -1, 1, 240);
       device::settingsAdjusted = true;
     }
     else if (display::touch_x >= 500 && display::touch_x <= 550 && display::touch_y >= 350 && display::touch_y <= 400) {// dosingInterval time up
-      user::dosingInterval = adjustValue(user::dosingInterval, 1, 0, 240);
+      user::dosingInterval = adjustValue(user::dosingInterval, 1, 1, 240);
       device::settingsAdjusted = true;
     }
     else if (display::touch_x >= 390 && display::touch_x <= 490 && display::touch_y >= 430 && display::touch_y <= 479) {// exit
@@ -1322,18 +1322,22 @@ void settingsTwoPageTouched() {
   else if (display::showEcTdsValue) {
     if (display::touch_x >= 210 && display::touch_x <= 260 && display::touch_y >= 400 && display::touch_y <= 450) {  // ec solution down
       sensor::ecSolution = adjustValue(sensor::ecSolution, -0.1, 1, 10);
+      sensor::tdsSolution = convertEcToTds(sensor::ecSolution);
       device::settingsAdjusted = true;
     }
     else if (display::touch_x >= 310 && display::touch_x <= 360 && display::touch_y >= 400 && display::touch_y <= 450) {  // ec solution up
       sensor::ecSolution = adjustValue(sensor::ecSolution, 1, 0.1, 10);
+      sensor::tdsSolution = convertEcToTds(sensor::ecSolution);
       device::settingsAdjusted = true;
     }
     else if (display::touch_x >= 580 && display::touch_x <= 630 && display::touch_y >= 400 && display::touch_y <= 450) {  // tds solution down
       sensor::tdsSolution = adjustValue(sensor::tdsSolution, -0.1, 1, 9999);
+      sensor::ecSolution = convertTdsToEc(sensor::tdsSolution);
       device::settingsAdjusted = true;
     }
     else if (display::touch_x >= 680 && display::touch_x <= 730 && display::touch_y >= 400 && display::touch_y <= 450) {  // tds solution up
       sensor::tdsSolution = adjustValue(sensor::tdsSolution, 0.1, 1, 9999);
+      sensor::ecSolution = convertTdsToEc(sensor::tdsSolution);
       device::settingsAdjusted = true;
     }
     else if (display::touch_x >= 390 && display::touch_x <= 490 && display::touch_y >= 430 && display::touch_y <= 479) {// exit

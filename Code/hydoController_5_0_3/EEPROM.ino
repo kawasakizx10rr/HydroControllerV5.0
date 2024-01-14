@@ -1,170 +1,162 @@
 void initializeEEPROM() {
-  EEPROM.begin(4096);
+  //EEPROM.begin(4096);
   char versionNum[6] {'0', '0', '0', '0', '0', '\0'};
   for (uint8_t i = 0; i < 6; i++)
-    versionNum[i] = EEPROM.read(i);
-  EEPROM.get(6, device::systemReset);
-  device::systemReset = true; // JUST FOR TESTING!!!!
-  printf("System reset: %s\n", device::systemReset ? "true" : "false");
+    versionNum[i] = externalEEPROM.read(i);
   printf("Current version number: %s\n", versionNum);
   printf("Software version number: %s\n", device::versionNumber);
-  if (strcmp(versionNum, device::versionNumber) == 0 && !device::systemReset) {
-    device::userProfile = EEPROM.read(7);
+  if (strcmp(versionNum, device::versionNumber) == 0) {
+    device::userProfile = externalEEPROM.read(6);
     loadSystemEEPROM();
     loadUserEEPROM(device::userProfile);
   }
   else {
     showResetMessage();
     saveSystemEEPROM();
-    device::systemReset = false;
     for (uint8_t i = 0; i < 5; i++)
       saveUserEEPROM(i);
     for (uint8_t i = 0; i < 6; i++)
-      EEPROM.put(i, device::versionNumber[i]);
-    EEPROM.put(6, device::systemReset);
-    EEPROM.put(7, device::userProfile); // set profile to 0
-    EEPROM.commit();
+      externalEEPROM.put(i, device::versionNumber[i]);
+    externalEEPROM.put(6, device::userProfile); // set profile to 0
+    //EEPROM.commit();
     clearPage();
   }
 }
 
 void saveSystemEEPROM() {
-  int address = 8;
+  int address = 7;
   printf("Saving system settings\nEEPROM starting at address: %d\n", address);
-  //EEPROM.put(address, sensor::ecCalibration);             address += sizeof(sensor::ecCalibration);
-  EEPROM.put(address, sensor::emptyWaterTankDepth);       address += sizeof(sensor::emptyWaterTankDepth);
-  EEPROM.put(address, sensor::etapeZeroVolumeResistance); address += sizeof(sensor::etapeZeroVolumeResistance);
-  EEPROM.put(address, sensor::etapeMaxVolumeResistance);  address += sizeof(sensor::etapeMaxVolumeResistance);
-  EEPROM.put(address, sensor::ecKvalueLow);               address += sizeof(sensor::ecKvalueLow);
-  EEPROM.put(address, sensor::ecKvalueHigh);              address += sizeof(sensor::ecKvalueHigh);
-  EEPROM.put(address, sensor::phNeutralVoltage);          address += sizeof(sensor::phNeutralVoltage);
-  EEPROM.put(address, sensor::phAcidicVoltage);           address += sizeof(sensor::phAcidicVoltage);
+  //externalEEPROM.put(address, sensor::ecCalibration);             address += sizeof(sensor::ecCalibration);
+  externalEEPROM.put(address, sensor::emptyWaterTankDepth);       address += sizeof(sensor::emptyWaterTankDepth);
+  externalEEPROM.put(address, sensor::etapeZeroVolumeResistance); address += sizeof(sensor::etapeZeroVolumeResistance);
+  externalEEPROM.put(address, sensor::etapeMaxVolumeResistance);  address += sizeof(sensor::etapeMaxVolumeResistance);
+  externalEEPROM.put(address, sensor::ecKvalueLow);               address += sizeof(sensor::ecKvalueLow);
+  externalEEPROM.put(address, sensor::ecKvalueHigh);              address += sizeof(sensor::ecKvalueHigh);
+  externalEEPROM.put(address, sensor::phNeutralVoltage);          address += sizeof(sensor::phNeutralVoltage);
+  externalEEPROM.put(address, sensor::phAcidicVoltage);           address += sizeof(sensor::phAcidicVoltage);
   //
   for (const char& val : user::profileOneName) {
-    EEPROM.put(address, val);
+    externalEEPROM.put(address, val);
     address += sizeof(val);
   }
   for (const char& val : user::profileTwoName) {
-    EEPROM.put(address, val);
+    externalEEPROM.put(address, val);
     address += sizeof(val);
   }
   for (const char& val : user::profileThreeName) {
-    EEPROM.put(address, val);
+    externalEEPROM.put(address, val);
     address += sizeof(val);
   }
   for (const char& val : user::profileFourName) {
-    EEPROM.put(address, val);
+    externalEEPROM.put(address, val);
     address += sizeof(val);
   }
   for (const char& val : user::profileFiveName) {
-    EEPROM.put(address, val);
+    externalEEPROM.put(address, val);
     address += sizeof(val);
   }
   for (uint8_t i = 0; i < message::maxLogs; i++) {
-    EEPROM.put(address++, message::logTypeArray[i]);
+    externalEEPROM.put(address++, message::logTypeArray[i]);
   }
   for (uint8_t i = 0; i < message::maxLogs; i++) {
     for (uint8_t n = 0; n < message::maxCharsPerLog; n++) {
-      EEPROM.put(address++, message::timeStrArray[i][n]);
+      externalEEPROM.put(address++, message::timeStrArray[i][n]);
     }
   }
-  /*
   for (const float& val : device::phArray) {
-    EEPROM.put(address, fltToInt(val));
+    externalEEPROM.put(address, fltToInt(val));
     address += sizeof(int);
   }
   for (const float& val : device::ecArray) {
-    EEPROM.put(address, fltToInt(val));
+    externalEEPROM.put(address, fltToInt(val));
     address += sizeof(int);
   }
   for (const float& val : device::tdsArray) {
-    EEPROM.put(address, int(val));
+    externalEEPROM.put(address, int(val));
     address += sizeof(int);
   }
   for (const float& val : device::co2Array) {
-    EEPROM.put(address, int(val));
+    externalEEPROM.put(address, int(val));
     address += sizeof(int);
   }
   for (const float& val : device::waterTemperatureArray) {
-    EEPROM.put(address, fltToInt(val));
+    externalEEPROM.put(address, fltToInt(val));
     address += sizeof(int);
   }
   for (const float& val : device::waterTemperatureArrayF) {
-    EEPROM.put(address, fltToInt(val));
+    externalEEPROM.put(address, fltToInt(val));
     address += sizeof(int);
   }
   for (const float& val : device::waterLevelArray) {
-    EEPROM.put(address, int(val));
+    externalEEPROM.put(address, int(val));
     address += sizeof(int);
   }
   for (const float& val : device::waterLevelArrayInInches) {
-    EEPROM.put(address, fltToInt(val));
+    externalEEPROM.put(address, fltToInt(val));
     address += sizeof(int);
   }
   for (const float& val : device::fanOneSpeedArray) {
-    EEPROM.put(address, int(val));
+    externalEEPROM.put(address, int(val));
     address += sizeof(int);
   }
   for (const float& val : device::fanTwoSpeedArray) {
-    EEPROM.put(address, int(val));
+    externalEEPROM.put(address, int(val));
     address += sizeof(int);
   }
   for (const float& val : device::airTemperatureArray) {
-    EEPROM.put(address, fltToInt(val));
+    externalEEPROM.put(address, fltToInt(val));
     address += sizeof(int);
   }
   for (const float& val : device::airTemperatureArrayF) {
-    EEPROM.put(address, fltToInt(val));
+    externalEEPROM.put(address, fltToInt(val));
     address += sizeof(int);
   }
   for (const float& val : device::humidityArray) {
-    EEPROM.put(address, int(val));
+    externalEEPROM.put(address, int(val));
     address += sizeof(int);
   }
-  */
   printf("EEPROM ending at address: %d\n", address);
 }
 
 void loadSystemEEPROM() {
   int address = 8;
   printf("Loading system settings\nEEPROM starting at address: %d\n", address);
-  //EEPROM.get(address, sensor::ecCalibration);             address += sizeof(sensor::ecCalibration);
-  EEPROM.get(address, sensor::emptyWaterTankDepth);       address += sizeof(sensor::emptyWaterTankDepth);
-  EEPROM.get(address, sensor::etapeZeroVolumeResistance); address += sizeof(sensor::etapeZeroVolumeResistance);
-  EEPROM.get(address, sensor::etapeMaxVolumeResistance);  address += sizeof(sensor::etapeMaxVolumeResistance);
-  EEPROM.get(address, sensor::ecKvalueLow);               address += sizeof(sensor::ecKvalueLow);
-  EEPROM.get(address, sensor::ecKvalueHigh);              address += sizeof(sensor::ecKvalueHigh);
-  EEPROM.get(address, sensor::phNeutralVoltage);          address += sizeof(sensor::phNeutralVoltage);
-  EEPROM.get(address, sensor::phAcidicVoltage);           address += sizeof(sensor::phAcidicVoltage);
+  //externalEEPROM.get(address, sensor::ecCalibration);             address += sizeof(sensor::ecCalibration);
+  externalEEPROM.get(address, sensor::emptyWaterTankDepth);       address += sizeof(sensor::emptyWaterTankDepth);
+  externalEEPROM.get(address, sensor::etapeZeroVolumeResistance); address += sizeof(sensor::etapeZeroVolumeResistance);
+  externalEEPROM.get(address, sensor::etapeMaxVolumeResistance);  address += sizeof(sensor::etapeMaxVolumeResistance);
+  externalEEPROM.get(address, sensor::ecKvalueLow);               address += sizeof(sensor::ecKvalueLow);
+  externalEEPROM.get(address, sensor::ecKvalueHigh);              address += sizeof(sensor::ecKvalueHigh);
+  externalEEPROM.get(address, sensor::phNeutralVoltage);          address += sizeof(sensor::phNeutralVoltage);
+  externalEEPROM.get(address, sensor::phAcidicVoltage);           address += sizeof(sensor::phAcidicVoltage);
   for (const char& val : user::profileOneName) {
-    EEPROM.get(address, val);
+    externalEEPROM.get(address, val);
     address += sizeof(val);
   }
   for (const char& val : user::profileTwoName) {
-    EEPROM.get(address, val);
+    externalEEPROM.get(address, val);
     address += sizeof(val);
   }
   for (const char& val : user::profileThreeName) {
-    EEPROM.get(address, val);
+    externalEEPROM.get(address, val);
     address += sizeof(val);
   }
   for (const char& val : user::profileFourName) {
-    EEPROM.get(address, val);
+    externalEEPROM.get(address, val);
     address += sizeof(val);
   }
   for (const char& val : user::profileFiveName) {
-    EEPROM.get(address, val);
+    externalEEPROM.get(address, val);
     address += sizeof(val);
   }
   for (uint8_t i = 0; i < message::maxLogs; i++) {
-    EEPROM.get(address++, message::logTypeArray[i]);
+    externalEEPROM.get(address++, message::logTypeArray[i]);
   }
   for (uint8_t i = 0; i < message::maxLogs; i++) {
     for (uint8_t n = 0; n < message::maxCharsPerLog; n++) {
-      EEPROM.get(address++, message::timeStrArray[i][n]);
+      externalEEPROM.get(address++, message::timeStrArray[i][n]);
     }
   }
-  /*
   loadEepromFltArray(device::phArray,                    address);
   loadEepromFltArray(device::ecArray,                    address);
   loadEepromIntArray(device::tdsArray,                   address);
@@ -178,7 +170,6 @@ void loadSystemEEPROM() {
   loadEepromFltArray(device::airTemperatureArray,        address);
   loadEepromFltArray(device::airTemperatureArrayF,       address);
   loadEepromIntArray(device::humidityArray,              address);
-  */
   printf("EEPROM ending at address: %d\n", address);
 }
 
@@ -209,14 +200,13 @@ void saveUserEEPROM(const uint8_t a_profile) {
     saveProfile(2502);
   else if (a_profile == 4)
     saveProfile(3211);
-  EEPROM.commit();
   delay(250);
 }
 
 void loadEepromFltArray(float* a_array, int& a_address) {
   int buffer;
   for (uint8_t i = 0; i < device::maxGraphArrayValues; i++) {
-    EEPROM.get(a_address, buffer);
+    externalEEPROM.get(a_address, buffer);
     a_array[i] = buffer / 100.0;
     a_address += sizeof(int);
   }
@@ -225,7 +215,7 @@ void loadEepromFltArray(float* a_array, int& a_address) {
 void loadEepromIntArray(float* a_array, int& a_address) {
   int buffer;
   for (uint8_t i = 0; i < device::maxGraphArrayValues; i++) {
-    EEPROM.get(a_address, buffer);
+    externalEEPROM.get(a_address, buffer);
     a_array[i] = buffer;
     a_address += sizeof(int);
   }
@@ -233,139 +223,143 @@ void loadEepromIntArray(float* a_array, int& a_address) {
 
 void loadProfile(int a_address) {
   printf("EEPROM starting at address: %d\n", a_address);
-  EEPROM.get(a_address, device::minPh);                      a_address += sizeof(device::minPh);
-  EEPROM.get(a_address, device::maxPh);                      a_address += sizeof(device::maxPh);
-  EEPROM.get(a_address, device::minEc);                      a_address += sizeof(device::minEc);
-  EEPROM.get(a_address, device::maxEc);                      a_address += sizeof(device::maxEc);
-  EEPROM.get(a_address, device::minWaterTemp);               a_address += sizeof(device::minWaterTemp);
-  EEPROM.get(a_address, device::maxWaterTemp);               a_address += sizeof(device::maxWaterTemp);
-  EEPROM.get(a_address, device::minWaterLevel);              a_address += sizeof(device::minWaterLevel);
-  EEPROM.get(a_address, device::maxWaterLevel);              a_address += sizeof(device::maxWaterLevel);
-  EEPROM.get(a_address, device::minTds);                     a_address += sizeof(device::minTds);
-  EEPROM.get(a_address, device::maxTds);                     a_address += sizeof(device::maxTds);
-  EEPROM.get(a_address, device::minAirTemp);                 a_address += sizeof(device::minAirTemp);
-  EEPROM.get(a_address, device::maxAirTemp);                 a_address += sizeof(device::maxAirTemp);
-  EEPROM.get(a_address, device::minHumidity);                a_address += sizeof(device::minHumidity);
-  EEPROM.get(a_address, device::maxHumidity);                a_address += sizeof(device::maxHumidity);
-  EEPROM.get(a_address, device::minCo2);                     a_address += sizeof(device::minCo2);
-  EEPROM.get(a_address, device::maxCo2);                     a_address += sizeof(device::maxCo2);
-  EEPROM.get(a_address, device::minFanOneSpeed);             a_address += sizeof(device::minFanOneSpeed);
-  EEPROM.get(a_address, device::maxFanOneSpeed);             a_address += sizeof(device::maxFanOneSpeed);
-  EEPROM.get(a_address, device::minFanTwoSpeed);             a_address += sizeof(device::minFanTwoSpeed);
-  EEPROM.get(a_address, device::maxFanTwoSpeed);             a_address += sizeof(device::maxFanTwoSpeed);
-  EEPROM.get(a_address, user::lightOnTimeHour);              a_address += sizeof(user::lightOnTimeHour);
-  EEPROM.get(a_address, user::lightOnTimeMin);               a_address += sizeof(user::lightOnTimeMin);
-  EEPROM.get(a_address, user::lightOffTimeHour);             a_address += sizeof(user::lightOffTimeHour);
-  EEPROM.get(a_address, user::lightOffTimeMin);              a_address += sizeof(user::lightOffTimeMin);
-  EEPROM.get(a_address, user::lightMode);                    a_address += sizeof(user::lightMode);
-  EEPROM.get(a_address, user::doserOneMode);                 a_address += sizeof(user::doserOneMode);
-  EEPROM.get(a_address, user::doserTwoMode);                 a_address += sizeof(user::doserTwoMode);
-  EEPROM.get(a_address, user::doserThreeMode);               a_address += sizeof(user::doserThreeMode);
-  EEPROM.get(a_address, user::doserFourMode);                a_address += sizeof(user::doserFourMode);
-  EEPROM.get(a_address, user::doserFiveMode);                a_address += sizeof(user::doserFiveMode);
-  EEPROM.get(a_address, user::doserSixMode);                 a_address += sizeof(user::doserSixMode);
-  EEPROM.get(a_address, user::doserOneMills);                a_address += sizeof(user::doserOneMills);
-  EEPROM.get(a_address, user::doserTwoMills);                a_address += sizeof(user::doserTwoMills);
-  EEPROM.get(a_address, user::doserThreeMills);              a_address += sizeof(user::doserThreeMills);
-  EEPROM.get(a_address, user::doserFourMills);               a_address += sizeof(user::doserFourMills);
-  EEPROM.get(a_address, user::doserFiveMills);               a_address += sizeof(user::doserFiveMills);
-  EEPROM.get(a_address, user::doserSixMills);                a_address += sizeof(user::doserSixMills);
-  EEPROM.get(a_address, user::targetMinTds);                 a_address += sizeof(user::targetMinTds);
-  EEPROM.get(a_address, user::targetMaxTds);                 a_address += sizeof(user::targetMaxTds);
-  EEPROM.get(a_address, user::targetMinPh);                  a_address += sizeof(user::targetMinPh);
-  EEPROM.get(a_address, user::targetMaxPh);                  a_address += sizeof(user::targetMaxPh);
-  EEPROM.get(a_address, user::targetMinEc);                  a_address += sizeof(user::targetMinEc);
-  EEPROM.get(a_address, user::targetMaxEc);                  a_address += sizeof(user::targetMaxEc);
-  EEPROM.get(a_address, user::targetCo2);                    a_address += sizeof(user::targetCo2);
-  EEPROM.get(a_address, user::co2Offset);                    a_address += sizeof(user::co2Offset);
-  EEPROM.get(a_address, user::roomWidthCm);                  a_address += sizeof(user::roomWidthCm);
-  EEPROM.get(a_address, user::roomLengthCm);                 a_address += sizeof(user::roomLengthCm);
-  EEPROM.get(a_address, user::roomHeightCm);                 a_address += sizeof(user::roomHeightCm);
-  EEPROM.get(a_address, user::co2FlowrateLtrs);              a_address += sizeof(user::co2FlowrateLtrs);
-  EEPROM.get(a_address, user::roomWidthInches);              a_address += sizeof(user::roomWidthInches);
-  EEPROM.get(a_address, user::roomLengthInches);             a_address += sizeof(user::roomLengthInches);
-  EEPROM.get(a_address, user::roomHeightInches);             a_address += sizeof(user::roomHeightInches);
-  EEPROM.get(a_address, user::co2FlowrateFeet3);             a_address += sizeof(user::co2FlowrateFeet3);
-  EEPROM.get(a_address, user::co2CheckTimeMinute);           a_address += sizeof(user::co2CheckTimeMinute);
-  EEPROM.get(a_address, user::co2CheckTimeHour);             a_address += sizeof(user::co2CheckTimeHour);
-  EEPROM.get(a_address, user::enableManualCo2Duration);      a_address += sizeof(user::enableManualCo2Duration);
-  EEPROM.get(a_address, user::disableCo2Control);            a_address += sizeof(user::disableCo2Control);
-  EEPROM.get(a_address, user::manualCo2GasDuration);         a_address += sizeof(user::manualCo2GasDuration);
-  EEPROM.get(a_address, user::disableFansTimer);             a_address += sizeof(user::disableFansTimer);
-  EEPROM.get(a_address, user::targetMinWaterTemp);           a_address += sizeof(user::targetMinWaterTemp);
-  EEPROM.get(a_address, user::targetMaxWaterTemp);           a_address += sizeof(user::targetMaxWaterTemp);
-  EEPROM.get(a_address, user::targetMinWaterHeight);         a_address += sizeof(user::targetMinWaterHeight);
-  EEPROM.get(a_address, user::targetMaxWaterHeight);         a_address += sizeof(user::targetMaxWaterHeight);
-  EEPROM.get(a_address, user::targetMinWaterHeightInches);   a_address += sizeof(user::targetMinWaterHeightInches);
-  EEPROM.get(a_address, user::targetMaxWaterHeightInches);   a_address += sizeof(user::targetMaxWaterHeightInches);
-  EEPROM.get(a_address, user::targetMinFanOneSpeed);         a_address += sizeof(user::targetMinFanOneSpeed);
-  EEPROM.get(a_address, user::targetMaxFanOneSpeed);         a_address += sizeof(user::targetMaxFanOneSpeed);
-  EEPROM.get(a_address, user::targetMinFanTwoSpeed);         a_address += sizeof(user::targetMinFanTwoSpeed);
-  EEPROM.get(a_address, user::targetMaxFanTwoSpeed);         a_address += sizeof(user::targetMaxFanTwoSpeed);
-  EEPROM.get(a_address, user::targetMinAirTemp);             a_address += sizeof(user::targetMinAirTemp);
-  EEPROM.get(a_address, user::targetMaxAirTemp);             a_address += sizeof(user::targetMaxAirTemp);
-  EEPROM.get(a_address, user::targetMinAirTempF);            a_address += sizeof(user::targetMinAirTempF);
-  EEPROM.get(a_address, user::targetMaxAirTempF);            a_address += sizeof(user::targetMaxAirTempF);
-  EEPROM.get(a_address, user::targetMinWaterTempF);          a_address += sizeof(user::targetMinWaterTempF);
-  EEPROM.get(a_address, user::targetMaxWaterTempF);          a_address += sizeof(user::targetMaxWaterTempF);
-  EEPROM.get(a_address, user::targetMinHumidity);            a_address += sizeof(user::targetMinHumidity);
-  EEPROM.get(a_address, user::targetMaxHumidity);            a_address += sizeof(user::targetMaxHumidity);
-  EEPROM.get(a_address, wifi::wifiEnabled);                  a_address += sizeof(wifi::wifiEnabled);
-  EEPROM.get(a_address, user::doserOneSpeed);                a_address += sizeof(user::doserOneSpeed);
-  EEPROM.get(a_address, user::doserTwoSpeed);                a_address += sizeof(user::doserTwoSpeed);
-  EEPROM.get(a_address, user::doserThreeSpeed);              a_address += sizeof(user::doserThreeSpeed);
-  EEPROM.get(a_address, user::doserFourSpeed);               a_address += sizeof(user::doserFourSpeed);
-  EEPROM.get(a_address, user::doserFiveSpeed);               a_address += sizeof(user::doserFiveSpeed);
-  EEPROM.get(a_address, user::doserSixSpeed);                a_address += sizeof(user::doserSixSpeed);
-  EEPROM.get(a_address, user::dosingInterval);               a_address += sizeof(user::dosingInterval);
-  EEPROM.get(a_address, user::refillDoserOneMills);          a_address += sizeof(user::refillDoserOneMills);
-  EEPROM.get(a_address, user::refillDoserTwoMills);          a_address += sizeof(user::refillDoserTwoMills);
-  EEPROM.get(a_address, user::refillDoserThreeMills);        a_address += sizeof(user::refillDoserThreeMills);
-  EEPROM.get(a_address, user::refillDoserFourMills);         a_address += sizeof(user::refillDoserFourMills);
-  EEPROM.get(a_address, user::refillDoserFiveMills);         a_address += sizeof(user::refillDoserFiveMills);
-  EEPROM.get(a_address, user::refillDoserSixMills);          a_address += sizeof(user::refillDoserSixMills);
-  EEPROM.get(a_address, user::disableDrainAndRefill);        a_address += sizeof(user::disableDrainAndRefill);
-  EEPROM.get(a_address, user::autoFillHour);                 a_address += sizeof(user::autoFillHour);
-  EEPROM.get(a_address, user::autoFillMinute);               a_address += sizeof(user::autoFillMinute);
-  EEPROM.get(a_address, user::drainTimeout);                 a_address += sizeof(user::drainTimeout);
-  EEPROM.get(a_address, user::backgroundColor);              a_address += sizeof(user::backgroundColor);
-  EEPROM.get(a_address, user::graphInterval);                a_address += sizeof(user::graphInterval);
-  EEPROM.get(a_address, user::afkTime);                      a_address += sizeof(user::afkTime);
-  EEPROM.get(a_address, user::convertToF);                   a_address += sizeof(user::convertToF);
-  EEPROM.get(a_address, user::convertToInches);              a_address += sizeof(user::convertToInches);
-  EEPROM.get(a_address, user::convertToTds);                 a_address += sizeof(user::convertToTds);
-  EEPROM.get(a_address, user::tdsErrorMargin);               a_address += sizeof(user::tdsErrorMargin);
-  EEPROM.get(a_address, user::phErrorMargin);                a_address += sizeof(user::phErrorMargin);
-  EEPROM.get(a_address, user::ecErrorMargin);                a_address += sizeof(user::ecErrorMargin);
-  EEPROM.get(a_address, user::co2ErrorMargin);               a_address += sizeof(user::co2ErrorMargin);
-  EEPROM.get(a_address, user::airTempErrorMargin);           a_address += sizeof(user::airTempErrorMargin);
-  EEPROM.get(a_address, user::airTempErrorMarginF);          a_address += sizeof(user::airTempErrorMarginF);
-  EEPROM.get(a_address, user::humidityErrorMargin);          a_address += sizeof(user::humidityErrorMargin);
-  EEPROM.get(a_address, user::waterTempErrorMargin);         a_address += sizeof(user::waterTempErrorMargin);
-  EEPROM.get(a_address, user::waterTempErrorMarginF);        a_address += sizeof(user::waterTempErrorMarginF);
-  EEPROM.get(a_address, user::waterHeightErrorMargin);       a_address += sizeof(user::waterHeightErrorMargin);
-  EEPROM.get(a_address, user::waterHeightErrorMarginInches); a_address += sizeof(user::waterHeightErrorMarginInches);
-  EEPROM.get(a_address, user::disableAirTempWarnings);       a_address += sizeof(user::disableAirTempWarnings);
-  EEPROM.get(a_address, user::disableHumidityWarnings);      a_address += sizeof(user::disableHumidityWarnings);
-  EEPROM.get(a_address, user::disablePpmWarnings);           a_address += sizeof(user::disablePpmWarnings);
-  EEPROM.get(a_address, user::disableEcWarnings);            a_address += sizeof(user::disableEcWarnings);
-  EEPROM.get(a_address, user::disablePhWarnings);            a_address += sizeof(user::disablePhWarnings);
-  EEPROM.get(a_address, user::disableCo2Warnings);           a_address += sizeof(user::disableCo2Warnings);
-  EEPROM.get(a_address, user::disableWaterTempWarnings);     a_address += sizeof(user::disableWaterTempWarnings);
-  EEPROM.get(a_address, user::disableWaterHeightWarnings);   a_address += sizeof(user::disableWaterHeightWarnings);
-  EEPROM.get(a_address, user::disableLED);                   a_address += sizeof(user::disableLED);
-  EEPROM.get(a_address, user::disableBeeper);                a_address += sizeof(user::disableBeeper);
-  EEPROM.get(a_address, user::disableMachineLearning);       a_address += sizeof(user::disableMachineLearning);
-  EEPROM.get(a_address, user::fansControlTemperature);       a_address += sizeof(user::fansControlTemperature);
-  EEPROM.get(a_address, user::fansControlHumidity);          a_address += sizeof(user::fansControlHumidity);
-  EEPROM.get(a_address, user::fanOneFixedSpeed);             a_address += sizeof(user::fanOneFixedSpeed);
-  EEPROM.get(a_address, user::fanTwoFixedSpeed);             a_address += sizeof(user::fanTwoFixedSpeed);
-  EEPROM.get(a_address, user::numberOfDosers);               a_address += sizeof(user::numberOfDosers);
-  EEPROM.get(a_address, user::useEtapeSensor);               a_address += sizeof(user::useEtapeSensor);
-  EEPROM.get(a_address, device::graphArrayPos);              a_address += sizeof(device::graphArrayPos);
-  EEPROM.get(a_address, device::conversionType);             a_address += sizeof(device::conversionType);
+  externalEEPROM.get(a_address, device::minPh);                      a_address += sizeof(device::minPh);
+  externalEEPROM.get(a_address, device::maxPh);                      a_address += sizeof(device::maxPh);
+  externalEEPROM.get(a_address, device::minEc);                      a_address += sizeof(device::minEc);
+  externalEEPROM.get(a_address, device::maxEc);                      a_address += sizeof(device::maxEc);
+  externalEEPROM.get(a_address, device::minWaterTemp);               a_address += sizeof(device::minWaterTemp);
+  externalEEPROM.get(a_address, device::maxWaterTemp);               a_address += sizeof(device::maxWaterTemp);
+  externalEEPROM.get(a_address, device::minWaterLevel);              a_address += sizeof(device::minWaterLevel);
+  externalEEPROM.get(a_address, device::maxWaterLevel);              a_address += sizeof(device::maxWaterLevel);
+  externalEEPROM.get(a_address, device::minTds);                     a_address += sizeof(device::minTds);
+  externalEEPROM.get(a_address, device::maxTds);                     a_address += sizeof(device::maxTds);
+  externalEEPROM.get(a_address, device::minAirTemp);                 a_address += sizeof(device::minAirTemp);
+  externalEEPROM.get(a_address, device::maxAirTemp);                 a_address += sizeof(device::maxAirTemp);
+  externalEEPROM.get(a_address, device::minHumidity);                a_address += sizeof(device::minHumidity);
+  externalEEPROM.get(a_address, device::maxHumidity);                a_address += sizeof(device::maxHumidity);
+  externalEEPROM.get(a_address, device::minCo2);                     a_address += sizeof(device::minCo2);
+  externalEEPROM.get(a_address, device::maxCo2);                     a_address += sizeof(device::maxCo2);
+  externalEEPROM.get(a_address, device::minFanOneSpeed);             a_address += sizeof(device::minFanOneSpeed);
+  externalEEPROM.get(a_address, device::maxFanOneSpeed);             a_address += sizeof(device::maxFanOneSpeed);
+  externalEEPROM.get(a_address, device::minFanTwoSpeed);             a_address += sizeof(device::minFanTwoSpeed);
+  externalEEPROM.get(a_address, device::maxFanTwoSpeed);             a_address += sizeof(device::maxFanTwoSpeed);
+  externalEEPROM.get(a_address, user::lightOnTimeHour);              a_address += sizeof(user::lightOnTimeHour);
+  externalEEPROM.get(a_address, user::lightOnTimeMin);               a_address += sizeof(user::lightOnTimeMin);
+  externalEEPROM.get(a_address, user::lightOffTimeHour);             a_address += sizeof(user::lightOffTimeHour);
+  externalEEPROM.get(a_address, user::lightOffTimeMin);              a_address += sizeof(user::lightOffTimeMin);
+  externalEEPROM.get(a_address, user::lightMode);                    a_address += sizeof(user::lightMode);
+  externalEEPROM.get(a_address, user::doserOneMode);                 a_address += sizeof(user::doserOneMode);
+  externalEEPROM.get(a_address, user::doserTwoMode);                 a_address += sizeof(user::doserTwoMode);
+  externalEEPROM.get(a_address, user::doserThreeMode);               a_address += sizeof(user::doserThreeMode);
+  externalEEPROM.get(a_address, user::doserFourMode);                a_address += sizeof(user::doserFourMode);
+  externalEEPROM.get(a_address, user::doserFiveMode);                a_address += sizeof(user::doserFiveMode);
+  externalEEPROM.get(a_address, user::doserSixMode);                 a_address += sizeof(user::doserSixMode);
+  externalEEPROM.get(a_address, user::doserOneMills);                a_address += sizeof(user::doserOneMills);
+  externalEEPROM.get(a_address, user::doserTwoMills);                a_address += sizeof(user::doserTwoMills);
+  externalEEPROM.get(a_address, user::doserThreeMills);              a_address += sizeof(user::doserThreeMills);
+  externalEEPROM.get(a_address, user::doserFourMills);               a_address += sizeof(user::doserFourMills);
+  externalEEPROM.get(a_address, user::doserFiveMills);               a_address += sizeof(user::doserFiveMills);
+  externalEEPROM.get(a_address, user::doserSixMills);                a_address += sizeof(user::doserSixMills);
+  externalEEPROM.get(a_address, user::targetMinTds);                 a_address += sizeof(user::targetMinTds);
+  externalEEPROM.get(a_address, user::targetMaxTds);                 a_address += sizeof(user::targetMaxTds);
+  externalEEPROM.get(a_address, user::targetMinPh);                  a_address += sizeof(user::targetMinPh);
+  externalEEPROM.get(a_address, user::targetMaxPh);                  a_address += sizeof(user::targetMaxPh);
+  externalEEPROM.get(a_address, user::targetMinEc);                  a_address += sizeof(user::targetMinEc);
+  externalEEPROM.get(a_address, user::targetMaxEc);                  a_address += sizeof(user::targetMaxEc);
+  externalEEPROM.get(a_address, user::targetCo2);                    a_address += sizeof(user::targetCo2);
+  externalEEPROM.get(a_address, user::co2Offset);                    a_address += sizeof(user::co2Offset);
+  externalEEPROM.get(a_address, user::roomWidthCm);                  a_address += sizeof(user::roomWidthCm);
+  externalEEPROM.get(a_address, user::roomLengthCm);                 a_address += sizeof(user::roomLengthCm);
+  externalEEPROM.get(a_address, user::roomHeightCm);                 a_address += sizeof(user::roomHeightCm);
+  externalEEPROM.get(a_address, user::co2FlowrateLtrs);              a_address += sizeof(user::co2FlowrateLtrs);
+  externalEEPROM.get(a_address, user::roomWidthInches);              a_address += sizeof(user::roomWidthInches);
+  externalEEPROM.get(a_address, user::roomLengthInches);             a_address += sizeof(user::roomLengthInches);
+  externalEEPROM.get(a_address, user::roomHeightInches);             a_address += sizeof(user::roomHeightInches);
+  externalEEPROM.get(a_address, user::co2FlowrateFeet3);             a_address += sizeof(user::co2FlowrateFeet3);
+  externalEEPROM.get(a_address, user::co2CheckTimeMinute);           a_address += sizeof(user::co2CheckTimeMinute);
+  externalEEPROM.get(a_address, user::co2CheckTimeHour);             a_address += sizeof(user::co2CheckTimeHour);
+  externalEEPROM.get(a_address, user::enableManualCo2Duration);      a_address += sizeof(user::enableManualCo2Duration);
+  externalEEPROM.get(a_address, user::disableCo2Control);            a_address += sizeof(user::disableCo2Control);
+  externalEEPROM.get(a_address, user::manualCo2GasDuration);         a_address += sizeof(user::manualCo2GasDuration);
+  externalEEPROM.get(a_address, user::disableFansTimer);             a_address += sizeof(user::disableFansTimer);
+  externalEEPROM.get(a_address, user::targetMinWaterTemp);           a_address += sizeof(user::targetMinWaterTemp);
+  externalEEPROM.get(a_address, user::targetMaxWaterTemp);           a_address += sizeof(user::targetMaxWaterTemp);
+  externalEEPROM.get(a_address, user::targetMinWaterHeight);         a_address += sizeof(user::targetMinWaterHeight);
+  externalEEPROM.get(a_address, user::targetMaxWaterHeight);         a_address += sizeof(user::targetMaxWaterHeight);
+  externalEEPROM.get(a_address, user::targetMinWaterHeightInches);   a_address += sizeof(user::targetMinWaterHeightInches);
+  externalEEPROM.get(a_address, user::targetMaxWaterHeightInches);   a_address += sizeof(user::targetMaxWaterHeightInches);
+  externalEEPROM.get(a_address, user::waterTankLength);              a_address += sizeof(user::waterTankLength);
+  externalEEPROM.get(a_address, user::waterTankLengthInches);        a_address += sizeof(user::waterTankLengthInches);
+  externalEEPROM.get(a_address, user::waterTankWidth);               a_address += sizeof(user::waterTankWidth);
+  externalEEPROM.get(a_address, user::waterTankWidthInches);         a_address += sizeof(user::waterTankWidthInches);
+  externalEEPROM.get(a_address, user::targetMinFanOneSpeed);         a_address += sizeof(user::targetMinFanOneSpeed);
+  externalEEPROM.get(a_address, user::targetMaxFanOneSpeed);         a_address += sizeof(user::targetMaxFanOneSpeed);
+  externalEEPROM.get(a_address, user::targetMinFanTwoSpeed);         a_address += sizeof(user::targetMinFanTwoSpeed);
+  externalEEPROM.get(a_address, user::targetMaxFanTwoSpeed);         a_address += sizeof(user::targetMaxFanTwoSpeed);
+  externalEEPROM.get(a_address, user::targetMinAirTemp);             a_address += sizeof(user::targetMinAirTemp);
+  externalEEPROM.get(a_address, user::targetMaxAirTemp);             a_address += sizeof(user::targetMaxAirTemp);
+  externalEEPROM.get(a_address, user::targetMinAirTempF);            a_address += sizeof(user::targetMinAirTempF);
+  externalEEPROM.get(a_address, user::targetMaxAirTempF);            a_address += sizeof(user::targetMaxAirTempF);
+  externalEEPROM.get(a_address, user::targetMinWaterTempF);          a_address += sizeof(user::targetMinWaterTempF);
+  externalEEPROM.get(a_address, user::targetMaxWaterTempF);          a_address += sizeof(user::targetMaxWaterTempF);
+  externalEEPROM.get(a_address, user::targetMinHumidity);            a_address += sizeof(user::targetMinHumidity);
+  externalEEPROM.get(a_address, user::targetMaxHumidity);            a_address += sizeof(user::targetMaxHumidity);
+  externalEEPROM.get(a_address, wifi::wifiEnabled);                  a_address += sizeof(wifi::wifiEnabled);
+  externalEEPROM.get(a_address, user::doserOneSpeed);                a_address += sizeof(user::doserOneSpeed);
+  externalEEPROM.get(a_address, user::doserTwoSpeed);                a_address += sizeof(user::doserTwoSpeed);
+  externalEEPROM.get(a_address, user::doserThreeSpeed);              a_address += sizeof(user::doserThreeSpeed);
+  externalEEPROM.get(a_address, user::doserFourSpeed);               a_address += sizeof(user::doserFourSpeed);
+  externalEEPROM.get(a_address, user::doserFiveSpeed);               a_address += sizeof(user::doserFiveSpeed);
+  externalEEPROM.get(a_address, user::doserSixSpeed);                a_address += sizeof(user::doserSixSpeed);
+  externalEEPROM.get(a_address, user::dosingInterval);               a_address += sizeof(user::dosingInterval);
+  externalEEPROM.get(a_address, user::refillDoserOneMills);          a_address += sizeof(user::refillDoserOneMills);
+  externalEEPROM.get(a_address, user::refillDoserTwoMills);          a_address += sizeof(user::refillDoserTwoMills);
+  externalEEPROM.get(a_address, user::refillDoserThreeMills);        a_address += sizeof(user::refillDoserThreeMills);
+  externalEEPROM.get(a_address, user::refillDoserFourMills);         a_address += sizeof(user::refillDoserFourMills);
+  externalEEPROM.get(a_address, user::refillDoserFiveMills);         a_address += sizeof(user::refillDoserFiveMills);
+  externalEEPROM.get(a_address, user::refillDoserSixMills);          a_address += sizeof(user::refillDoserSixMills);
+  externalEEPROM.get(a_address, user::disableDrainAndRefill);        a_address += sizeof(user::disableDrainAndRefill);
+  externalEEPROM.get(a_address, user::autoFillHour);                 a_address += sizeof(user::autoFillHour);
+  externalEEPROM.get(a_address, user::autoFillMinute);               a_address += sizeof(user::autoFillMinute);
+  externalEEPROM.get(a_address, user::drainTimeout);                 a_address += sizeof(user::drainTimeout);
+  externalEEPROM.get(a_address, user::backgroundColor);              a_address += sizeof(user::backgroundColor);
+  externalEEPROM.get(a_address, user::graphInterval);                a_address += sizeof(user::graphInterval);
+  externalEEPROM.get(a_address, user::afkTime);                      a_address += sizeof(user::afkTime);
+  externalEEPROM.get(a_address, user::convertToF);                   a_address += sizeof(user::convertToF);
+  externalEEPROM.get(a_address, user::convertToInches);              a_address += sizeof(user::convertToInches);
+  externalEEPROM.get(a_address, user::convertToTds);                 a_address += sizeof(user::convertToTds);
+  externalEEPROM.get(a_address, user::tdsErrorMargin);               a_address += sizeof(user::tdsErrorMargin);
+  externalEEPROM.get(a_address, user::phErrorMargin);                a_address += sizeof(user::phErrorMargin);
+  externalEEPROM.get(a_address, user::ecErrorMargin);                a_address += sizeof(user::ecErrorMargin);
+  externalEEPROM.get(a_address, user::co2ErrorMargin);               a_address += sizeof(user::co2ErrorMargin);
+  externalEEPROM.get(a_address, user::airTempErrorMargin);           a_address += sizeof(user::airTempErrorMargin);
+  externalEEPROM.get(a_address, user::airTempErrorMarginF);          a_address += sizeof(user::airTempErrorMarginF);
+  externalEEPROM.get(a_address, user::humidityErrorMargin);          a_address += sizeof(user::humidityErrorMargin);
+  externalEEPROM.get(a_address, user::waterTempErrorMargin);         a_address += sizeof(user::waterTempErrorMargin);
+  externalEEPROM.get(a_address, user::waterTempErrorMarginF);        a_address += sizeof(user::waterTempErrorMarginF);
+  externalEEPROM.get(a_address, user::waterHeightErrorMargin);       a_address += sizeof(user::waterHeightErrorMargin);
+  externalEEPROM.get(a_address, user::waterHeightErrorMarginInches); a_address += sizeof(user::waterHeightErrorMarginInches);
+  externalEEPROM.get(a_address, user::disableAirTempWarnings);       a_address += sizeof(user::disableAirTempWarnings);
+  externalEEPROM.get(a_address, user::disableHumidityWarnings);      a_address += sizeof(user::disableHumidityWarnings);
+  externalEEPROM.get(a_address, user::disablePpmWarnings);           a_address += sizeof(user::disablePpmWarnings);
+  externalEEPROM.get(a_address, user::disableEcWarnings);            a_address += sizeof(user::disableEcWarnings);
+  externalEEPROM.get(a_address, user::disablePhWarnings);            a_address += sizeof(user::disablePhWarnings);
+  externalEEPROM.get(a_address, user::disableCo2Warnings);           a_address += sizeof(user::disableCo2Warnings);
+  externalEEPROM.get(a_address, user::disableWaterTempWarnings);     a_address += sizeof(user::disableWaterTempWarnings);
+  externalEEPROM.get(a_address, user::disableWaterHeightWarnings);   a_address += sizeof(user::disableWaterHeightWarnings);
+  externalEEPROM.get(a_address, user::disableLED);                   a_address += sizeof(user::disableLED);
+  externalEEPROM.get(a_address, user::disableBeeper);                a_address += sizeof(user::disableBeeper);
+  externalEEPROM.get(a_address, user::disableMachineLearning);       a_address += sizeof(user::disableMachineLearning);
+  externalEEPROM.get(a_address, user::fansControlTemperature);       a_address += sizeof(user::fansControlTemperature);
+  externalEEPROM.get(a_address, user::fansControlHumidity);          a_address += sizeof(user::fansControlHumidity);
+  externalEEPROM.get(a_address, user::fanOneFixedSpeed);             a_address += sizeof(user::fanOneFixedSpeed);
+  externalEEPROM.get(a_address, user::fanTwoFixedSpeed);             a_address += sizeof(user::fanTwoFixedSpeed);
+  externalEEPROM.get(a_address, user::numberOfDosers);               a_address += sizeof(user::numberOfDosers);
+  externalEEPROM.get(a_address, user::useEtapeSensor);               a_address += sizeof(user::useEtapeSensor);
+  externalEEPROM.get(a_address, device::graphArrayPos);              a_address += sizeof(device::graphArrayPos);
+  externalEEPROM.get(a_address, device::conversionType);             a_address += sizeof(device::conversionType);
   for (const bool& val : user::autoFillDays) {
-    EEPROM.get(a_address, val);
+    externalEEPROM.get(a_address, val);
     a_address += sizeof(val);
   }
   printf("EEPROM ending at address: %d\n", a_address);
@@ -373,141 +367,144 @@ void loadProfile(int a_address) {
 
 void saveProfile(int a_address) {
   printf("EEPROM starting at address: %d\n", a_address);
-  EEPROM.put(a_address, device::minPh);                      a_address += sizeof(device::minPh);
-  EEPROM.put(a_address, device::maxPh);                      a_address += sizeof(device::maxPh);
-  EEPROM.put(a_address, device::minEc);                      a_address += sizeof(device::minEc);
-  EEPROM.put(a_address, device::maxEc);                      a_address += sizeof(device::maxEc);
-  EEPROM.put(a_address, device::minWaterTemp);               a_address += sizeof(device::minWaterTemp);
-  EEPROM.put(a_address, device::maxWaterTemp);               a_address += sizeof(device::maxWaterTemp);
-  EEPROM.put(a_address, device::minWaterLevel);              a_address += sizeof(device::minWaterLevel);
-  EEPROM.put(a_address, device::maxWaterLevel);              a_address += sizeof(device::maxWaterLevel);
-  EEPROM.put(a_address, device::minTds);                     a_address += sizeof(device::minTds);
-  EEPROM.put(a_address, device::maxTds);                     a_address += sizeof(device::maxTds);
-  EEPROM.put(a_address, device::minAirTemp);                 a_address += sizeof(device::minAirTemp);
-  EEPROM.put(a_address, device::maxAirTemp);                 a_address += sizeof(device::maxAirTemp);
-  EEPROM.put(a_address, device::minHumidity);                a_address += sizeof(device::minHumidity);
-  EEPROM.put(a_address, device::maxHumidity);                a_address += sizeof(device::maxHumidity);
-  EEPROM.put(a_address, device::minCo2);                     a_address += sizeof(device::minCo2);
-  EEPROM.put(a_address, device::maxCo2);                     a_address += sizeof(device::maxCo2);
-  EEPROM.put(a_address, device::minFanOneSpeed);             a_address += sizeof(device::minFanOneSpeed);
-  EEPROM.put(a_address, device::maxFanOneSpeed);             a_address += sizeof(device::maxFanOneSpeed);
-  EEPROM.put(a_address, device::minFanTwoSpeed);             a_address += sizeof(device::minFanTwoSpeed);
-  EEPROM.put(a_address, device::maxFanTwoSpeed);             a_address += sizeof(device::maxFanTwoSpeed);
-  EEPROM.put(a_address, user::lightOnTimeHour);              a_address += sizeof(user::lightOnTimeHour);
-  EEPROM.put(a_address, user::lightOnTimeMin);               a_address += sizeof(user::lightOnTimeMin);
-  EEPROM.put(a_address, user::lightOffTimeHour);             a_address += sizeof(user::lightOffTimeHour);
-  EEPROM.put(a_address, user::lightOffTimeMin);              a_address += sizeof(user::lightOffTimeMin);
-  EEPROM.put(a_address, user::lightMode);                    a_address += sizeof(user::lightMode);
-  EEPROM.put(a_address, user::doserOneMode);                 a_address += sizeof(user::doserOneMode);
-  EEPROM.put(a_address, user::doserTwoMode);                 a_address += sizeof(user::doserTwoMode);
-  EEPROM.put(a_address, user::doserThreeMode);               a_address += sizeof(user::doserThreeMode);
-  EEPROM.put(a_address, user::doserFourMode);                a_address += sizeof(user::doserFourMode);
-  EEPROM.put(a_address, user::doserFiveMode);                a_address += sizeof(user::doserFiveMode);
-  EEPROM.put(a_address, user::doserSixMode);                 a_address += sizeof(user::doserSixMode);
-  EEPROM.put(a_address, user::doserOneMills);                a_address += sizeof(user::doserOneMills);
-  EEPROM.put(a_address, user::doserTwoMills);                a_address += sizeof(user::doserTwoMills);
-  EEPROM.put(a_address, user::doserThreeMills);              a_address += sizeof(user::doserThreeMills);
-  EEPROM.put(a_address, user::doserFourMills);               a_address += sizeof(user::doserFourMills);
-  EEPROM.put(a_address, user::doserFiveMills);               a_address += sizeof(user::doserFiveMills);
-  EEPROM.put(a_address, user::doserSixMills);                a_address += sizeof(user::doserSixMills);
-  EEPROM.put(a_address, user::targetMinTds);                 a_address += sizeof(user::targetMinTds);
-  EEPROM.put(a_address, user::targetMaxTds);                 a_address += sizeof(user::targetMaxTds);
-  EEPROM.put(a_address, user::targetMinPh);                  a_address += sizeof(user::targetMinPh);
-  EEPROM.put(a_address, user::targetMaxPh);                  a_address += sizeof(user::targetMaxPh);
-  EEPROM.put(a_address, user::targetMinEc);                  a_address += sizeof(user::targetMinEc);
-  EEPROM.put(a_address, user::targetMaxEc);                  a_address += sizeof(user::targetMaxEc);
-  EEPROM.put(a_address, user::targetCo2);                    a_address += sizeof(user::targetCo2);
-  EEPROM.put(a_address, user::co2Offset);                    a_address += sizeof(user::co2Offset);
-  EEPROM.put(a_address, user::roomWidthCm);                  a_address += sizeof(user::roomWidthCm);
-  EEPROM.put(a_address, user::roomLengthCm);                 a_address += sizeof(user::roomLengthCm);
-  EEPROM.put(a_address, user::roomHeightCm);                 a_address += sizeof(user::roomHeightCm);
-  EEPROM.put(a_address, user::co2FlowrateLtrs);              a_address += sizeof(user::co2FlowrateLtrs);
-  EEPROM.put(a_address, user::roomWidthInches);              a_address += sizeof(user::roomWidthInches);
-  EEPROM.put(a_address, user::roomLengthInches);             a_address += sizeof(user::roomLengthInches);
-  EEPROM.put(a_address, user::roomHeightInches);             a_address += sizeof(user::roomHeightInches);
-  EEPROM.put(a_address, user::co2FlowrateFeet3);             a_address += sizeof(user::co2FlowrateFeet3);
-  EEPROM.put(a_address, user::co2CheckTimeMinute);           a_address += sizeof(user::co2CheckTimeMinute);
-  EEPROM.put(a_address, user::co2CheckTimeHour);             a_address += sizeof(user::co2CheckTimeHour);
-  EEPROM.put(a_address, user::enableManualCo2Duration);      a_address += sizeof(user::enableManualCo2Duration);
-  EEPROM.put(a_address, user::disableCo2Control);            a_address += sizeof(user::disableCo2Control);
-  EEPROM.put(a_address, user::manualCo2GasDuration);         a_address += sizeof(user::manualCo2GasDuration);
-  EEPROM.put(a_address, user::disableFansTimer);             a_address += sizeof(user::disableFansTimer);
-  EEPROM.put(a_address, user::targetMinWaterTemp);           a_address += sizeof(user::targetMinWaterTemp);
-  EEPROM.put(a_address, user::targetMaxWaterTemp);           a_address += sizeof(user::targetMaxWaterTemp);
-  EEPROM.put(a_address, user::targetMinWaterHeight);         a_address += sizeof(user::targetMinWaterHeight);
-  EEPROM.put(a_address, user::targetMaxWaterHeight);         a_address += sizeof(user::targetMaxWaterHeight);
-  EEPROM.put(a_address, user::targetMinWaterHeightInches);   a_address += sizeof(user::targetMinWaterHeightInches);
-  EEPROM.put(a_address, user::targetMaxWaterHeightInches);   a_address += sizeof(user::targetMaxWaterHeightInches);
-  EEPROM.put(a_address, user::targetMinFanOneSpeed);         a_address += sizeof(user::targetMinFanOneSpeed);
-  EEPROM.put(a_address, user::targetMaxFanOneSpeed);         a_address += sizeof(user::targetMaxFanOneSpeed);
-  EEPROM.put(a_address, user::targetMinFanTwoSpeed);         a_address += sizeof(user::targetMinFanTwoSpeed);
-  EEPROM.put(a_address, user::targetMaxFanTwoSpeed);         a_address += sizeof(user::targetMaxFanTwoSpeed);
-  EEPROM.put(a_address, user::targetMinAirTemp);             a_address += sizeof(user::targetMinAirTemp);
-  EEPROM.put(a_address, user::targetMaxAirTemp);             a_address += sizeof(user::targetMaxAirTemp);
-  EEPROM.put(a_address, user::targetMinAirTempF);            a_address += sizeof(user::targetMinAirTempF);
-  EEPROM.put(a_address, user::targetMaxAirTempF);            a_address += sizeof(user::targetMaxAirTempF);
-  EEPROM.put(a_address, user::targetMinWaterTempF);          a_address += sizeof(user::targetMinWaterTempF);
-  EEPROM.put(a_address, user::targetMaxWaterTempF);          a_address += sizeof(user::targetMaxWaterTempF);
-  EEPROM.put(a_address, user::targetMinHumidity);            a_address += sizeof(user::targetMinHumidity);
-  EEPROM.put(a_address, user::targetMaxHumidity);            a_address += sizeof(user::targetMaxHumidity);
-  EEPROM.put(a_address, wifi::wifiEnabled);                  a_address += sizeof(wifi::wifiEnabled);
-  EEPROM.put(a_address, user::doserOneSpeed);                a_address += sizeof(user::doserOneSpeed);
-  EEPROM.put(a_address, user::doserTwoSpeed);                a_address += sizeof(user::doserTwoSpeed);
-  EEPROM.put(a_address, user::doserThreeSpeed);              a_address += sizeof(user::doserThreeSpeed);
-  EEPROM.put(a_address, user::doserFourSpeed);               a_address += sizeof(user::doserFourSpeed);
-  EEPROM.put(a_address, user::doserFiveSpeed);               a_address += sizeof(user::doserFiveSpeed);
-  EEPROM.put(a_address, user::doserSixSpeed);                a_address += sizeof(user::doserSixSpeed);
-  EEPROM.put(a_address, user::dosingInterval);               a_address += sizeof(user::dosingInterval);
-  EEPROM.put(a_address, user::refillDoserOneMills);          a_address += sizeof(user::refillDoserOneMills);
-  EEPROM.put(a_address, user::refillDoserTwoMills);          a_address += sizeof(user::refillDoserTwoMills);
-  EEPROM.put(a_address, user::refillDoserThreeMills);        a_address += sizeof(user::refillDoserThreeMills);
-  EEPROM.put(a_address, user::refillDoserFourMills);         a_address += sizeof(user::refillDoserFourMills);
-  EEPROM.put(a_address, user::refillDoserFiveMills);         a_address += sizeof(user::refillDoserFiveMills);
-  EEPROM.put(a_address, user::refillDoserSixMills);          a_address += sizeof(user::refillDoserSixMills);
-  EEPROM.put(a_address, user::disableDrainAndRefill);        a_address += sizeof(user::disableDrainAndRefill);
-  EEPROM.put(a_address, user::autoFillHour);                 a_address += sizeof(user::autoFillHour);
-  EEPROM.put(a_address, user::autoFillMinute);               a_address += sizeof(user::autoFillMinute);
-  EEPROM.put(a_address, user::drainTimeout);                 a_address += sizeof(user::drainTimeout);
-  EEPROM.put(a_address, user::backgroundColor);              a_address += sizeof(user::backgroundColor);
-  EEPROM.put(a_address, user::graphInterval);                a_address += sizeof(user::graphInterval);
-  EEPROM.put(a_address, user::afkTime);                      a_address += sizeof(user::afkTime);
-  EEPROM.put(a_address, user::convertToF);                   a_address += sizeof(user::convertToF);
-  EEPROM.put(a_address, user::convertToInches);              a_address += sizeof(user::convertToInches);
-  EEPROM.put(a_address, user::convertToTds);                 a_address += sizeof(user::convertToTds);
-  EEPROM.put(a_address, user::tdsErrorMargin);               a_address += sizeof(user::tdsErrorMargin);
-  EEPROM.put(a_address, user::phErrorMargin);                a_address += sizeof(user::phErrorMargin);
-  EEPROM.put(a_address, user::ecErrorMargin);                a_address += sizeof(user::ecErrorMargin);
-  EEPROM.put(a_address, user::co2ErrorMargin);               a_address += sizeof(user::co2ErrorMargin);
-  EEPROM.put(a_address, user::airTempErrorMargin);           a_address += sizeof(user::airTempErrorMargin);
-  EEPROM.put(a_address, user::airTempErrorMarginF);          a_address += sizeof(user::airTempErrorMarginF);
-  EEPROM.put(a_address, user::humidityErrorMargin);          a_address += sizeof(user::humidityErrorMargin);
-  EEPROM.put(a_address, user::waterTempErrorMargin);         a_address += sizeof(user::waterTempErrorMargin);
-  EEPROM.put(a_address, user::waterTempErrorMarginF);        a_address += sizeof(user::waterTempErrorMarginF);
-  EEPROM.put(a_address, user::waterHeightErrorMargin);       a_address += sizeof(user::waterHeightErrorMargin);
-  EEPROM.put(a_address, user::waterHeightErrorMarginInches); a_address += sizeof(user::waterHeightErrorMarginInches);
-  EEPROM.put(a_address, user::disableAirTempWarnings);       a_address += sizeof(user::disableAirTempWarnings);
-  EEPROM.put(a_address, user::disableHumidityWarnings);      a_address += sizeof(user::disableHumidityWarnings);
-  EEPROM.put(a_address, user::disablePpmWarnings);           a_address += sizeof(user::disablePpmWarnings);
-  EEPROM.put(a_address, user::disableEcWarnings);            a_address += sizeof(user::disableEcWarnings);
-  EEPROM.put(a_address, user::disablePhWarnings);            a_address += sizeof(user::disablePhWarnings);
-  EEPROM.put(a_address, user::disableCo2Warnings);           a_address += sizeof(user::disableCo2Warnings);
-  EEPROM.put(a_address, user::disableWaterTempWarnings);     a_address += sizeof(user::disableWaterTempWarnings);
-  EEPROM.put(a_address, user::disableWaterHeightWarnings);   a_address += sizeof(user::disableWaterHeightWarnings);
-  EEPROM.put(a_address, user::disableLED);                   a_address += sizeof(user::disableLED);
-  EEPROM.put(a_address, user::disableBeeper);                a_address += sizeof(user::disableBeeper);
-  EEPROM.put(a_address, user::disableMachineLearning);       a_address += sizeof(user::disableMachineLearning);
-  EEPROM.put(a_address, user::fansControlTemperature);       a_address += sizeof(user::fansControlTemperature);
-  EEPROM.put(a_address, user::fansControlHumidity);          a_address += sizeof(user::fansControlHumidity);
-  EEPROM.put(a_address, user::fanOneFixedSpeed);             a_address += sizeof(user::fanOneFixedSpeed);
-  EEPROM.put(a_address, user::fanTwoFixedSpeed);             a_address += sizeof(user::fanTwoFixedSpeed);
-  EEPROM.put(a_address, user::numberOfDosers);               a_address += sizeof(user::numberOfDosers);
-  EEPROM.put(a_address, user::useEtapeSensor);               a_address += sizeof(user::useEtapeSensor);
-  EEPROM.put(a_address, device::graphArrayPos);              a_address += sizeof(device::graphArrayPos);
-  EEPROM.put(a_address, device::conversionType);             a_address += sizeof(device::conversionType);
+  externalEEPROM.put(a_address, device::minPh);                      a_address += sizeof(device::minPh);
+  externalEEPROM.put(a_address, device::maxPh);                      a_address += sizeof(device::maxPh);
+  externalEEPROM.put(a_address, device::minEc);                      a_address += sizeof(device::minEc);
+  externalEEPROM.put(a_address, device::maxEc);                      a_address += sizeof(device::maxEc);
+  externalEEPROM.put(a_address, device::minWaterTemp);               a_address += sizeof(device::minWaterTemp);
+  externalEEPROM.put(a_address, device::maxWaterTemp);               a_address += sizeof(device::maxWaterTemp);
+  externalEEPROM.put(a_address, device::minWaterLevel);              a_address += sizeof(device::minWaterLevel);
+  externalEEPROM.put(a_address, device::maxWaterLevel);              a_address += sizeof(device::maxWaterLevel);
+  externalEEPROM.put(a_address, device::minTds);                     a_address += sizeof(device::minTds);
+  externalEEPROM.put(a_address, device::maxTds);                     a_address += sizeof(device::maxTds);
+  externalEEPROM.put(a_address, device::minAirTemp);                 a_address += sizeof(device::minAirTemp);
+  externalEEPROM.put(a_address, device::maxAirTemp);                 a_address += sizeof(device::maxAirTemp);
+  externalEEPROM.put(a_address, device::minHumidity);                a_address += sizeof(device::minHumidity);
+  externalEEPROM.put(a_address, device::maxHumidity);                a_address += sizeof(device::maxHumidity);
+  externalEEPROM.put(a_address, device::minCo2);                     a_address += sizeof(device::minCo2);
+  externalEEPROM.put(a_address, device::maxCo2);                     a_address += sizeof(device::maxCo2);
+  externalEEPROM.put(a_address, device::minFanOneSpeed);             a_address += sizeof(device::minFanOneSpeed);
+  externalEEPROM.put(a_address, device::maxFanOneSpeed);             a_address += sizeof(device::maxFanOneSpeed);
+  externalEEPROM.put(a_address, device::minFanTwoSpeed);             a_address += sizeof(device::minFanTwoSpeed);
+  externalEEPROM.put(a_address, device::maxFanTwoSpeed);             a_address += sizeof(device::maxFanTwoSpeed);
+  externalEEPROM.put(a_address, user::lightOnTimeHour);              a_address += sizeof(user::lightOnTimeHour);
+  externalEEPROM.put(a_address, user::lightOnTimeMin);               a_address += sizeof(user::lightOnTimeMin);
+  externalEEPROM.put(a_address, user::lightOffTimeHour);             a_address += sizeof(user::lightOffTimeHour);
+  externalEEPROM.put(a_address, user::lightOffTimeMin);              a_address += sizeof(user::lightOffTimeMin);
+  externalEEPROM.put(a_address, user::lightMode);                    a_address += sizeof(user::lightMode);
+  externalEEPROM.put(a_address, user::doserOneMode);                 a_address += sizeof(user::doserOneMode);
+  externalEEPROM.put(a_address, user::doserTwoMode);                 a_address += sizeof(user::doserTwoMode);
+  externalEEPROM.put(a_address, user::doserThreeMode);               a_address += sizeof(user::doserThreeMode);
+  externalEEPROM.put(a_address, user::doserFourMode);                a_address += sizeof(user::doserFourMode);
+  externalEEPROM.put(a_address, user::doserFiveMode);                a_address += sizeof(user::doserFiveMode);
+  externalEEPROM.put(a_address, user::doserSixMode);                 a_address += sizeof(user::doserSixMode);
+  externalEEPROM.put(a_address, user::doserOneMills);                a_address += sizeof(user::doserOneMills);
+  externalEEPROM.put(a_address, user::doserTwoMills);                a_address += sizeof(user::doserTwoMills);
+  externalEEPROM.put(a_address, user::doserThreeMills);              a_address += sizeof(user::doserThreeMills);
+  externalEEPROM.put(a_address, user::doserFourMills);               a_address += sizeof(user::doserFourMills);
+  externalEEPROM.put(a_address, user::doserFiveMills);               a_address += sizeof(user::doserFiveMills);
+  externalEEPROM.put(a_address, user::doserSixMills);                a_address += sizeof(user::doserSixMills);
+  externalEEPROM.put(a_address, user::targetMinTds);                 a_address += sizeof(user::targetMinTds);
+  externalEEPROM.put(a_address, user::targetMaxTds);                 a_address += sizeof(user::targetMaxTds);
+  externalEEPROM.put(a_address, user::targetMinPh);                  a_address += sizeof(user::targetMinPh);
+  externalEEPROM.put(a_address, user::targetMaxPh);                  a_address += sizeof(user::targetMaxPh);
+  externalEEPROM.put(a_address, user::targetMinEc);                  a_address += sizeof(user::targetMinEc);
+  externalEEPROM.put(a_address, user::targetMaxEc);                  a_address += sizeof(user::targetMaxEc);
+  externalEEPROM.put(a_address, user::targetCo2);                    a_address += sizeof(user::targetCo2);
+  externalEEPROM.put(a_address, user::co2Offset);                    a_address += sizeof(user::co2Offset);
+  externalEEPROM.put(a_address, user::roomWidthCm);                  a_address += sizeof(user::roomWidthCm);
+  externalEEPROM.put(a_address, user::roomLengthCm);                 a_address += sizeof(user::roomLengthCm);
+  externalEEPROM.put(a_address, user::roomHeightCm);                 a_address += sizeof(user::roomHeightCm);
+  externalEEPROM.put(a_address, user::co2FlowrateLtrs);              a_address += sizeof(user::co2FlowrateLtrs);
+  externalEEPROM.put(a_address, user::roomWidthInches);              a_address += sizeof(user::roomWidthInches);
+  externalEEPROM.put(a_address, user::roomLengthInches);             a_address += sizeof(user::roomLengthInches);
+  externalEEPROM.put(a_address, user::roomHeightInches);             a_address += sizeof(user::roomHeightInches);
+  externalEEPROM.put(a_address, user::co2FlowrateFeet3);             a_address += sizeof(user::co2FlowrateFeet3);
+  externalEEPROM.put(a_address, user::co2CheckTimeMinute);           a_address += sizeof(user::co2CheckTimeMinute);
+  externalEEPROM.put(a_address, user::co2CheckTimeHour);             a_address += sizeof(user::co2CheckTimeHour);
+  externalEEPROM.put(a_address, user::enableManualCo2Duration);      a_address += sizeof(user::enableManualCo2Duration);
+  externalEEPROM.put(a_address, user::disableCo2Control);            a_address += sizeof(user::disableCo2Control);
+  externalEEPROM.put(a_address, user::manualCo2GasDuration);         a_address += sizeof(user::manualCo2GasDuration);
+  externalEEPROM.put(a_address, user::disableFansTimer);             a_address += sizeof(user::disableFansTimer);
+  externalEEPROM.put(a_address, user::targetMinWaterTemp);           a_address += sizeof(user::targetMinWaterTemp);
+  externalEEPROM.put(a_address, user::targetMaxWaterTemp);           a_address += sizeof(user::targetMaxWaterTemp);
+  externalEEPROM.put(a_address, user::targetMinWaterHeight);         a_address += sizeof(user::targetMinWaterHeight);
+  externalEEPROM.put(a_address, user::targetMaxWaterHeight);         a_address += sizeof(user::targetMaxWaterHeight);
+  externalEEPROM.put(a_address, user::targetMinWaterHeightInches);   a_address += sizeof(user::targetMinWaterHeightInches);
+  externalEEPROM.put(a_address, user::targetMaxWaterHeightInches);   a_address += sizeof(user::targetMaxWaterHeightInches);
+  externalEEPROM.put(a_address, user::waterTankLength);              a_address += sizeof(user::waterTankLength);
+  externalEEPROM.put(a_address, user::waterTankLengthInches);        a_address += sizeof(user::waterTankLengthInches);
+  externalEEPROM.put(a_address, user::waterTankWidth);               a_address += sizeof(user::waterTankWidth);
+  externalEEPROM.put(a_address, user::waterTankWidthInches);         a_address += sizeof(user::waterTankWidthInches);
+  externalEEPROM.put(a_address, user::targetMinFanOneSpeed);         a_address += sizeof(user::targetMinFanOneSpeed);
+  externalEEPROM.put(a_address, user::targetMaxFanOneSpeed);         a_address += sizeof(user::targetMaxFanOneSpeed);
+  externalEEPROM.put(a_address, user::targetMinFanTwoSpeed);         a_address += sizeof(user::targetMinFanTwoSpeed);
+  externalEEPROM.put(a_address, user::targetMaxFanTwoSpeed);         a_address += sizeof(user::targetMaxFanTwoSpeed);
+  externalEEPROM.put(a_address, user::targetMinAirTemp);             a_address += sizeof(user::targetMinAirTemp);
+  externalEEPROM.put(a_address, user::targetMaxAirTemp);             a_address += sizeof(user::targetMaxAirTemp);
+  externalEEPROM.put(a_address, user::targetMinAirTempF);            a_address += sizeof(user::targetMinAirTempF);
+  externalEEPROM.put(a_address, user::targetMaxAirTempF);            a_address += sizeof(user::targetMaxAirTempF);
+  externalEEPROM.put(a_address, user::targetMinWaterTempF);          a_address += sizeof(user::targetMinWaterTempF);
+  externalEEPROM.put(a_address, user::targetMaxWaterTempF);          a_address += sizeof(user::targetMaxWaterTempF);
+  externalEEPROM.put(a_address, user::targetMinHumidity);            a_address += sizeof(user::targetMinHumidity);
+  externalEEPROM.put(a_address, user::targetMaxHumidity);            a_address += sizeof(user::targetMaxHumidity);
+  externalEEPROM.put(a_address, wifi::wifiEnabled);                  a_address += sizeof(wifi::wifiEnabled);
+  externalEEPROM.put(a_address, user::doserOneSpeed);                a_address += sizeof(user::doserOneSpeed);
+  externalEEPROM.put(a_address, user::doserTwoSpeed);                a_address += sizeof(user::doserTwoSpeed);
+  externalEEPROM.put(a_address, user::doserThreeSpeed);              a_address += sizeof(user::doserThreeSpeed);
+  externalEEPROM.put(a_address, user::doserFourSpeed);               a_address += sizeof(user::doserFourSpeed);
+  externalEEPROM.put(a_address, user::doserFiveSpeed);               a_address += sizeof(user::doserFiveSpeed);
+  externalEEPROM.put(a_address, user::doserSixSpeed);                a_address += sizeof(user::doserSixSpeed);
+  externalEEPROM.put(a_address, user::dosingInterval);               a_address += sizeof(user::dosingInterval);
+  externalEEPROM.put(a_address, user::refillDoserOneMills);          a_address += sizeof(user::refillDoserOneMills);
+  externalEEPROM.put(a_address, user::refillDoserTwoMills);          a_address += sizeof(user::refillDoserTwoMills);
+  externalEEPROM.put(a_address, user::refillDoserThreeMills);        a_address += sizeof(user::refillDoserThreeMills);
+  externalEEPROM.put(a_address, user::refillDoserFourMills);         a_address += sizeof(user::refillDoserFourMills);
+  externalEEPROM.put(a_address, user::refillDoserFiveMills);         a_address += sizeof(user::refillDoserFiveMills);
+  externalEEPROM.put(a_address, user::refillDoserSixMills);          a_address += sizeof(user::refillDoserSixMills);
+  externalEEPROM.put(a_address, user::disableDrainAndRefill);        a_address += sizeof(user::disableDrainAndRefill);
+  externalEEPROM.put(a_address, user::autoFillHour);                 a_address += sizeof(user::autoFillHour);
+  externalEEPROM.put(a_address, user::autoFillMinute);               a_address += sizeof(user::autoFillMinute);
+  externalEEPROM.put(a_address, user::drainTimeout);                 a_address += sizeof(user::drainTimeout);
+  externalEEPROM.put(a_address, user::backgroundColor);              a_address += sizeof(user::backgroundColor);
+  externalEEPROM.put(a_address, user::graphInterval);                a_address += sizeof(user::graphInterval);
+  externalEEPROM.put(a_address, user::afkTime);                      a_address += sizeof(user::afkTime);
+  externalEEPROM.put(a_address, user::convertToF);                   a_address += sizeof(user::convertToF);
+  externalEEPROM.put(a_address, user::convertToInches);              a_address += sizeof(user::convertToInches);
+  externalEEPROM.put(a_address, user::convertToTds);                 a_address += sizeof(user::convertToTds);
+  externalEEPROM.put(a_address, user::tdsErrorMargin);               a_address += sizeof(user::tdsErrorMargin);
+  externalEEPROM.put(a_address, user::phErrorMargin);                a_address += sizeof(user::phErrorMargin);
+  externalEEPROM.put(a_address, user::ecErrorMargin);                a_address += sizeof(user::ecErrorMargin);
+  externalEEPROM.put(a_address, user::co2ErrorMargin);               a_address += sizeof(user::co2ErrorMargin);
+  externalEEPROM.put(a_address, user::airTempErrorMargin);           a_address += sizeof(user::airTempErrorMargin);
+  externalEEPROM.put(a_address, user::airTempErrorMarginF);          a_address += sizeof(user::airTempErrorMarginF);
+  externalEEPROM.put(a_address, user::humidityErrorMargin);          a_address += sizeof(user::humidityErrorMargin);
+  externalEEPROM.put(a_address, user::waterTempErrorMargin);         a_address += sizeof(user::waterTempErrorMargin);
+  externalEEPROM.put(a_address, user::waterTempErrorMarginF);        a_address += sizeof(user::waterTempErrorMarginF);
+  externalEEPROM.put(a_address, user::waterHeightErrorMargin);       a_address += sizeof(user::waterHeightErrorMargin);
+  externalEEPROM.put(a_address, user::waterHeightErrorMarginInches); a_address += sizeof(user::waterHeightErrorMarginInches);
+  externalEEPROM.put(a_address, user::disableAirTempWarnings);       a_address += sizeof(user::disableAirTempWarnings);
+  externalEEPROM.put(a_address, user::disableHumidityWarnings);      a_address += sizeof(user::disableHumidityWarnings);
+  externalEEPROM.put(a_address, user::disablePpmWarnings);           a_address += sizeof(user::disablePpmWarnings);
+  externalEEPROM.put(a_address, user::disableEcWarnings);            a_address += sizeof(user::disableEcWarnings);
+  externalEEPROM.put(a_address, user::disablePhWarnings);            a_address += sizeof(user::disablePhWarnings);
+  externalEEPROM.put(a_address, user::disableCo2Warnings);           a_address += sizeof(user::disableCo2Warnings);
+  externalEEPROM.put(a_address, user::disableWaterTempWarnings);     a_address += sizeof(user::disableWaterTempWarnings);
+  externalEEPROM.put(a_address, user::disableWaterHeightWarnings);   a_address += sizeof(user::disableWaterHeightWarnings);
+  externalEEPROM.put(a_address, user::disableLED);                   a_address += sizeof(user::disableLED);
+  externalEEPROM.put(a_address, user::disableBeeper);                a_address += sizeof(user::disableBeeper);
+  externalEEPROM.put(a_address, user::disableMachineLearning);       a_address += sizeof(user::disableMachineLearning);
+  externalEEPROM.put(a_address, user::fansControlTemperature);       a_address += sizeof(user::fansControlTemperature);
+  externalEEPROM.put(a_address, user::fansControlHumidity);          a_address += sizeof(user::fansControlHumidity);
+  externalEEPROM.put(a_address, user::fanOneFixedSpeed);             a_address += sizeof(user::fanOneFixedSpeed);
+  externalEEPROM.put(a_address, user::fanTwoFixedSpeed);             a_address += sizeof(user::fanTwoFixedSpeed);
+  externalEEPROM.put(a_address, user::numberOfDosers);               a_address += sizeof(user::numberOfDosers);
+  externalEEPROM.put(a_address, user::useEtapeSensor);               a_address += sizeof(user::useEtapeSensor);
+  externalEEPROM.put(a_address, device::graphArrayPos);              a_address += sizeof(device::graphArrayPos);
+  externalEEPROM.put(a_address, device::conversionType);             a_address += sizeof(device::conversionType);
   for (const bool& val : user::autoFillDays) {
-    EEPROM.put(a_address, val);
+    externalEEPROM.put(a_address, val);
     a_address += sizeof(val);
   }
-  EEPROM.commit();
   printf("EEPROM ending at address: %d\n", a_address);
 }

@@ -566,7 +566,7 @@ void continueMessage(const char* a_text, const float& a_num, const uint8_t a_pre
         tft.fillRect(numX, numY, 744 - numX, 36, RA8875_WHITE);
       tft.print(a_num, a_precision);
     }
-    if (c == '\n') {
+    else if (c == '\n') {
       startY += 38;
       tft.setCursor(startX - 8, startY);
     }

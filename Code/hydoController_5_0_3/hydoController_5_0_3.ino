@@ -313,8 +313,6 @@ bool airHeaterIsOn = false;
 bool waterHeaterIsOn = false;
 uint8_t currentDoserNum = 0;
 // bool currentlyDraining;
-bool systemReset = false;
-bool serialDebug = true;
 uint8_t dosingTimerHourCounter = 0;
 unsigned long primeTouchTime = 0;
 bool doserIsPriming[6] {0,0,0,0,0,0};
@@ -504,10 +502,10 @@ float targetMinWaterHeight = 10.1;
 float targetMaxWaterHeight = 32.2;
 float targetMinWaterHeightInches = 10.1;
 float targetMaxWaterHeightInches = 32.2;
-float waterTankLength = 50; // TO DO
-float waterTankWidth = 50; // TO DO
-float waterTankLengthInches = 20; // TO DO
-float waterTankWidthInches = 20; // TO DO
+float waterTankLength = 50; 
+float waterTankWidth = 50; 
+float waterTankLengthInches = 20;
+float waterTankWidthInches = 20;
 int doserOneSpeed = 4096;
 int doserTwoSpeed = 4096;
 int doserThreeSpeed = 4096;
@@ -585,14 +583,14 @@ float humidity = 0;
 float waterLevel = 0;
 float waterLevelInches = 0;
 float waterVolumeLtrs = 0;
-float waterVolumeGallons = 0; // TO DO
+float waterVolumeGallons = 0;
 float emptyWaterTankDepth = 0;
 long hcsrDuration = 0;
 float ecCalibration = 1;
 float phDownSolution = 4.0;
 float phUpSolution = 11.0;
-float ecSolution = 4.0;
-float tdsSolution = 4.0;
+float ecSolution = 1.0;
+float tdsSolution = 640.0;
 const float phCalSolutionPart1 = 7.0;
 const float phCalSolutionPart2 = 4.0;
 const float ecCalSolutionPart1 = 1.413;
@@ -630,7 +628,7 @@ Adafruit_ADS1115 ads;
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x41); // 0x41 = 65
 DFRobot_PH ph;
 DFRobot_EC ec;
-//ExternalEEPROM externalEEPROM;
+ExternalEEPROM externalEEPROM;
 WebServer server(80);
 
 
@@ -652,7 +650,7 @@ void loop() {
   drawPages();
   screenSaver();
   envriomentalControl();
-  //if (wifi::wifiEnabled)
-  //  server.handleClient();
+  if (wifi::wifiEnabled)
+    server.handleClient();
   displayWarnings();
 }

@@ -542,7 +542,8 @@ void adjustWaterEc() {
       if (user::ecDosingMode == user::PRECISE) {
         printf("EC/TDS dosing mode set to precise\n");
         // Work out the exact amout of nutrients to dose
-        dosingAmount = (user::targetMinEc - sensor::ec) * sensor::waterVolumeLtrs / sensor::ecSolution;
+        float waterVolumeLtrs = (user::convertToInches ? sensor::waterVolumeLtrs : convertGallonsToLtrs(sensor::waterVolumeGallons));
+        dosingAmount = (user::targetMinEc - sensor::ec) * waterVolumeLtrs / sensor::ecSolution;
         float mlsPerDoser = (float)dosingAmount / numEnabledDosers;
         for (int i = 0; i < 6; i++) {
           if (enabledDosers[i] && currentDoserModes[i] == device::DOSER_EC)
@@ -609,7 +610,8 @@ void adjustWaterTds() {
       if (user::ecDosingMode == user::PRECISE) {
         printf("EC/TDS dosing mode set to precise\n");
         // Work out the exact amout of nutrients to dose
-        dosingAmount = (user::targetMinTds - sensor::tds) * sensor::waterVolumeLtrs / sensor::tdsSolution;
+        float waterVolumeLtrs = (user::convertToInches ? sensor::waterVolumeLtrs : convertGallonsToLtrs(sensor::waterVolumeGallons));
+        dosingAmount = (user::targetMinTds - sensor::tds) * waterVolumeLtrs / sensor::tdsSolution;
         float mlsPerDoser = (float)dosingAmount / numEnabledDosers;
         for (int i = 0; i < 6; i++) {
           if (enabledDosers[i] && currentDoserModes[i] == device::DOSER_EC)
@@ -687,11 +689,12 @@ void adjustWaterPh() {
           numEnabledDosers++;
       }
       sensor::ph < user::targetMinPh ? saveLogMessage(8) : saveLogMessage(7);
+      float waterVolumeLtrs = (user::convertToInches ? sensor::waterVolumeLtrs : convertGallonsToLtrs(sensor::waterVolumeGallons));
       if (user::phDosingMode == user::PRECISE) {
         printf("PH dosing mode set to precise\n");
         if (sensor::ph < user::targetMinPh) {
           // Work out the exact amout of PH up to dose
-          dosingAmount = (user::targetMinPh - sensor::ph) * sensor::waterVolumeLtrs / sensor::phDownSolution;
+          dosingAmount = (user::targetMinPh - sensor::ph) * waterVolumeLtrs / sensor::phDownSolution;
           float mlsPerDoser = (float)dosingAmount / numEnabledDosers;
           for (int i = 0; i < 6; i++) {
             if (enabledDosers[i])
@@ -701,7 +704,7 @@ void adjustWaterPh() {
         }
         else if (sensor::ph > user::targetMaxPh) {
           // Work out the exact amout of PH down to dose
-          dosingAmount = (sensor::ph - user::targetMaxPh) * sensor::waterVolumeLtrs / sensor::phUpSolution;
+          dosingAmount = (sensor::ph - user::targetMaxPh) * waterVolumeLtrs / sensor::phUpSolution;
           float mlsPerDoser = (float)dosingAmount / numEnabledDosers;
           for (int i = 0; i < 6; i++) {
             if (enabledDosers[i])

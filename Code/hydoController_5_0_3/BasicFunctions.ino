@@ -15,10 +15,10 @@ void initializeDevice() {
   tft.setCursor(120, 276);
   tft.print("version "); tft.print(device::versionNumber);
   int startX = 305;
+  //
+  tft.setFont(&Arial_22px_Regular);
   tft.setCursor(120, 375);
-  tft.fillRect(120,375,400,24,RA8875_BLACK);
   tft.print("Initilizing device...");
-  //externalEEPROM.setMemoryType(256);
   for (int i = 0; i < 5; i++)  {
     tft.fillCircle(startX, 340, 14, RA8875_WHITE);
     delay(500);
@@ -26,12 +26,18 @@ void initializeDevice() {
   }
   printf("SPI max speed: %luMhz\n", MAXSPISPEED);
   //
-  tft.setFont(&Arial_22px_Regular);
   tft.setCursor(120, 375);
   tft.fillRect(120,375,400,24,RA8875_BLACK);
   tft.print("Loading EEPROM...");
   delay(200);
-  //initializeEEPROM();
+  if (!externalEEPROM.begin()) {
+    tft.fillRect(120,375,400,24,RA8875_BLACK);
+    tft.setCursor(120, 375);
+    tft.print("Failed to load EEPROM");
+    while(true){};
+  }
+  externalEEPROM.setMemoryType(256);
+  initializeEEPROM();
   tft.setCursor(120, 375);
   tft.fillRect(120,375,400,24,RA8875_BLACK);
   tft.print("Loading DS3231...");
@@ -132,7 +138,7 @@ void initializeDevice() {
     device::fanTwoSpeedArray[0] = 0.01;
     device::graphArrayPos = 1;
   }
-/*
+
   if (wifi::wifiEnabled) {
     // Connect to Wi-Fi network with SSID and password
     // Remove the password parameter, if you want the AP (Access Point) to be open
@@ -150,7 +156,7 @@ void initializeDevice() {
     server.begin();  //Start web server
     delay(2000);
   }
-*/
+
   rtc.refresh();
   device::previousDosingMinute = rtc.minute();
   device::previousDosingHour = rtc.hour();
@@ -258,8 +264,6 @@ float adjustValue(float a_val, float a_increment, const float& a_min, const floa
   else if (a_increment > 0) {
     if (a_val <= (a_max - a_increment))
       a_val += a_increment;
-    else
-      a_val = a_min;
     if (a_val > a_max)
       a_val = a_max;
   }
@@ -603,4 +607,30 @@ void addCharToStr(char* a_charPtr, const int a_arrayLen, const char a_char) {
   if (device::intputPosition < a_arrayLen - 2)
     device::intputPosition++;
   device::updateKeyboardInput = true;
+}
+
+float convertEcToTds(const float a_ec) {
+  float rtnVal = 0;
+  if (device::conversionType == device::EU) // European 1 ms/cm (EC 1.0 or CF 10) = 640 ppm
+    rtnVal = a_ec * 640.0;
+  else if (device::conversionType == device::US) // USA 1 ms/cm (EC 1.0 or CF 10) = 500 ppm
+    rtnVal = a_ec * 500.0;
+  else if (device::conversionType == device::AU) // Australian 1 ms/cm (EC 1.0 or CF 10) = 700 ppm
+    rtnVal = a_ec * 700.0;     
+  return rtnVal;
+}
+
+float convertTdsToEc(const float a_tds) {
+  float rtnVal = 0;
+  if (device::conversionType == device::EU) // European 1 ms/cm (EC 1.0 or CF 10) = 640 ppm
+    rtnVal = a_tds / 640.0;
+  else if (device::conversionType == device::US) // USA 1 ms/cm (EC 1.0 or CF 10) = 500 ppm
+    rtnVal = a_tds / 500.0;
+  else if (device::conversionType == device::AU) // Australian 1 ms/cm (EC 1.0 or CF 10) = 700 ppm
+    rtnVal = a_tds / 700.0;     
+  return rtnVal;
+}
+
+float convertGallonsToLtrs(const float a_gallons) {
+  return a_gallons / 3.78541;
 }
