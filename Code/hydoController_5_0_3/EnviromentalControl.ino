@@ -22,7 +22,8 @@ void waterLevelControl() {
     if (!user::disableDrainAndRefill && rtc.day() != previousDate) {
       for (uint8_t i = 0; i < 31; i++) {
         if (user::autoFillDays[i] && rtc.day() == i + 1 && rtc.hour() == user::autoFillHour && rtc.minute() >= user::autoFillMinute) {
-          printf("Auto drain time matched, about to start the auto drain process\n");
+          if (device::globalDebug)
+            printf("Auto drain time matched, about to start the auto drain process\n");
           saveLogMessage(1);
           startDraining = true;
           previousDate = rtc.day();
@@ -39,7 +40,8 @@ void waterLevelControl() {
 
     // Show a dialog asking the user if they want to abort the drain process while its draining
     if (startDraining && continueDraining != device::CANCEL) {
-      printf("About to show the drain abort dialog, and start draining\n");
+      if (device::globalDebug)
+        printf("About to show the drain abort dialog, and start draining\n");
       const float waterTarget = user::convertToInches ? user::targetMinWaterHeight / 2.5 : user::targetMinWaterHeight;
       abortMessage(message::cancelDraining, user::convertToInches ? "\"" : "cm", waterTarget, -1, 1);
     }
@@ -56,7 +58,8 @@ void waterLevelControl() {
           analogWriteChnl(pca9685Channel::outletPump, (device::relayOffState == HIGH ? 4096 : 0));
           startDraining = false;
           startRefilling = true;
-          printf("Failed to pump any further water out of the tank, quiting drain process\n");
+          if (device::globalDebug)
+            printf("Failed to pump any further water out of the tank, quiting drain process\n");
         }
         int waterHeight = getWaterHeight();
         if (waterHeight >= 0)
@@ -68,7 +71,8 @@ void waterLevelControl() {
         }
       }
       else {
-        printf("Draining complete\n");
+        if (device::globalDebug)
+          printf("Draining complete\n");
         analogWriteChnl(pca9685Channel::outletPump, (device::relayOffState == HIGH ? 4096 : 0));
         startDraining = false;
         startRefilling = true;
@@ -80,7 +84,8 @@ void waterLevelControl() {
         tft.touchReadPixel(&display::touch_x, &display::touch_y);
         if (millis() >= lastTouch) {
           if (display::touch_x >= startX + 200 && display::touch_x <= startX + 400 && display::touch_y >= startY + 200 && display::touch_y <= startY + 250) { // Cancel
-            printf("Water drain aborted\n");
+            if (device::globalDebug)
+              printf("Water drain aborted\n");
             analogWriteChnl(pca9685Channel::outletPump, (device::relayOffState == HIGH ? 4096 : 0));
             beep();
             startDraining = false;
@@ -97,7 +102,8 @@ void waterLevelControl() {
       if (millis() - previousDelayMillis >= 300000UL) {
         if ((sensor::waterLevel < user::targetMinWaterHeight && !user::convertToInches) || (sensor::waterLevelInches < user::targetMinWaterHeightInches && user::convertToInches)) {
           startRefilling = true;
-          printf("The water level is below the min target, starting refill process\n");
+          if (device::globalDebug)
+            printf("The water level is below the min target, starting refill process\n");
         }
         previousDelayMillis = millis();
       }
@@ -108,7 +114,8 @@ void waterLevelControl() {
 
     // Show a dialog asking the user if they want to abort the refill process while its refilling
     if (startRefilling && continueRefilling != device::CANCEL) {
-      printf("About to show refill abort dialog, and refill tank\n");
+      if (device::globalDebug)
+        printf("About to show refill abort dialog, and refill tank\n");
       const float waterTarget = user::convertToInches ? user::targetMaxWaterHeightInches : user::targetMaxWaterHeight;
       abortMessage(message::cancelRefilling, user::convertToInches ? "\"" : "cm", waterTarget, -1, 1);
       saveLogMessage(2);
@@ -124,9 +131,7 @@ void waterLevelControl() {
           display::refreshPage = true;
         }
       }
-
     }
-
   }
 }
 
@@ -144,12 +149,14 @@ bool refillTank(const unsigned long& a_lastTouch, unsigned long& a_previousMilli
     analogWriteChnl(pca9685Channel::inletPump, (device::relayOffState == HIGH ? 0 : 4096));
     // timer checking water level is still decresing else bail after 1 minute * drainTimeout
     if (millis() - a_previousMillis >= 60000UL * user::drainTimeout) {
-      printf("Failed to pump in any further water, quiting refill process and starting dosing\n");
+      if (device::globalDebug)
+        printf("Failed to pump in any further water, quiting refill process and starting dosing\n");
       analogWriteChnl(pca9685Channel::inletPump, (device::relayOffState == HIGH ? 4096 : 0));
       startRefilling = false;
     }
     else if (waterLevel >= waterTarget) {
-      printf("Finished pumping in water, quiting refill process and starting dosing\n");
+      if (device::globalDebug)
+        printf("Finished pumping in water, quiting refill process and starting dosing\n");
       analogWriteChnl(pca9685Channel::inletPump, (device::relayOffState == HIGH ? 4096 : 0));
       startRefilling = false;
     }
@@ -162,7 +169,8 @@ bool refillTank(const unsigned long& a_lastTouch, unsigned long& a_previousMilli
     a_previousMillis = millis();
   }
   else if (!startRefilling && !lockPump) {
-    printf("Refilling complete, starting dosing\n");
+    if (device::globalDebug)
+        printf("Refilling complete, starting dosing\n");
     for (uint8_t i = 0; i < user::numberOfDosers; i++)
       enabledDosers[i] = true;
     lockPump = true;
@@ -184,7 +192,8 @@ bool refillTank(const unsigned long& a_lastTouch, unsigned long& a_previousMilli
     else if (enabledDosers[5] && user::doserSixMode != device::DOSER_OFF)
       enabledDosers[5] = runDoser(6, pca9685Channel::doserSix, user::doserSixSpeed, user::refillDoserSixMills, previousDoserMillis);
     else {
-      printf("Dosing is complete\n");
+      if (device::globalDebug)
+        printf("Dosing is complete\n");
       lockPump = false;
       device::dosingTimerHourCounter = 0;
       return false;
@@ -248,7 +257,8 @@ void lightingControl() {
     rtc.refresh();
     if (lightOnTimeHour == rtc.hour() && lightOnTimeMin == rtc.minute() && !device::lightOn) {
       analogWriteChnl(pca9685Channel::light, (device::relayOffState == HIGH ? 0 : 4096));
-      printf("Light on\n");
+      if (device::globalDebug)
+        printf("Light on\n");
       device::lightOn = true;
       device::lightSwitchedOnHour = rtc.hour();
       device::lightSwitchedOnMin = rtc.minute();
@@ -256,20 +266,23 @@ void lightingControl() {
     }
     else if (lightOffTimeHour == rtc.hour() && lightOffTimeMin == rtc.minute() && device::lightOn) {
       analogWriteChnl(pca9685Channel::light, 0);
-      printf("Light off\n");
+      if (device::globalDebug)
+        printf("Light off\n");
       device::lightOn = false;
       saveLogMessage(5);
     }
   }
   else if (lightMode == 1 && lightMode != prviousLightMode) { // constant on
     analogWriteChnl(pca9685Channel::light, (device::relayOffState == HIGH ? 0 : 4096));
-    printf("Light const on\n");
+    if (device::globalDebug)
+      printf("Light const on\n");
     device::lightOn = true;
     device::lightSwitchedOnHour = rtc.hour();
     device::lightSwitchedOnMin = rtc.minute();
   }
   else if (lightMode == 2 && lightMode != prviousLightMode) { // constant off
-    printf("Light const off\n");
+    if (device::globalDebug)
+      printf("Light const off\n");
     analogWriteChnl(pca9685Channel::light, (device::relayOffState == HIGH ? 4096 : 0));
     device::lightOn = false;
   }
@@ -344,7 +357,8 @@ void co2Control() {
           startCo2Relay = true;
           // turn on the Co2 solnoide
           analogWriteChnl(pca9685Channel::co2Solenoid, (device::relayOffState == HIGH ? 0 : 4096));
-          printf("About to show Co2 abort dialog, and start pumping Co2\n");
+          if (device::globalDebug)
+            printf("About to show Co2 abort dialog, and start pumping Co2\n");
           // Show a dialog asking the user if they want to abort the Co2 adjustment while its pumping
           continueMessage(message::cancelCo2, sensor::co2GasTime / 60000.0, 0, false, true, false);
           co2RunTime = millis() + sensor::co2GasTime;
@@ -364,29 +378,16 @@ void airControl() {
   static uint8_t previousFanOneSpeed = 200;
   static uint8_t previousFanTwoSpeed = 200;
   float tempPercent = 0, humPercent = 0;
-  float tempOutOfRange = 0, humOutOfRange = 0;
 
   if (millis() - previousMillis >= 2000UL) {
+    if (device::globalDebug)   
+      printf("\n...airControl...\n");
     rtc.refresh();
     // If Co2 has disabled the fans for x durations, check to see if we can turn the fans back on else do nothing
     if (device::co2DisabledFans && device::co2TurnFansBackOnHour == rtc.hour() && device::co2TurnFansBackOnMinute >= rtc.minute())
       device::co2DisabledFans = false;
     else if (device::co2DisabledFans)
       return;
-
-    // Check to see if the fan speed is less than or greater than the min or max speed and if so adjust the current fans speed
-    if (device::fanOneSpeed < user::targetMinFanOneSpeed) {
-      device::fanOneSpeed = user::targetMinFanOneSpeed;
-    }
-    else if (device::fanOneSpeed > user::targetMaxFanOneSpeed) {
-      device::fanOneSpeed = user::targetMaxFanOneSpeed;
-    }
-    if (device::fanTwoSpeed < user::targetMinFanTwoSpeed) {
-      device::fanTwoSpeed = user::targetMinFanTwoSpeed;
-    }
-    else if (device::fanTwoSpeed > user::targetMaxFanTwoSpeed) {
-      device::fanTwoSpeed = user::targetMaxFanTwoSpeed;
-    }
 
     // Check to see if the temperature and or humidity is out of range of the user targets
     device::controlOptions tempOption = device::SPEED_IDLE;
@@ -395,32 +396,31 @@ void airControl() {
     const float maxAirTemp = user::convertToF ? user::targetMaxAirTempF : user::targetMaxAirTemp;
     const float minAirTemp = user::convertToF ? user::targetMinAirTempF : user::targetMinAirTemp;
     const float airTemp = user::convertToF ? convertToF(sensor::airTemp) : sensor::airTemp;
-
+    float tempTarget = airTemp, humTarget = sensor::humidity;
     // Check to see if the temperature is out of range
     if (airTemp > maxAirTemp && user::fansControlTemperature) {
-      tempOutOfRange = abs(maxAirTemp - airTemp);     
-      tempOption = device::SPEED_UP;
+      float tempOutOfRange = abs(maxAirTemp - airTemp); 
       tempPercent = tempOutOfRange / (maxAirTemp / 100.0);
-      //printf("SPEED_UP tempPercent: %d\n", tempPercent);
+      tempTarget = maxAirTemp;
     }
     else if (airTemp < minAirTemp && user::fansControlTemperature) {
-      tempOutOfRange = abs(minAirTemp - airTemp);
-      tempOption = device::SPEED_DOWN;
+      float tempOutOfRange = abs(minAirTemp - airTemp);
       tempPercent = tempOutOfRange / (minAirTemp / 100.0);
+      tempTarget = minAirTemp;
       //printf("SPEED_DOWN tempPercent: %d\n", tempPercent);
     }
 
     // Check to see if the humidity is out of range
     if (sensor::humidity > user::targetMaxHumidity && user::fansControlHumidity)  {
-      humOutOfRange = abs(user::targetMaxHumidity - sensor::humidity);
-      humOption = device::SPEED_UP;
+      float humOutOfRange = abs(user::targetMaxHumidity - sensor::humidity);
       humPercent = humOutOfRange / (user::targetMaxHumidity / 100.0);
+      humTarget = user::targetMaxHumidity;
       //printf("SPEED_UP humPercent: %d\n", humPercent);
     }
     else if (sensor::humidity < user::targetMinHumidity && user::fansControlHumidity)  {
-      humOutOfRange = abs(user::targetMinHumidity - sensor::humidity);
-      humOption = device::SPEED_DOWN;
+      float humOutOfRange = abs(user::targetMinHumidity - sensor::humidity);
       humPercent = humOutOfRange / (user::targetMinHumidity / 100.0);
+      humTarget = user::targetMinHumidity;
       //printf("SPEED_DOWN humPercent: %d\n", humPercent);
     }
 
@@ -429,41 +429,106 @@ void airControl() {
     if (rtc.minute() != prevAirHeaterMin) {
       if (airTemp <= minAirTemp && !device::airHeaterIsOn) {
         device::airHeaterIsOn = true;
+        if (device::globalDebug)   
+          printf("air heater on\n");
         analogWriteChnl(pca9685Channel::airHeater, (device::relayOffState == HIGH ? 0 : 4096));
         saveLogMessage(11); // save log message, air heater on
       }
       else if (airTemp > minAirTemp &&device::airHeaterIsOn) {
         device::airHeaterIsOn = false;
+        if (device::globalDebug)   
+          printf("air heater off\n");
         analogWriteChnl(pca9685Channel::airHeater, (device::relayOffState == HIGH ? 4096 : 0));
         saveLogMessage(12); // save log message, air heater off
       }
       prevAirHeaterMin = rtc.minute();
     }
-    //printf("Temp out by: %.2f%%\n", tempOption == device::SPEED_UP ? tempPercent : -tempPercent);
-    //printf("Hum out by %.2f%%\n", humOption == device::SPEED_UP ? humPercent : -humPercent);
-
-    // Temperature and humidity are ok, so send 'just fan' IR command
-    if (tempPercent <= 0.01 && humPercent <= 0.01) {
-      // Fans should stay at current speed ?
-      //printf("Temp and Hum ok, fans speed remains the same..\n");
+    if (sensor::fanArrayPos == sensor::maxFanArrayVals) {
+      for (int i = 0; i < sensor::maxFanArrayVals - 1; i++) {
+        sensor::fanTemperatureArray[i] = sensor::fanTemperatureArray[i + 1];
+        sensor::fanHumidityArray[i] = sensor::fanHumidityArray[i + 1];
+      }
+      sensor::fanTemperatureArray[sensor::fanArrayPos -1] = sensor::airTemp;
+      sensor::fanHumidityArray[sensor::fanArrayPos - 1] = sensor::humidity;
     }
-    // Temperature or humidity is out of range so work out which command needs to be sent
     else {
-      // Check if the tempPercent > humPercent, else control the humidity
-      if (tempPercent > humPercent)
-        fanMode = tempOption;
-      else
-        fanMode = humOption;
-      // adjust the fan speeds based on the fanMode and max min targets
-      if (fanMode == device::SPEED_UP && device::fanOneSpeed < user::targetMaxFanOneSpeed)
-        device::fanOneSpeed++;
-      else if (fanMode == device::SPEED_DOWN && device::fanOneSpeed > user::targetMinFanOneSpeed)
-        device::fanOneSpeed--;
-      if (fanMode == device::SPEED_UP && device::fanTwoSpeed < user::targetMaxFanTwoSpeed)
-        device::fanTwoSpeed++;
-      else if (fanMode == device::SPEED_DOWN && device::fanTwoSpeed > user::targetMinFanTwoSpeed)
-        device::fanTwoSpeed--;
+      sensor::fanTemperatureArray[sensor::fanArrayPos] = sensor::airTemp;
+      sensor::fanHumidityArray[sensor::fanArrayPos] = sensor::humidity;
+      sensor::fanArrayPos++;
     }
+
+    float averageTemp = averageFltArray(sensor::fanTemperatureArray, sensor::fanArrayPos);
+    sensor::airStates tempAirState = sensor::IS_SAME;
+    if (hasChanged(sensor::fanTemperatureArray[0], averageTemp, 1)) {
+      if (sensor::fanTemperatureArray[0] > averageTemp)
+        tempAirState = sensor::IS_FALLING;
+      else if (sensor::fanTemperatureArray[0] < averageTemp)
+        tempAirState = sensor::IS_RISING;
+    }
+    float averageHum = averageFltArray(sensor::fanHumidityArray, sensor::fanArrayPos);
+    sensor::airStates humAirState = sensor::IS_SAME;
+    if (hasChanged(sensor::fanHumidityArray[0], averageHum, 1)) {
+      if (sensor::fanHumidityArray[0] > averageHum)
+        humAirState = sensor::IS_FALLING;
+      else if (sensor::fanHumidityArray[0] < averageHum)
+        humAirState = sensor::IS_RISING;
+    }
+
+    if (user::fansControlTemperature) {
+      if (device::globalDebug)   
+        printf("TemperatureArray[0]: %.2fc, averageTemp: %.2fc\n", sensor::fanTemperatureArray[0], averageTemp);
+      adjustFanMode(airTemp, tempTarget, tempOption, tempAirState, "air temp", tempPercent);
+    }
+    if (user::fansControlHumidity) {
+      if (device::globalDebug)      
+        printf("HumidityArray[0]: %.2f%%, averageHum: %.2f%%\n", sensor::fanHumidityArray[0], averageHum);
+      adjustFanMode(sensor::humidity, humTarget, humOption, humAirState, "humidity", humPercent);
+    }
+
+    // Temperature has priority over humidity
+    if (tempOption != device::SPEED_IDLE || !user::fansControlHumidity) {
+      fanMode = tempOption;
+      if (device::globalDebug)
+        printf("Fans set to control temperature%s", (user::fansControlHumidity ? ", as temperature takes priority\n" : "\n"));
+    }
+    else {
+      fanMode = humOption;
+      if (device::globalDebug)
+        printf("Fans set to control humidity%s", (user::fansControlTemperature ? ", as the temperature is in range\n" : "\n"));
+    }
+
+    // Check to see if the fan speed is less than or greater than the min or max speed and if so adjust the current fans speed
+    if (device::fanOneSpeed < user::targetMinFanOneSpeed) 
+      device::fanOneSpeed = user::targetMinFanOneSpeed;   
+    else if (device::fanOneSpeed > user::targetMaxFanOneSpeed) 
+      device::fanOneSpeed = user::targetMaxFanOneSpeed;   
+    if (device::fanTwoSpeed < user::targetMinFanTwoSpeed) 
+      device::fanTwoSpeed = user::targetMinFanTwoSpeed;  
+    else if (device::fanTwoSpeed > user::targetMaxFanTwoSpeed) 
+      device::fanTwoSpeed = user::targetMaxFanTwoSpeed;
+    
+    // adjust the fan speeds
+    if (fanMode == device::SPEED_MAX)
+      device::fanOneSpeed = user::targetMaxFanOneSpeed;
+    else if (fanMode == device::SPEED_MIN)
+      device::fanOneSpeed = user::targetMinFanOneSpeed;
+    else if (fanMode == device::SPEED_UP && device::fanOneSpeed < user::targetMaxFanOneSpeed)
+      device::fanOneSpeed++;
+    else if (fanMode == device::SPEED_DOWN && device::fanOneSpeed > user::targetMinFanOneSpeed)
+      device::fanOneSpeed--;
+
+    if (fanMode == device::SPEED_MAX)
+      device::fanTwoSpeed = user::targetMaxFanTwoSpeed;
+    else if (fanMode == device::SPEED_MIN)
+      device::fanTwoSpeed = user::targetMinFanTwoSpeed;
+    else if (fanMode == device::SPEED_UP && device::fanTwoSpeed < user::targetMaxFanTwoSpeed)
+      device::fanTwoSpeed++;
+    else if (fanMode == device::SPEED_DOWN && device::fanTwoSpeed > user::targetMinFanTwoSpeed)
+      device::fanTwoSpeed--;
+    
+    if (device::globalDebug)
+      printf("Fan one speed: %d%%, fan two speed: %d%%\n", device::fanOneSpeed, device::fanTwoSpeed);
+
     // Send the new fan speeds to the Atmel328P
     if (device::fanOneSpeed != previousFanOneSpeed || device::fanTwoSpeed != previousFanTwoSpeed) {
       setFanSpeeds(device::fanOneSpeed, device::fanTwoSpeed);
@@ -484,7 +549,8 @@ void waterEcPhControl() {
   if (device::previousDosingHour != rtc.hour() && rtc.minute() >= device::previousDosingMinute) {
     device::dosingTimerHourCounter++;
     device::previousDosingHour = rtc.hour();
-    printf("Dosing Timer Hour Counter: %d\n", device::dosingTimerHourCounter);
+    if (device::globalDebug)
+      printf("Dosing Timer Hour Counter: %d\n", device::dosingTimerHourCounter);
   }
   // If the dosing hour counter is greather than or equals the dosingInterval then run the dosing logic
   if (device::dosingTimerHourCounter >= user::dosingInterval) {
@@ -505,10 +571,12 @@ void waterEcPhControl() {
 }
 
 void adjustWaterEc() {
-  printf("Attempting to adjust the EC...\n");
+  if (device::globalDebug)
+    printf("Attempting to adjust the EC...\n");
   if (sensor::ec < user::targetMinEc) {
     float percentage = percentOutOfRange(user::targetMinEc, sensor::ec);
-    printf("EC is lower than min target by: %.2f%%\n", percentage);
+    if (device::globalDebug)
+      printf("EC is lower than min target by: %.2f%%\n", percentage);
     // Display a notification to cancel or continue with the starting of the dosing
     unsigned long lastTouch = millis();
     launchDosingNotification(percentage, 1, lastTouch);
@@ -540,7 +608,8 @@ void adjustWaterEc() {
       saveLogMessage(9);
       //
       if (user::ecDosingMode == user::PRECISE) {
-        printf("EC/TDS dosing mode set to precise\n");
+        if (device::globalDebug)
+          printf("EC/TDS dosing mode set to precise\n");
         // Work out the exact amout of nutrients to dose
         float waterVolumeLtrs = (user::convertToInches ? sensor::waterVolumeLtrs : convertGallonsToLtrs(sensor::waterVolumeGallons));
         dosingAmount = (user::targetMinEc - sensor::ec) * waterVolumeLtrs / sensor::ecSolution;
@@ -551,11 +620,13 @@ void adjustWaterEc() {
           else if (enabledDosers[i] && currentDoserModes[i] == device::DOSER_EC_OP)
             dosingMls[i] = currentDoserMls[i];
         }
-        printf("Add %d milliliters of nutrients, divided by %d EC dosers = %.2f\n", dosingAmount, numEnabledDosers, mlsPerDoser);
+        if (device::globalDebug)
+          printf("Add %d milliliters of nutrients, divided by %d EC dosers = %.2f\n", dosingAmount, numEnabledDosers, mlsPerDoser);
       }
       //
       else {
-        printf("EC/TDS dosing mode set to incremental\n");
+        if (device::globalDebug)
+          printf("EC/TDS dosing mode set to incremental\n");
         for (int i = 0; i < 6; i++) {
           if (enabledDosers[i])
             dosingMls[i] = currentDoserMls[i];
@@ -563,7 +634,8 @@ void adjustWaterEc() {
       }
       // Run the dosing pumps   
       if (dosingAmount > 0) {
-        printf("Starting dosing...\n");
+        if (device::globalDebug)
+          printf("Starting dosing...\n");
         device::currentlyDosing = true;
         runDosers(enabledDosers, dosingMls, percentage, 1, lastTouch);
       }     
@@ -573,10 +645,12 @@ void adjustWaterEc() {
 }
 
 void adjustWaterTds() {
-  printf("Attempting to adjust the TDS...\n");
+  if (device::globalDebug)
+    printf("Attempting to adjust the TDS...\n");
   if (sensor::tds < user::targetMinTds) {
     float percentage = percentOutOfRange(user::targetMinTds, sensor::tds);
-    printf("TDS is lower than min target by: %.2f%%\n", percentage);
+    if (device::globalDebug)
+      printf("TDS is lower than min target by: %.2f%%\n", percentage);
     // Display a notification to cancel or continue with the starting of the dosing
     unsigned long lastTouch = millis();
     launchDosingNotification(percentage, 1, lastTouch);
@@ -608,7 +682,8 @@ void adjustWaterTds() {
       saveLogMessage(9);
       //
       if (user::ecDosingMode == user::PRECISE) {
-        printf("EC/TDS dosing mode set to precise\n");
+        if (device::globalDebug)
+          printf("EC/TDS dosing mode set to precise\n");
         // Work out the exact amout of nutrients to dose
         float waterVolumeLtrs = (user::convertToInches ? sensor::waterVolumeLtrs : convertGallonsToLtrs(sensor::waterVolumeGallons));
         dosingAmount = (user::targetMinTds - sensor::tds) * waterVolumeLtrs / sensor::tdsSolution;
@@ -619,11 +694,13 @@ void adjustWaterTds() {
           else if (enabledDosers[i] && currentDoserModes[i] == device::DOSER_EC_OP)
             dosingMls[i] = currentDoserMls[i];
         }
-        printf("Add %d milliliters of nutrients, divided by %d EC dosers = %.2f\n", dosingAmount, numEnabledDosers, mlsPerDoser);
+        if (device::globalDebug)
+          printf("Add %d milliliters of nutrients, divided by %d EC dosers = %.2f\n", dosingAmount, numEnabledDosers, mlsPerDoser);
       }
       //
       else {
-        printf("EC/TDS dosing mode set to incremental\n");
+        if (device::globalDebug)
+          printf("EC/TDS dosing mode set to incremental\n");
         for (int i = 0; i < 6; i++) {
           if (enabledDosers[i])
             dosingMls[i] = currentDoserMls[i];
@@ -631,7 +708,8 @@ void adjustWaterTds() {
       }
       // Run the dosing pumps   
       if (dosingAmount > 0) {
-        printf("Starting dosing...\n");
+        if (device::globalDebug)
+          printf("Starting dosing...\n");
         device::currentlyDosing = true;
         runDosers(enabledDosers, dosingMls, percentage, 1, lastTouch);
       }     
@@ -641,10 +719,12 @@ void adjustWaterTds() {
 }
 
 void adjustWaterPh() {
-  printf("Attempting to adjust the PH...\n");
+  if (device::globalDebug)
+    printf("Attempting to adjust the PH...\n");
   if (sensor::ph < user::targetMinPh || sensor::ph > user::targetMaxPh) {
     float percentage = percentOutOfRange(sensor::ph < user::targetMinPh ? user::targetMinPh : user::targetMaxPh, sensor::ph);
-    printf("PH is %s than min target by %.2f%%", (sensor::ph < user::targetMinPh ? "lower" : "higher"), percentage);
+    if (device::globalDebug)
+      printf("PH is %s than min target by %.2f%%", (sensor::ph < user::targetMinPh ? "lower" : "higher"), percentage);
     // Display a notification to cancel or continue with the starting of the dosing
     unsigned long lastTouch = millis();
     launchDosingNotification(percentage, 0, lastTouch);
@@ -691,7 +771,8 @@ void adjustWaterPh() {
       sensor::ph < user::targetMinPh ? saveLogMessage(8) : saveLogMessage(7);
       float waterVolumeLtrs = (user::convertToInches ? sensor::waterVolumeLtrs : convertGallonsToLtrs(sensor::waterVolumeGallons));
       if (user::phDosingMode == user::PRECISE) {
-        printf("PH dosing mode set to precise\n");
+        if (device::globalDebug)
+          printf("PH dosing mode set to precise\n");
         if (sensor::ph < user::targetMinPh) {
           // Work out the exact amout of PH up to dose
           dosingAmount = (user::targetMinPh - sensor::ph) * waterVolumeLtrs / sensor::phDownSolution;
@@ -700,7 +781,8 @@ void adjustWaterPh() {
             if (enabledDosers[i])
               dosingMls[i] = mlsPerDoser;
           }
-          printf("Add %d milliliters of PH up solution, divided by %d PH up dosers = %.2f\n", dosingAmount, numEnabledDosers, mlsPerDoser);
+          if (device::globalDebug)
+            printf("Add %d milliliters of PH up solution, divided by %d PH up dosers = %.2f\n", dosingAmount, numEnabledDosers, mlsPerDoser);
         }
         else if (sensor::ph > user::targetMaxPh) {
           // Work out the exact amout of PH down to dose
@@ -710,7 +792,8 @@ void adjustWaterPh() {
             if (enabledDosers[i])
               dosingMls[i] = mlsPerDoser;
           }
-          printf("Add %d milliliters of PH down solution, divided by %d PH down dosers = %.2f\n", dosingAmount, numEnabledDosers, mlsPerDoser);
+          if (device::globalDebug)
+            printf("Add %d milliliters of PH down solution, divided by %d PH down dosers = %.2f\n", dosingAmount, numEnabledDosers, mlsPerDoser);
         } 
       }
       else {
@@ -730,7 +813,8 @@ void adjustWaterPh() {
       }
       // Run the dosing pumps   
       if (dosingAmount > 0) {
-        printf("Starting dosing...\n");
+        if (device::globalDebug)
+          printf("Starting dosing...\n");
         device::currentlyDosing = true;
         runDosers(enabledDosers, dosingMls, percentage, 0, lastTouch);
       }        
@@ -770,7 +854,8 @@ void runDosers(bool* a_enabledDosers, float* a_dosingMls, const float a_percent,
     else if (a_enabledDosers[5])
       a_enabledDosers[5] = runDoser(6, pca9685Channel::doserSix, user::doserSixSpeed, a_dosingMls[5], previousDoserMillis);
     else if (device::currentlyDosing) {
-      printf("Dosing complete\n");
+      if (device::globalDebug)
+        printf("Dosing complete\n");
       device::currentlyDosing = false;
       clearPage();
       display::refreshPage = true;
@@ -781,7 +866,8 @@ void runDosers(bool* a_enabledDosers, float* a_dosingMls, const float a_percent,
       tft.touchReadPixel(&display::touch_x, &display::touch_y);
       if (millis() >= a_lastTouch) {
         if (display::touch_x >= startX + 200 && display::touch_x <= startX + 400 && display::touch_y >= startY + 200 && display::touch_y <= startY + 250) { // Cancel
-          printf("Dosing aborted\n");
+        if (device::globalDebug)
+            printf("Dosing aborted\n");
           beep();
           device::currentlyDosing = false;
           for (uint8_t i = 0; i < 6; i++)
@@ -796,18 +882,20 @@ void runDosers(bool* a_enabledDosers, float* a_dosingMls, const float a_percent,
 
 // Run a given doser for a_mls * 1000 on a_doserPin at a_doserSpeed
 bool runDoser(const uint8_t& a_doserNum, const uint8_t& a_doserChnl, const int& a_doserSpeed, const float& a_mls, unsigned long& a_previousDoserMillis) {
-  static unsigned long debugPreviousMillis = 0; // JUST FOR TESTING !
+  static unsigned long debugPreviousMillis = 0;
   if (millis() - a_previousDoserMillis <= 1000UL * a_mls) {
-    if (a_previousDoserMillis != debugPreviousMillis) { // JUST FOR TESTING !  ----->
+    if (device::globalDebug && a_previousDoserMillis != debugPreviousMillis) {
       printf("Starting doser: %d, pumping %d\n", a_doserNum, a_mls);
       debugPreviousMillis = a_previousDoserMillis;
-    } // <---
+    }
     analogWriteChnl(a_doserChnl, a_doserSpeed);
     device::currentDoserNum = a_doserNum;
   }
   else {
-    printf("Stopping doser: %d\n", a_doserNum); // JUST FOR TESTING !
-    printf("Doser run time: %lu\n", millis() - a_previousDoserMillis); // JUST FOR TESTING !
+    if (device::globalDebug) {
+      printf("Stopping doser: %d\n", a_doserNum);
+      printf("Doser run time: %lu\n", millis() - a_previousDoserMillis);
+    }
     analogWriteChnl(a_doserChnl, 0);
     a_previousDoserMillis = millis();
     return false;

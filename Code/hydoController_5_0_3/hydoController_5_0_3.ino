@@ -1,6 +1,7 @@
 /*
-  Version V5.0.2 Updated on the 8th Jan 2024
+  Version V5.0.3 Updated on the 14th Jan 2024
 */
+// TO DO: add user setup guide for new device / reset
 
 // Library imports
 #include <SPI.h>
@@ -34,6 +35,7 @@
 // HDC10180 = 64 
 // DS3231   = 104 and 87 (Two addresses are used as the rtc eeprom is addressable too)
 // 24LC256  = 80
+// 328P     = 9
 
 // pins used
 namespace pin {
@@ -276,7 +278,7 @@ const char* heaterOnNotification       = "Air heater on";      // 11
 const char* heaterOffNotification      = "Air heater off";     // 12
 const char* waterOnNotification        = "Water heater on";    // 13
 const char* waterOffNotification       = "Water heater off";   // 14
-const char* const notificationsArray[] = {
+const char* notificationsArray[] = {
   bootNotification,
   drainNotification,
   refillNotification,
@@ -293,6 +295,26 @@ const char* const notificationsArray[] = {
   waterOnNotification,
   waterOffNotification
 };
+// User guide messages
+const char* initalSetup             = "Please ensure all the sensors and dosing pumps are connected, and 1.413 and 12.88 mS/cm EC calibration solution, and 4.0 and 7.0 PH calibration solution";
+const char* ecConversionSetup       = "Set the EC to TDS conversion";
+const char* sizeConversionSetup     = "Set the CM or inches conversion";
+const char* tempConversionSetup     = "Set the temperature conversion";
+const char* setRtcGuide             = "Set the date and time for the RTC";
+// const char* initalSetupGuide           = "";
+// const char* initalSetupGuide           = "";
+// const char* initalSetupGuide           = "";
+// const char* initalSetupGuide           = "";
+// const char* initalSetupGuide           = "";
+// const char* initalSetupGuide           = "";
+// const char* initalSetupGuide           = "";
+// const char* initalSetupGuide           = "";
+// const char* initalSetupGuide           = "";
+// const char* initalSetupGuide           = "";
+const char* setupMessageArray[] = {
+  initalSetup,
+  sizeConversionSetup
+};
 const uint8_t maxLogs = 10;
 const uint8_t maxCharsPerLog = 16;
 uint8_t logTypeArray[maxLogs];
@@ -302,6 +324,7 @@ uint8_t infoPos = 0;
 }
 
 namespace device {
+bool globalDebug = true;
 const char* versionNumber = "5.0.2"; // do not adjust !
 bool relayOffState = HIGH;
 const uint8_t slaveAddress = 9;
@@ -323,23 +346,8 @@ uint8_t continueDosing = 0;
 int scrollTouchCount = 0;
 uint8_t phCalStage = 0;
 bool newGraphData = false;
-uint8_t graphArrayPos = 0;
 bool ecWaitTillNextCall = false;
 bool phWaitTillNextCall = false;
-const uint8_t maxGraphArrayValues = 120;
-float phArray[maxGraphArrayValues];
-float co2Array[maxGraphArrayValues];
-float ecArray[maxGraphArrayValues];
-float tdsArray[maxGraphArrayValues];
-float waterTemperatureArray[maxGraphArrayValues];
-float waterTemperatureArrayF[maxGraphArrayValues];
-float waterLevelArray[maxGraphArrayValues];
-float waterLevelArrayInInches[maxGraphArrayValues];
-float airTemperatureArray[maxGraphArrayValues];
-float airTemperatureArrayF[maxGraphArrayValues];
-float humidityArray[maxGraphArrayValues];
-float fanOneSpeedArray[maxGraphArrayValues];
-float fanTwoSpeedArray[maxGraphArrayValues];
 uint8_t lightSwitchedOnHour = 0;
 uint8_t lightSwitchedOnMin = 0;
 bool lightOn = false;
@@ -430,7 +438,9 @@ uint8_t conversionType = EU;
 enum controlOptions {
   SPEED_IDLE,
   SPEED_DOWN,
-  SPEED_UP
+  SPEED_UP,
+  SPEED_MIN,
+  SPEED_MAX
 };
 }
 
@@ -606,6 +616,26 @@ float etapeMaxVolumeResistance = 271.4; // 288.71 resistance value (in ohms) whe
 const float etapeCalibrationCm = 31.00; // maximum mesurement in centimeters on etap 12" version
 const float etapeOffset = 2.5; // Lowest value read on etape in Centimeters, datasheet says 2.5 but i get 2.5
 const uint8_t co2Request[] {0xFF, 0x01, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x79};
+uint8_t sensorArrayPos = 0;
+const uint8_t maxSensorArrayVals = 120;
+float phArray[maxSensorArrayVals];
+float co2Array[maxSensorArrayVals];
+float ecArray[maxSensorArrayVals];
+float tdsArray[maxSensorArrayVals];
+float waterTemperatureArray[maxSensorArrayVals];
+float waterTemperatureArrayF[maxSensorArrayVals];
+float waterLevelArray[maxSensorArrayVals];
+float waterLevelArrayInInches[maxSensorArrayVals];
+float airTemperatureArray[maxSensorArrayVals];
+float airTemperatureArrayF[maxSensorArrayVals];
+float humidityArray[maxSensorArrayVals];
+float fanOneSpeedArray[maxSensorArrayVals];
+float fanTwoSpeedArray[maxSensorArrayVals];
+uint8_t fanArrayPos = 0;
+const uint8_t maxFanArrayVals = 60;
+float fanTemperatureArray[maxFanArrayVals];
+float fanHumidityArray[maxFanArrayVals];
+enum airStates{ IS_FALLING, IS_RISING, IS_SAME};
 }
 
 namespace wifi {
@@ -646,9 +676,7 @@ void setup() {
 void loop() {
   touchEvent();
   readSensors();
-  //adjustScreenValuesTest();
   drawPages();
-  screenSaver();
   envriomentalControl();
   if (wifi::wifiEnabled)
     server.handleClient();

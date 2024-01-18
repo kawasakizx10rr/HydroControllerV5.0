@@ -3,15 +3,17 @@ void initializeEEPROM() {
   char versionNum[6] {'0', '0', '0', '0', '0', '\0'};
   for (uint8_t i = 0; i < 6; i++)
     versionNum[i] = externalEEPROM.read(i);
-  printf("Current version number: %s\n", versionNum);
-  printf("Software version number: %s\n", device::versionNumber);
+  if (device::globalDebug) {
+    printf("Current version number: %s\n", versionNum);
+    printf("Software version number: %s\n", device::versionNumber);
+  }
   if (strcmp(versionNum, device::versionNumber) == 0) {
     device::userProfile = externalEEPROM.read(6);
     loadSystemEEPROM();
     loadUserEEPROM(device::userProfile);
   }
   else {
-    showResetMessage();
+    //showResetMessage();
     saveSystemEEPROM();
     for (uint8_t i = 0; i < 5; i++)
       saveUserEEPROM(i);
@@ -25,7 +27,8 @@ void initializeEEPROM() {
 
 void saveSystemEEPROM() {
   int address = 7;
-  printf("Saving system settings\nEEPROM starting at address: %d\n", address);
+  if (device::globalDebug)
+    printf("Saving system settings\nEEPROM starting at address: %d\n", address);
   //externalEEPROM.put(address, sensor::ecCalibration);             address += sizeof(sensor::ecCalibration);
   externalEEPROM.put(address, sensor::emptyWaterTankDepth);       address += sizeof(sensor::emptyWaterTankDepth);
   externalEEPROM.put(address, sensor::etapeZeroVolumeResistance); address += sizeof(sensor::etapeZeroVolumeResistance);
@@ -63,64 +66,66 @@ void saveSystemEEPROM() {
       externalEEPROM.put(address++, message::timeStrArray[i][n]);
     }
   }
-  for (const float& val : device::phArray) {
+  for (const float& val : sensor::phArray) {
     externalEEPROM.put(address, fltToInt(val));
     address += sizeof(int);
   }
-  for (const float& val : device::ecArray) {
+  for (const float& val : sensor::ecArray) {
     externalEEPROM.put(address, fltToInt(val));
     address += sizeof(int);
   }
-  for (const float& val : device::tdsArray) {
+  for (const float& val : sensor::tdsArray) {
     externalEEPROM.put(address, int(val));
     address += sizeof(int);
   }
-  for (const float& val : device::co2Array) {
+  for (const float& val : sensor::co2Array) {
     externalEEPROM.put(address, int(val));
     address += sizeof(int);
   }
-  for (const float& val : device::waterTemperatureArray) {
+  for (const float& val : sensor::waterTemperatureArray) {
     externalEEPROM.put(address, fltToInt(val));
     address += sizeof(int);
   }
-  for (const float& val : device::waterTemperatureArrayF) {
+  for (const float& val : sensor::waterTemperatureArrayF) {
     externalEEPROM.put(address, fltToInt(val));
     address += sizeof(int);
   }
-  for (const float& val : device::waterLevelArray) {
+  for (const float& val : sensor::waterLevelArray) {
     externalEEPROM.put(address, int(val));
     address += sizeof(int);
   }
-  for (const float& val : device::waterLevelArrayInInches) {
+  for (const float& val : sensor::waterLevelArrayInInches) {
     externalEEPROM.put(address, fltToInt(val));
     address += sizeof(int);
   }
-  for (const float& val : device::fanOneSpeedArray) {
+  for (const float& val : sensor::fanOneSpeedArray) {
     externalEEPROM.put(address, int(val));
     address += sizeof(int);
   }
-  for (const float& val : device::fanTwoSpeedArray) {
+  for (const float& val : sensor::fanTwoSpeedArray) {
     externalEEPROM.put(address, int(val));
     address += sizeof(int);
   }
-  for (const float& val : device::airTemperatureArray) {
+  for (const float& val : sensor::airTemperatureArray) {
     externalEEPROM.put(address, fltToInt(val));
     address += sizeof(int);
   }
-  for (const float& val : device::airTemperatureArrayF) {
+  for (const float& val : sensor::airTemperatureArrayF) {
     externalEEPROM.put(address, fltToInt(val));
     address += sizeof(int);
   }
-  for (const float& val : device::humidityArray) {
+  for (const float& val : sensor::humidityArray) {
     externalEEPROM.put(address, int(val));
     address += sizeof(int);
   }
-  printf("EEPROM ending at address: %d\n", address);
+  if (device::globalDebug)
+    printf("EEPROM ending at address: %d\n", address);
 }
 
 void loadSystemEEPROM() {
   int address = 8;
-  printf("Loading system settings\nEEPROM starting at address: %d\n", address);
+  if (device::globalDebug)
+    printf("Loading system settings\nEEPROM starting at address: %d\n", address);
   //externalEEPROM.get(address, sensor::ecCalibration);             address += sizeof(sensor::ecCalibration);
   externalEEPROM.get(address, sensor::emptyWaterTankDepth);       address += sizeof(sensor::emptyWaterTankDepth);
   externalEEPROM.get(address, sensor::etapeZeroVolumeResistance); address += sizeof(sensor::etapeZeroVolumeResistance);
@@ -157,24 +162,25 @@ void loadSystemEEPROM() {
       externalEEPROM.get(address++, message::timeStrArray[i][n]);
     }
   }
-  loadEepromFltArray(device::phArray,                    address);
-  loadEepromFltArray(device::ecArray,                    address);
-  loadEepromIntArray(device::tdsArray,                   address);
-  loadEepromIntArray(device::co2Array,                   address);
-  loadEepromFltArray(device::waterTemperatureArray,      address);
-  loadEepromFltArray(device::waterTemperatureArrayF,     address);
-  loadEepromIntArray(device::waterLevelArray,            address);
-  loadEepromFltArray(device::waterLevelArrayInInches,    address);
-  loadEepromIntArray(device::fanOneSpeedArray,           address);
-  loadEepromIntArray(device::fanTwoSpeedArray,           address);
-  loadEepromFltArray(device::airTemperatureArray,        address);
-  loadEepromFltArray(device::airTemperatureArrayF,       address);
-  loadEepromIntArray(device::humidityArray,              address);
+  loadEepromFltArray(sensor::phArray, sensor::maxSensorArrayVals, address);
+  loadEepromFltArray(sensor::ecArray, sensor::maxSensorArrayVals, address);
+  loadEepromIntArray(sensor::tdsArray, sensor::maxSensorArrayVals, address);
+  loadEepromIntArray(sensor::co2Array, sensor::maxSensorArrayVals, address);
+  loadEepromFltArray(sensor::waterTemperatureArray, sensor::maxSensorArrayVals, address);
+  loadEepromFltArray(sensor::waterTemperatureArrayF, sensor::maxSensorArrayVals, address);
+  loadEepromIntArray(sensor::waterLevelArray, sensor::maxSensorArrayVals, address);
+  loadEepromFltArray(sensor::waterLevelArrayInInches, sensor::maxSensorArrayVals, address);
+  loadEepromIntArray(sensor::fanOneSpeedArray, sensor::maxSensorArrayVals, address);
+  loadEepromIntArray(sensor::fanTwoSpeedArray, sensor::maxSensorArrayVals, address);
+  loadEepromFltArray(sensor::airTemperatureArray, sensor::maxSensorArrayVals, address);
+  loadEepromFltArray(sensor::airTemperatureArrayF, sensor::maxSensorArrayVals, address);
+  loadEepromIntArray(sensor::humidityArray, sensor::maxSensorArrayVals, address);
   printf("EEPROM ending at address: %d\n", address);
 }
 
 void loadUserEEPROM(const uint8_t a_profile) {
-  printf("Loading profile: %d\n", a_profile);
+  if (device::globalDebug)
+    printf("Loading profile: %d\n", a_profile);
   if (a_profile == 0)
     loadProfile(375);
   else if (a_profile == 1)
@@ -189,7 +195,8 @@ void loadUserEEPROM(const uint8_t a_profile) {
 }
 
 void saveUserEEPROM(const uint8_t a_profile) {
-  printf("Saving profile: %d\n", a_profile);
+  if (device::globalDebug)
+    printf("Saving profile: %d\n", a_profile);
   if (a_profile == 0)
     saveProfile(375);
   else if (a_profile == 1)
@@ -203,18 +210,18 @@ void saveUserEEPROM(const uint8_t a_profile) {
   delay(250);
 }
 
-void loadEepromFltArray(float* a_array, int& a_address) {
+void loadEepromFltArray(float* a_array, int a_len, int& a_address) {
   int buffer;
-  for (uint8_t i = 0; i < device::maxGraphArrayValues; i++) {
+  for (uint8_t i = 0; i < a_len; i++) {
     externalEEPROM.get(a_address, buffer);
     a_array[i] = buffer / 100.0;
     a_address += sizeof(int);
   }
 }
 
-void loadEepromIntArray(float* a_array, int& a_address) {
+void loadEepromIntArray(float* a_array, int a_len, int& a_address) {
   int buffer;
-  for (uint8_t i = 0; i < device::maxGraphArrayValues; i++) {
+  for (uint8_t i = 0; i < a_len; i++) {
     externalEEPROM.get(a_address, buffer);
     a_array[i] = buffer;
     a_address += sizeof(int);
@@ -222,7 +229,8 @@ void loadEepromIntArray(float* a_array, int& a_address) {
 }
 
 void loadProfile(int a_address) {
-  printf("EEPROM starting at address: %d\n", a_address);
+  if (device::globalDebug)
+    printf("EEPROM starting at address: %d\n", a_address);
   externalEEPROM.get(a_address, device::minPh);                      a_address += sizeof(device::minPh);
   externalEEPROM.get(a_address, device::maxPh);                      a_address += sizeof(device::maxPh);
   externalEEPROM.get(a_address, device::minEc);                      a_address += sizeof(device::minEc);
@@ -356,17 +364,19 @@ void loadProfile(int a_address) {
   externalEEPROM.get(a_address, user::fanTwoFixedSpeed);             a_address += sizeof(user::fanTwoFixedSpeed);
   externalEEPROM.get(a_address, user::numberOfDosers);               a_address += sizeof(user::numberOfDosers);
   externalEEPROM.get(a_address, user::useEtapeSensor);               a_address += sizeof(user::useEtapeSensor);
-  externalEEPROM.get(a_address, device::graphArrayPos);              a_address += sizeof(device::graphArrayPos);
+  externalEEPROM.get(a_address, sensor::sensorArrayPos);              a_address += sizeof(sensor::sensorArrayPos);
   externalEEPROM.get(a_address, device::conversionType);             a_address += sizeof(device::conversionType);
   for (const bool& val : user::autoFillDays) {
     externalEEPROM.get(a_address, val);
     a_address += sizeof(val);
   }
-  printf("EEPROM ending at address: %d\n", a_address);
+  if (device::globalDebug)
+    printf("EEPROM ending at address: %d\n", a_address);
 }
 
 void saveProfile(int a_address) {
-  printf("EEPROM starting at address: %d\n", a_address);
+  if (device::globalDebug)
+    printf("EEPROM starting at address: %d\n", a_address);
   externalEEPROM.put(a_address, device::minPh);                      a_address += sizeof(device::minPh);
   externalEEPROM.put(a_address, device::maxPh);                      a_address += sizeof(device::maxPh);
   externalEEPROM.put(a_address, device::minEc);                      a_address += sizeof(device::minEc);
@@ -500,11 +510,12 @@ void saveProfile(int a_address) {
   externalEEPROM.put(a_address, user::fanTwoFixedSpeed);             a_address += sizeof(user::fanTwoFixedSpeed);
   externalEEPROM.put(a_address, user::numberOfDosers);               a_address += sizeof(user::numberOfDosers);
   externalEEPROM.put(a_address, user::useEtapeSensor);               a_address += sizeof(user::useEtapeSensor);
-  externalEEPROM.put(a_address, device::graphArrayPos);              a_address += sizeof(device::graphArrayPos);
+  externalEEPROM.put(a_address, sensor::sensorArrayPos);             a_address += sizeof(sensor::sensorArrayPos);
   externalEEPROM.put(a_address, device::conversionType);             a_address += sizeof(device::conversionType);
   for (const bool& val : user::autoFillDays) {
     externalEEPROM.put(a_address, val);
     a_address += sizeof(val);
   }
-  printf("EEPROM ending at address: %d\n", a_address);
+  if (device::globalDebug)
+    printf("EEPROM ending at address: %d\n", a_address);
 }

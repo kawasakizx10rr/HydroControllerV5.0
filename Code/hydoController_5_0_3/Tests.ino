@@ -8,7 +8,7 @@ void adjustScreenValuesTest() {
     display::showInfoDialog = true;
     unsigned long startTime = millis();
     while (millis() - startTime < 5000UL) {
-      infoMessage(); 
+      infoMessage(message::infoMessageArray, message::infoPos); 
       display::refreshPage = false;
     }
     display::showInfoDialog = false;
@@ -376,22 +376,22 @@ void adjustScreenValuesTest() {
       user::humidityErrorMargin = (highValues ? 100 : 0);
     }
 
-    for (int i = 0; i < device::maxGraphArrayValues; i++) {
-      device::phArray[i] = (float)random(1, 140) / 10;
-      device::co2Array[i] = random(300, 5000);
-      device::ecArray[i] = (float)random(1, 10000) / 10;
-      device::tdsArray[i] = random(1, 99);
-      device::waterTemperatureArray[i] = (float)random(10, 1000) / 10;
-      device::waterTemperatureArrayF[i] = (float)random(10, 2100) / 10;
-      device::waterLevelArray[i] = random(1, 99);
-      device::waterLevelArrayInInches[i] = random(1, 99);
-      device::airTemperatureArray[i] = (float)random(50, 1000) / 10;
-      device::airTemperatureArrayF[i] = (float)random(320, 2100) / 10;
-      device::humidityArray[i] = (float)random(0, 1000) / 10;
-      device::fanOneSpeedArray[i] = random(0, 100);
-      device::fanTwoSpeedArray[i] = random(0, 100);
+    for (int i = 0; i < sensor::maxSensorArrayVals; i++) {
+      sensor::phArray[i] = (float)random(1, 140) / 10;
+      sensor::co2Array[i] = random(300, 5000);
+      sensor::ecArray[i] = (float)random(1, 10000) / 10;
+      sensor::tdsArray[i] = random(1, 99);
+      sensor::waterTemperatureArray[i] = (float)random(10, 1000) / 10;
+      sensor::waterTemperatureArrayF[i] = (float)random(10, 2100) / 10;
+      sensor::waterLevelArray[i] = random(1, 99);
+      sensor::waterLevelArrayInInches[i] = random(1, 99);
+      sensor::airTemperatureArray[i] = (float)random(50, 1000) / 10;
+      sensor::airTemperatureArrayF[i] = (float)random(320, 2100) / 10;
+      sensor::humidityArray[i] = (float)random(0, 1000) / 10;
+      sensor::fanOneSpeedArray[i] = random(0, 100);
+      sensor::fanTwoSpeedArray[i] = random(0, 100);
     }
-    device::graphArrayPos = device::maxGraphArrayValues;
+    sensor::sensorArrayPos = sensor::maxSensorArrayVals;
 
     highValues = !highValues;
     prevMillis = millis();

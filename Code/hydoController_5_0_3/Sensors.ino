@@ -70,15 +70,18 @@ void readSensors() {
     if (buffer[0] == 255 && buffer[5] == 0 && buffer[7] == 0)
       sensorValue = (256 * (int)buffer[2]) + (int)buffer[3];
     if (sensorValue <= 0) {
-      printf("Error reading Co2 sensor buffer: ");
-      for (const uint8_t& val : buffer) {
-       printf("%d,", val);
+      if (device::globalDebug) {
+        printf("Error reading Co2 sensor buffer: ");
+        for (const uint8_t& val : buffer) {
+        printf("%d,", val);
+        }
+        printf("\n");
       }
-      printf("\n");
       sensor::co2 = 0;
     }
     else if (sensorValue < 300) {
-      printf("Co2 sensor currently preheating...\n");
+      if (device::globalDebug)
+        printf("Co2 sensor currently preheating...\n");
       sensor::co2 = 0;
     }
     else {
@@ -188,17 +191,19 @@ void setTankDepth() {
   float distance = (sensor::hcsrDuration / 2) / 29.1;   // Divide by 29.1 or multiply by 0.0343
   if (distance > 0 && distance < 999) {
     sensor::emptyWaterTankDepth = distance;
-    printf("EmptyWaterTankDepth = %.2f\n", sensor::emptyWaterTankDepth);
+    if (device::globalDebug)
+      printf("EmptyWaterTankDepth = %.2f\n", sensor::emptyWaterTankDepth);
   }
   else {
     sensor::emptyWaterTankDepth = 0;
-    printf("Error: tank depth <= 0 or >= 999\n");
+    if (device::globalDebug)
+      printf("Error: tank depth <= 0 or >= 999\n");
   }
   saveSystemEEPROM();
 }
 
 // This is a generic Co2 formula tried and tested.
-void generateCo2GasTime(void) {
+void generateCo2GasTime() {
   float roomHeight = 0.0328084 * user::roomHeightCm; // convert cm to feet
   float roomWidth = 0.0328084 * user::roomWidthCm; // convert cm to feet
   float roomLenght = 0.0328084 * user::roomLengthCm; // convert cm to feet
@@ -215,16 +220,19 @@ void generateCo2GasTime(void) {
   co2PpmMargin *= 0.000001;
   //flowrate = flowrate / 60.0; // If in hours
   float gasTime = (roomsize * co2PpmMargin) / flowrate;
-  printf("Gas time in minues = %.2f\n", gasTime);
+  if (device::globalDebug)
+    printf("Gas time in minues = %.2f\n", gasTime);
   if (gasTime >= 999)
     gasTime = 999;
   sensor::co2GasTime = gasTime * 60000UL;
-  printf("Co2 gas time in millis = %ul\n", sensor::co2GasTime);
+  if (device::globalDebug)
+    printf("Co2 gas time in millis = %ul\n", sensor::co2GasTime);
 }
 
 bool phCallbration() {
   bool returnVal = false;
-  printf("Starting PH sensor calibration\n");
+  if (device::globalDebug)
+    printf("Starting PH sensor calibration\n");
   // Turn the PH sensor off
   digitalWrite(pin::tdsTransistor, LOW);
   // Turn on the TDS sensor
@@ -235,8 +243,9 @@ bool phCallbration() {
   dallasTemperature.requestTemperatures();
   sensor::waterTemp = dallasTemperature.getTempCByIndex(0);
   // Print the current calibration solution value
-  float voltage = analogReadChnlToVolts(ads1115Channel::phSensor);    
-  printf("Raw PH voltage = %.2f\n", voltage);
+  float voltage = analogReadChnlToVolts(ads1115Channel::phSensor);
+  if (device::globalDebug)
+    printf("Raw PH voltage = %.2f\n", voltage);
   if(ph.calibration(voltage, sensor::waterTemp))
     returnVal = true;
   // Turn off the TDS sensor
@@ -246,7 +255,8 @@ bool phCallbration() {
 
 bool tdsCalibration() {
   bool returnVal = false;
-  printf("Starting TDS sensor calibration\n");
+  if (device::globalDebug)
+    printf("Starting TDS sensor calibration\n");
   // Turn the PH sensor off
   digitalWrite(pin::phTransistor, LOW);
   // Turn on the TDS sensor
@@ -258,7 +268,8 @@ bool tdsCalibration() {
   sensor::waterTemp = dallasTemperature.getTempCByIndex(0);
   // Print the current calibration solution value
   float voltage = analogReadChnlToVolts(ads1115Channel::tdsSensor);    
-  printf("Raw EC voltage = %.2f\n", voltage);
+  if (device::globalDebug)
+    printf("Raw EC voltage = %.2f\n", voltage);
   if(ec.calibration(voltage, sensor::waterTemp))
     returnVal = true;
   // Turn off the TDS sensor
@@ -268,14 +279,16 @@ bool tdsCalibration() {
 
 void setEtapeZeroVolumeResistance() {
   sensor::temp_etapeZeroVolumeResistance = readResistance(ads1115Channel::etapeSensor, 560);
-  printf("Etape zero volume resistance = %.2f Ohms\n", sensor::etapeZeroVolumeResistance);
+  if (device::globalDebug)
+    printf("Etape zero volume resistance = %.2f Ohms\n", sensor::etapeZeroVolumeResistance);
 }
 
 void setEtapeMaxVolumeResistance() {
   sensor::etapeZeroVolumeResistance = sensor::temp_etapeZeroVolumeResistance;
   sensor::temp_etapeZeroVolumeResistance = 0;
   sensor::etapeMaxVolumeResistance = readResistance(ads1115Channel::etapeSensor, 560);
-  printf("Etape max reading resistance = %.2f Ohms\n", sensor::etapeMaxVolumeResistance);
+  if (device::globalDebug)
+    printf("Etape max reading resistance = %.2f Ohms\n", sensor::etapeMaxVolumeResistance);
 }
 
 float readResistance(const int& a_chnl, const int& a_seriesResistance) {

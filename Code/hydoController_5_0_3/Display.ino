@@ -1,35 +1,38 @@
 // Draw the given page
 void drawPages() {
-  if (display::showInfoDialog)
-    infoMessage();
-  else if (display::page == 0)
-    homePage();
-  else if (display::page == 1)
-    graphsPage();
-  else if (display::page == 2)
-    maxminsPage();
-  else if (display::page == 3)
-    profilesPage();
-  else if (display::page == 4)
-    settingsPage();
-  else if (display::page == 5)
-    user::convertToTds ? tdsPage() : ecPage();
-  else if (display::page == 6)
-    phPage();
-  else if (display::page == 7)
-    co2Page();
-  else if (display::page == 8)
-    waterPage();
-  else if (display::page == 9)
-    dosersPage();
-  else if (display::page == 10)
-    lightingPage();
-  else if (display::page == 11)
-    fansPage();
-  else if (display::page == 12)
-    warningsPage();
-  display::refreshPage = false;
-  device::newGraphData = false;
+  if (!display::displayIsOff) {
+    if (display::showInfoDialog)
+      infoMessage(message::infoMessageArray, message::infoPos);
+    else if (display::page == 0)
+      homePage();
+    else if (display::page == 1)
+      graphsPage();
+    else if (display::page == 2)
+      maxminsPage();
+    else if (display::page == 3)
+      profilesPage();
+    else if (display::page == 4)
+      settingsPage();
+    else if (display::page == 5)
+      user::convertToTds ? tdsPage() : ecPage();
+    else if (display::page == 6)
+      phPage();
+    else if (display::page == 7)
+      co2Page();
+    else if (display::page == 8)
+      waterPage();
+    else if (display::page == 9)
+      dosersPage();
+    else if (display::page == 10)
+      lightingPage();
+    else if (display::page == 11)
+      fansPage();
+    else if (display::page == 12)
+      warningsPage();
+    display::refreshPage = false;
+    device::newGraphData = false;
+  }
+  screenSaver();
 }
 // =============================================================================================================================================================================================
 // =============================================================================================================================================================================================
@@ -115,43 +118,43 @@ void homePage() {
   // draw values and graph
   //if (display::refreshPage || device::newGraphData) {
     if (display::homePage == 0) {
-      drawSensorSlide(sensor::tds, user::targetMinTds, user::targetMaxTds, device::tdsArray, 0);
+      drawSensorSlide(sensor::tds, user::targetMinTds, user::targetMaxTds, sensor::tdsArray, 0);
     }
     else if (display::homePage == 1) {
-      drawSensorSlide(sensor::ec, user::targetMinEc, user::targetMaxEc, device::ecArray, 2);
+      drawSensorSlide(sensor::ec, user::targetMinEc, user::targetMaxEc, sensor::ecArray, 2);
     }
     else if (display::homePage == 2) {
-      drawSensorSlide(sensor::ph, user::targetMinPh, user::targetMaxPh, device::phArray, 2);
+      drawSensorSlide(sensor::ph, user::targetMinPh, user::targetMaxPh, sensor::phArray, 2);
     }
     else if (display::homePage == 3) {
-      drawSensorSlide(sensor::co2, user::targetCo2, user::targetCo2, device::co2Array, 0);
+      drawSensorSlide(sensor::co2, user::targetCo2, user::targetCo2, sensor::co2Array, 0);
     }
     else if (display::homePage == 4) {
       if (user::convertToF)
-        drawSensorSlide(convertToF(sensor::waterTemp), user::targetMinWaterTempF, user::targetMaxWaterTempF, device::waterTemperatureArrayF, 1);
+        drawSensorSlide(convertToF(sensor::waterTemp), user::targetMinWaterTempF, user::targetMaxWaterTempF, sensor::waterTemperatureArrayF, 1);
       else
-        drawSensorSlide(sensor::waterTemp, user::targetMinWaterTemp, user::targetMaxWaterTemp, device::waterTemperatureArray, 1);
+        drawSensorSlide(sensor::waterTemp, user::targetMinWaterTemp, user::targetMaxWaterTemp, sensor::waterTemperatureArray, 1);
     }
     else if (display::homePage == 5) {
       if (user::convertToInches)
-        drawSensorSlide(sensor::waterLevelInches, user::targetMinWaterHeightInches, user::targetMaxWaterHeightInches, device::waterLevelArrayInInches, 1);
+        drawSensorSlide(sensor::waterLevelInches, user::targetMinWaterHeightInches, user::targetMaxWaterHeightInches, sensor::waterLevelArrayInInches, 1);
       else
-        drawSensorSlide(sensor::waterLevel, user::targetMinWaterHeight, user::targetMaxWaterHeight, device::waterLevelArray, 1);
+        drawSensorSlide(sensor::waterLevel, user::targetMinWaterHeight, user::targetMaxWaterHeight, sensor::waterLevelArray, 1);
     }
     else if (display::homePage == 6) {
-      drawSensorSlide(device::fanOneSpeed, user::targetMinFanOneSpeed, user::targetMaxFanOneSpeed, device::fanOneSpeedArray, 0);
+      drawSensorSlide(device::fanOneSpeed, user::targetMinFanOneSpeed, user::targetMaxFanOneSpeed, sensor::fanOneSpeedArray, 0);
     }
     else if (display::homePage == 7) {
-      drawSensorSlide(device::fanTwoSpeed, user::targetMinFanTwoSpeed, user::targetMaxFanTwoSpeed, device::fanTwoSpeedArray, 0);
+      drawSensorSlide(device::fanTwoSpeed, user::targetMinFanTwoSpeed, user::targetMaxFanTwoSpeed, sensor::fanTwoSpeedArray, 0);
     }
     else if (display::homePage == 8) {
       if (user::convertToF)
-        drawSensorSlide(convertToF(sensor::airTemp), user::targetMinAirTempF, user::targetMaxAirTempF, device::airTemperatureArrayF, 1);
+        drawSensorSlide(convertToF(sensor::airTemp), user::targetMinAirTempF, user::targetMaxAirTempF, sensor::airTemperatureArrayF, 1);
       else
-        drawSensorSlide(sensor::airTemp, user::targetMinAirTemp, user::targetMaxAirTemp, device::airTemperatureArray, 1);
+        drawSensorSlide(sensor::airTemp, user::targetMinAirTemp, user::targetMaxAirTemp, sensor::airTemperatureArray, 1);
     }
     else if (display::homePage == 9) {
-      drawSensorSlide(sensor::humidity, user::targetMinHumidity, user::targetMaxHumidity, device::humidityArray, 1);
+      drawSensorSlide(sensor::humidity, user::targetMinHumidity, user::targetMaxHumidity, sensor::humidityArray, 1);
     }
   //}
 }
@@ -168,47 +171,47 @@ void graphsPage() {
     unsigned int graphColors[10] {};
 
     if (display::showTdsGraph) {
-      graphArrays[numOfGraphs] = device::tdsArray;
+      graphArrays[numOfGraphs] = sensor::tdsArray;
       graphColors[numOfGraphs++] = display::RA8875_PURPLE;
     }
     if (display::showPhGraph) {
-      graphArrays[numOfGraphs] = device::phArray;
+      graphArrays[numOfGraphs] = sensor::phArray;
       graphColors[numOfGraphs++] = display::RA8875_LIGHT_GREEN;
     }
     if (display::showEcGraph) {
-      graphArrays[numOfGraphs] = device::ecArray;
+      graphArrays[numOfGraphs] = sensor::ecArray;
       graphColors[numOfGraphs++] = RA8875_YELLOW;
     }
     if (display::showCo2Graph) {
-      graphArrays[numOfGraphs] = device::co2Array;
+      graphArrays[numOfGraphs] = sensor::co2Array;
       graphColors[numOfGraphs++] = RA8875_MAGENTA;
     }
     if (display::showWaterTempGraph) {
-      graphArrays[numOfGraphs] = (user::convertToF ? device::waterTemperatureArrayF : device::waterTemperatureArray);
+      graphArrays[numOfGraphs] = (user::convertToF ? sensor::waterTemperatureArrayF : sensor::waterTemperatureArray);
       graphColors[numOfGraphs++] = display::RA8875_ORANGE;
     }
     if (display::showWaterLvlGraph) {
-      graphArrays[numOfGraphs] = (user::convertToInches ? device::waterLevelArrayInInches : device::waterLevelArray);
+      graphArrays[numOfGraphs] = (user::convertToInches ? sensor::waterLevelArrayInInches : sensor::waterLevelArray);
       graphColors[numOfGraphs++] = RA8875_BLUE;
     }
     if (display::showFanOneGraph) {
-      graphArrays[numOfGraphs] = device::fanOneSpeedArray;
+      graphArrays[numOfGraphs] = sensor::fanOneSpeedArray;
       graphColors[numOfGraphs++] = RA8875_WHITE;
     }
     if (display::showFanTwoGraph) {
-      graphArrays[numOfGraphs] = device::fanTwoSpeedArray;
+      graphArrays[numOfGraphs] = sensor::fanTwoSpeedArray;
       graphColors[numOfGraphs++] = RA8875_BLACK;
     }
     if (display::showAirTempGraph) {
-      graphArrays[numOfGraphs] = (user::convertToF ? device::airTemperatureArrayF : device::airTemperatureArray);
+      graphArrays[numOfGraphs] = (user::convertToF ? sensor::airTemperatureArrayF : sensor::airTemperatureArray);
       graphColors[numOfGraphs++] = RA8875_RED;
     }
     if (display::showHumidityGraph) {
-      graphArrays[numOfGraphs] = device::humidityArray;
+      graphArrays[numOfGraphs] = sensor::humidityArray;
       graphColors[numOfGraphs++] = display::RA8875_SEABLUE;
     }
     if (numOfGraphs > 0)
-      drawGraph(95, 100, 350, tft.width() - 155, 10, graphArrays, numOfGraphs, device::graphArrayPos, 0, graphColors);
+      drawGraph(95, 100, 350, tft.width() - 155, 10, graphArrays, numOfGraphs, sensor::sensorArrayPos, 0, graphColors);
   }
 }
 // =============================================================================================================================================================================================
@@ -451,7 +454,7 @@ void co2Page() {
     static int roomLengthStartPos = 0, roomLengthEndPos = 0;
     static float previousRoomLength;
     float roomLength = user::convertToInches ? user::roomLengthInches : user::roomLengthCm;
-    if (display::refreshPage || hasChanged(roomLength, previousRoomLength, 0.01)) {
+    if (display::refreshPage || hasChanged(roomLength, previousRoomLength, 2)) {
       tft.fillRect(roomLengthStartPos, 236, roomLengthEndPos - roomLengthStartPos, 50, user::backgroundColor);
       if (user::convertToInches) {
         roomLengthStartPos = 225 - ((tft.getStringWidth(roomLength, 1) / 2) + 8);
@@ -476,7 +479,7 @@ void co2Page() {
     static int roomWidthStartPos = 0, roomWidthEndPos = 0;
     static float previousRoomWidth;
     float roomWidth = user::convertToInches ? user::roomWidthInches : user::roomWidthCm;
-    if (display::refreshPage || hasChanged(roomWidth, previousRoomWidth, 0.01)) {
+    if (display::refreshPage || hasChanged(roomWidth, previousRoomWidth, 2)) {
       tft.fillRect(roomWidthStartPos, 236, roomWidthEndPos - roomWidthStartPos, 50, user::backgroundColor);
       if (user::convertToInches) {
         roomWidthStartPos = 430 - ((tft.getStringWidth(roomWidth, 1) / 2) + 8);
@@ -501,7 +504,7 @@ void co2Page() {
     static int roomHeightStartPos = 0, roomHeightEndPos = 0;
     static float previousRoomHeight;
     float roomHeight = user::convertToInches ? user::roomHeightInches : user::roomHeightCm;
-    if (display::refreshPage || hasChanged(roomHeight, previousRoomHeight, 0.01)) {
+    if (display::refreshPage || hasChanged(roomHeight, previousRoomHeight, 2)) {
       tft.fillRect(roomHeightStartPos, 236, roomHeightEndPos - roomHeightStartPos, 50, user::backgroundColor);
       if (user::convertToInches) {
         roomHeightStartPos = 640 - ((tft.getStringWidth(roomHeight, 1) / 2) + 8);
@@ -540,7 +543,7 @@ void co2Page() {
     static int co2FlowrateStartPos = 0, co2FlowrateEndPos = 0;
     static float previousCo2Flowrate;
     float co2Flowrate = user::convertToInches ? user::co2FlowrateFeet3 : user::co2FlowrateLtrs;
-    if (display::refreshPage || hasChanged(co2Flowrate, previousCo2Flowrate, 0.01)) {
+    if (display::refreshPage || hasChanged(co2Flowrate, previousCo2Flowrate, 2)) {
       tft.fillRect(co2FlowrateStartPos, 238, co2FlowrateEndPos - co2FlowrateStartPos, 50, user::backgroundColor);
       if (co2Flowrate < 10)
         co2FlowrateStartPos = 140;
@@ -1277,7 +1280,7 @@ void drawSettingsPageZero() {
       if (display::refreshPage || user::convertToInches != previousHeightInInches) {
         tft.setFont(&akashi_36px_Regular);
         tft.setTextColor(RA8875_BLACK, user::backgroundColor);
-        tft.print(110, 420 - scrollMargin, "Set height In Inches");
+        tft.print(110, 420 - scrollMargin, "Set size In Inches");
         drawMiniRadioButton(652, 420 - scrollMargin, user::convertToInches);
         previousHeightInInches = user::convertToInches;
       }

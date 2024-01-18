@@ -18,12 +18,12 @@ void drawGraph (
        minArrayVal = a_data[i][n];
     }
   }
-  
+  int maxGraphArrayValues = 120;
   bool redrawGraph = device::newGraphData;
   static float graphXstartPosition = a_xStartPos;
   static float xSpacing = 0;
   static float prevMinArrayVal = 0, prevMaxArrayVal = 0;
-  if (display::refreshPage || hasChanged(minArrayVal, prevMinArrayVal, 0.01) || hasChanged(maxArrayVal, prevMaxArrayVal, 0.01)) {
+  if (display::refreshPage || hasChanged(minArrayVal, prevMinArrayVal, 0.01) || hasChanged(maxArrayVal, prevMaxArrayVal, 2)) {
     tft.fillRect(a_xStartPos, a_yStartPos, a_graphWidth, tft.height() - a_yStartPos, user::backgroundColor); //
     // work out the x position to start the graph at, based on the width on the y axis numbers. while drawing the draw y line and numbers   
     float yIncrement = 0;
@@ -51,9 +51,9 @@ void drawGraph (
 
     // draw x line and numbers
     float xLablePosition = graphXstartPosition + 2;
-    xSpacing = (float)(a_graphWidth - (graphXstartPosition - a_xStartPos)) / device::maxGraphArrayValues;
-    float lableSpacing = (float)(a_graphWidth - (graphXstartPosition - a_xStartPos)) / ((device::maxGraphArrayValues / 10) + 1);
-    for (int i = 0; i < (device::maxGraphArrayValues / 10) + 1; i++) {
+    xSpacing = (float)(a_graphWidth - (graphXstartPosition - a_xStartPos)) / maxGraphArrayValues;
+    float lableSpacing = (float)(a_graphWidth - (graphXstartPosition - a_xStartPos)) / ((maxGraphArrayValues / 10) + 1);
+    for (int i = 0; i < (maxGraphArrayValues / 10) + 1; i++) {
       tft.setCursor(xLablePosition, a_yStartPos + a_graphHeight - 1);
       tft.print(i*10);
       xLablePosition += lableSpacing;

@@ -3,7 +3,8 @@ void touchEvent() {
     tft.touchReadPixel(&display::touch_x, &display::touch_y);
     display::lastTouchMillis = millis();
     static uint16_t previousTouchX = 0, previousTouchY = 0;
-    if (display::touch_x > 0 && display::touch_y > 0) {
+    printf("tft touched...\n");
+    if (display::touch_x > 0 && display::touch_y > 0) {     
       //tft.fillCircle(display::touch_x, display::touch_y, 2, RA8875_WHITE); // for touch debugging / calibration check
       sliders();
       static unsigned long previousTouchMillis = 0;
@@ -1008,9 +1009,7 @@ void settingsOnePageTouched() {
         }
         else if (display::touch_x >= 460 && display::touch_x <= 620 && display::touch_y >= 430 && display::touch_y <= 470) { // confirm
           beep();
-          if (wifi::wifiEnabled) {
-            restartWifi();
-          }
+          restartWifi();
           display::showWifiSsid = false;
           clearPage();
           display::showingDialog = false;
@@ -1049,9 +1048,7 @@ void settingsOnePageTouched() {
         }
         else if (display::touch_x >= 460 && display::touch_x <= 620 && display::touch_y >= 430 && display::touch_y <= 470) { // confirm
           beep();
-          if (wifi::wifiEnabled) {
-            restartWifi();
-          }
+          restartWifi();
           display::showWifiPassword = false;
           clearPage();
           display::showingDialog = false;
@@ -1191,7 +1188,7 @@ void settingsOnePageTouched() {
     }
     if (display::settingsPageOneScrollPos >= 2 && display::settingsPageOneScrollPos <= 7) {
       if (display::touch_x >= 680 && display::touch_x <= 750 && display::touch_y >= 520 - scrollMargin && display::touch_y <= 550 - scrollMargin) { // clear graph history
-        device::graphArrayPos = 0;
+        sensor::sensorArrayPos = 0;
         beep();
       }
     }

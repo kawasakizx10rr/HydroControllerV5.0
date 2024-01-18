@@ -441,38 +441,38 @@ void getPageData() {
       copyFloatToArray(sensor::ec, 2);
       copyFloatToArray(user::targetMinEc, 2); 
       copyFloatToArray(user::targetMaxEc, 2); 
-      copyFloatArrayToArray(device::ecArray, 120, 2);   
+      copyFloatArrayToArray(sensor::ecArray, 120, 2);   
     }
     else if (slide == "1") { // home page slide 1
       copyIntToArray(sensor::tds);
       copyIntToArray(user::targetMinTds); 
       copyIntToArray(user::targetMaxTds); 
-      copyFloatArrayToArray(device::tdsArray, 120, 0);   
+      copyFloatArrayToArray(sensor::tdsArray, 120, 0);   
     }
     else if (slide == "2") { // home page slide 2
       copyFloatToArray(sensor::ph, 2); 
       copyFloatToArray(user::targetMinPh, 2); 
       copyFloatToArray(user::targetMaxPh, 2); 
-      copyFloatArrayToArray(device::phArray, 120, 2);
+      copyFloatArrayToArray(sensor::phArray, 120, 2);
     }
     else if (slide == "3") { // home page slide 3
       copyIntToArray(sensor::co2); 
       copyIntToArray(user::targetCo2); 
       copyIntToArray(user::targetCo2); 
-      copyFloatArrayToArray(device::co2Array, 120, 0);
+      copyFloatArrayToArray(sensor::co2Array, 120, 0);
     }
     else if (slide == "4") { // home page slide 4
       if (user::convertToF) {
         copyFloatToArray(convertToF(sensor::waterTemp), 1); 
         copyFloatToArray(user::targetMinWaterTempF, 1); 
         copyFloatToArray(user::targetMaxWaterTempF, 1); 
-        copyFloatArrayToArray(device::waterTemperatureArrayF, 120, 1);
+        copyFloatArrayToArray(sensor::waterTemperatureArrayF, 120, 1);
       }
       else {
         copyFloatToArray(sensor::waterTemp, 1); 
         copyFloatToArray(user::targetMinWaterTemp, 1); 
         copyFloatToArray(user::targetMaxWaterTemp, 1); 
-        copyFloatArrayToArray(device::waterTemperatureArray, 120, 1);
+        copyFloatArrayToArray(sensor::waterTemperatureArray, 120, 1);
       }
     }
     else if (slide == "5") { // home page slide 5
@@ -480,13 +480,13 @@ void getPageData() {
         copyFloatToArray(sensor::waterLevelInches, 1); 
         copyFloatToArray(user::targetMinWaterHeightInches, 1); 
         copyFloatToArray(user::targetMaxWaterHeightInches, 1); 
-        copyFloatArrayToArray(device::waterLevelArrayInInches, 120, 1);
+        copyFloatArrayToArray(sensor::waterLevelArrayInInches, 120, 1);
       }
       else {
         copyFloatToArray(sensor::waterLevel, 1); 
         copyFloatToArray(user::targetMinWaterHeight, 1); 
         copyFloatToArray(user::targetMaxWaterHeight, 1); 
-        copyFloatArrayToArray(device::waterLevelArray, 120, 1);
+        copyFloatArrayToArray(sensor::waterLevelArray, 120, 1);
       }
     }
     else if (slide == "6") { // home page slide 6
@@ -494,32 +494,32 @@ void getPageData() {
         copyFloatToArray(convertToF(sensor::airTemp), 1); 
         copyFloatToArray(user::targetMinAirTempF, 1); 
         copyFloatToArray(user::targetMaxAirTempF, 1); 
-        copyFloatArrayToArray(device::airTemperatureArrayF, 120, 1);
+        copyFloatArrayToArray(sensor::airTemperatureArrayF, 120, 1);
       }
       else {
         copyFloatToArray(sensor::airTemp, 1); 
         copyFloatToArray(user::targetMinAirTemp, 1); 
         copyFloatToArray(user::targetMaxAirTemp, 1); 
-        copyFloatArrayToArray(device::airTemperatureArray, 120, 1);
+        copyFloatArrayToArray(sensor::airTemperatureArray, 120, 1);
       }
     }
     else if (slide == "7") { // home page slide 7
       copyFloatToArray(sensor::humidity, 1); 
       copyFloatToArray(user::targetMinHumidity, 1); 
       copyFloatToArray(user::targetMaxHumidity, 1); 
-      copyFloatArrayToArray(device::humidityArray, 120, 1);
+      copyFloatArrayToArray(sensor::humidityArray, 120, 1);
     }
     else if (slide == "8") { // home page slide 8
       copyIntToArray(device::fanOneSpeed); 
       copyIntToArray(user::targetMinFanOneSpeed); 
       copyIntToArray(user::targetMaxFanOneSpeed); 
-      copyFloatArrayToArray(device::fanOneSpeedArray, 120, 0);
+      copyFloatArrayToArray(sensor::fanOneSpeedArray, 120, 0);
     }
     else if (slide == "9") { // home page slide 9
       copyIntToArray(device::fanTwoSpeed); 
       copyIntToArray(user::targetMinFanTwoSpeed); 
       copyIntToArray(user::targetMaxFanTwoSpeed); 
-      copyFloatArrayToArray(device::fanTwoSpeedArray, 120, 0);
+      copyFloatArrayToArray(sensor::fanTwoSpeedArray, 120, 0);
     }
   }
   // Page 1 (Graphs page)
@@ -527,43 +527,43 @@ void getPageData() {
     copyIntToArray(user::convertToF); 
     copyIntToArray(user::convertToInches); 
     if (slide == "0") {
-      copyFloatArrayToArray(device::ecArray, 120, 2);     
+      copyFloatArrayToArray(sensor::ecArray, 120, 2);     
     }
     else if (slide == "1") {
-       copyFloatArrayToArray(device::tdsArray, 120, 0); 
+       copyFloatArrayToArray(sensor::tdsArray, 120, 0); 
     }
     else if (slide == "2") {
-      copyFloatArrayToArray(device::phArray, 120, 2);
+      copyFloatArrayToArray(sensor::phArray, 120, 2);
     }
     else if (slide == "3") {
-      copyFloatArrayToArray(device::co2Array, 120, 0);
+      copyFloatArrayToArray(sensor::co2Array, 120, 0);
     }
     else if (slide == "4") {
       if (user::convertToF)
-        copyFloatArrayToArray(device::waterTemperatureArrayF, 120, 1);
+        copyFloatArrayToArray(sensor::waterTemperatureArrayF, 120, 1);
       else
-        copyFloatArrayToArray(device::waterTemperatureArray, 120, 1);
+        copyFloatArrayToArray(sensor::waterTemperatureArray, 120, 1);
     }
     else if (slide == "5") {
       if (user::convertToInches) 
-        copyFloatArrayToArray(device::waterLevelArrayInInches, 120, 1);
+        copyFloatArrayToArray(sensor::waterLevelArrayInInches, 120, 1);
       else
-        copyFloatArrayToArray(device::waterLevelArray, 120, 1);
+        copyFloatArrayToArray(sensor::waterLevelArray, 120, 1);
     }
     else if (slide == "6") {
       if (user::convertToF)
-        copyFloatArrayToArray(device::airTemperatureArrayF, 120, 1);
+        copyFloatArrayToArray(sensor::airTemperatureArrayF, 120, 1);
       else
-        copyFloatArrayToArray(device::airTemperatureArray, 120, 1);
+        copyFloatArrayToArray(sensor::airTemperatureArray, 120, 1);
     }
     else if (slide == "7") {
-      copyFloatArrayToArray(device::humidityArray, 120, 1);
+      copyFloatArrayToArray(sensor::humidityArray, 120, 1);
     }
     else if (slide == "8") {
-      copyFloatArrayToArray(device::fanOneSpeedArray, 120, 0);
+      copyFloatArrayToArray(sensor::fanOneSpeedArray, 120, 0);
     }
     else if (slide == "9") {
-      copyFloatArrayToArray(device::fanTwoSpeedArray, 120, 0);
+      copyFloatArrayToArray(sensor::fanTwoSpeedArray, 120, 0);
     }
   }
    // Page 2 (Max mins page)

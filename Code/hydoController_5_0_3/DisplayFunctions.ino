@@ -5,7 +5,8 @@ void launchCo2Notification(uint8_t& a_continueCo2Control, uint8_t& a_previousDat
   unsigned long continuePreviousMillis = millis();
   tft.backlight(true);
   tft.displayOn(true);
-  printf("About to show co2 cancel timer dialog\n");
+  if (device::globalDebug)
+    printf("About to show co2 cancel timer dialog\n");
   saveLogMessage(3);
   while (co2DialogTimer != 0 && a_continueCo2Control == device::NOT_SET) {
     if (co2DialogTimer != previousCo2Timer) {
@@ -51,7 +52,8 @@ void abortCo2Notification(bool& a_startCo2Relay, unsigned long& a_lastTouch, con
       if (millis() >= a_lastTouch) {
         if (display::touch_x >= startX + 200 && display::touch_x <= startX + 400 && display::touch_y >= startY + 200 && display::touch_y <= startY + 250) { // Cancel
           analogWriteChnl(pca9685Channel::co2Solenoid, (device::relayOffState == HIGH ? 4096 : 0));
-          printf("Aborted pumping Co2!\n");
+          if (device::globalDebug)
+            printf("Aborted pumping Co2!\n");
           sensor::co2GasTime = 0;
           a_startCo2Relay = false;
           device::co2DisabledFans = false;
@@ -62,7 +64,8 @@ void abortCo2Notification(bool& a_startCo2Relay, unsigned long& a_lastTouch, con
     }
     if (millis() > a_co2RunTime) {
       analogWriteChnl(pca9685Channel::co2Solenoid, (device::relayOffState == HIGH ? 4096 : 0));
-      printf("Finished pumping Co2\n");
+      if (device::globalDebug)
+        printf("Finished pumping Co2\n");
       sensor::co2GasTime = 0;
       a_startCo2Relay = false;
       clearPage();
@@ -79,7 +82,8 @@ void launchDrainNotification(uint8_t& a_continueDraining, bool& a_startDraining)
   unsigned long continuePreviousMillis = millis();
   tft.backlight(true);
   tft.displayOn(true);
-  printf("About to show the drain cancel timer dialog\n");
+  if (device::globalDebug)
+    printf("About to show the drain cancel timer dialog\n");
   while (drainingDialogTimer != 0 && a_continueDraining == device::NOT_SET) {
     if (drainingDialogTimer != previousDrainingTimer) {
       continueMessage(message::drainingAlert, drainingDialogTimer, 0, true, true, refreshText);
@@ -120,7 +124,8 @@ void launchRefillNotification(bool& a_startRefilling, uint8_t& a_continueRefilli
     unsigned long continuePreviousMillis = millis();
     tft.backlight(true);
     tft.displayOn(true);
-    printf("About to show refill cancel timer dialog\n");
+    if (device::globalDebug)
+      printf("About to show refill cancel timer dialog\n");
     while (refillingDialogTimer != 0 && a_continueRefilling == device::NOT_SET) {
       if (refillingDialogTimer != previousRefillingTimer) {
         continueMessage(message::refillingAlert, refillingDialogTimer, 0, true, true, refreshText);
@@ -191,7 +196,8 @@ void OuterMenuIcons() {
   drawPageIcon(11, 604, 16, fanIcon, 512, 64, 64);
   drawPageIcon(12, 703, 20, warningsIcon, 510, 67, 61);
   display::previousPage = display::page;
-  printf("icon time: %lu\n", millis() - iconTime);
+  if (device::globalDebug)
+    printf("icon time: %lu\n", millis() - iconTime);
 }
 
 // Draw the black frame you see around the menu icons
@@ -272,13 +278,21 @@ void drawEcPhButton(const int& a_x, const int& a_y, const uint8_t& a_doserMode, 
 // and the afkTime set in the GUI settings.
 void screenSaver() {
   if (user::afkTime != 0 && (millis() - display::lastTouchMillis > user::afkTime * 60000UL)) { 
-    tft.backlight(false);
-    tft.displayOn(false);
-    display::displayIsOff = true;
+    if (!display::displayIsOff) {
+      if (device::globalDebug)
+        printf("Turning display off\n");   
+      tft.backlight(false);
+      tft.displayOn(false);
+      //tft.sleep(true);
+      display::displayIsOff = true;
+    }
   }
   else if (display::displayIsOff) {
+    if (device::globalDebug)
+      printf("Turning display on\n");
     tft.backlight(true);
     tft.displayOn(true);
+    //tft.sleep(false);
     display::displayIsOff = false;
   }
 }
@@ -463,7 +477,8 @@ void displayDosingNotification(const uint8_t& a_seconds, const float& a_outOfRan
   static uint8_t previousSeconds;
   static int startSecPos, endSecPos;
   if (a_refreshDosingNotification) {
-    printf("showing dosing alert\n");
+    if (device::globalDebug)
+      printf("showing dosing alert\n");
     tft.setFont(&akashi_36px_Regular);
     tft.setFontScale(1);
     //Frame
@@ -605,25 +620,25 @@ void abortMessage(const char *a_text, const char* a_str, const float& a_value, c
   }
 }
 
-void infoMessage() {
+void infoMessage(const char** a_messageArray, const int a_messageIndex) { // message::infoMessageArray, message::infoPos
   char charBuffer[33]{0};
   uint16_t startX = 146, startY = 166;
-  uint charPos = 0, fontX = 0, dialogHeight = 40;
-  static int prevInfoPos = -1;
+  uint charPos = 0, fontX = 146, dialogHeight = 40;
   tft.setFont(&akashi_36px_Regular);
   tft.setFontScale(1);
   tft.setTextColor(RA8875_BLACK, RA8875_WHITE);  
-  if ((display::refreshPage || prevInfoPos != message::infoPos) && display::showInfoDialog) {
-    printf("Starting infoMessage [%d]\n", message::infoPos);
+  if (display::refreshPage && display::showInfoDialog) {
+    if (device::globalDebug)
+      printf("Starting infoMessage\n");
     // Work out the dialog height
-    for (unsigned int i = 0; i < strlen(message::infoMessageArray[message::infoPos]); i++) {
-      char c = message::infoMessageArray[message::infoPos][i];
+    for (unsigned int i = 0; i < strlen(a_messageArray[a_messageIndex]); i++) {
+      char c = a_messageArray[a_messageIndex][i];
       if (charPos < 32)
         charBuffer[charPos++] = c;
-      if (charPos == 32 || c == ' ' || i == strlen(message::infoMessageArray[message::infoPos]) - 1) {
+      if (charPos == 32 || c == ' ' || i == strlen(a_messageArray[a_messageIndex]) - 1) {
         if (fontX + tft.getStringWidth(charBuffer) > startX + 610) {
           dialogHeight += 40;
-          fontX = 0;
+          fontX = 146;
         }
         else
           fontX += tft.getStringWidth(charBuffer);
@@ -631,7 +646,7 @@ void infoMessage() {
         charPos = 0;
       }
     }
-    if (charPos > 0 || fontX > 0)
+    if (charPos > 0 || fontX > 146)
       dialogHeight += 40;
     //Frame
     tft.fillRoundRect(startX - 20, startY, 630, dialogHeight, 5, RA8875_WHITE);
@@ -641,11 +656,11 @@ void infoMessage() {
     // Draw text
     charPos = 0;
     memset(charBuffer, 0 , 33);
-    for (unsigned int i = 0; i < strlen(message::infoMessageArray[message::infoPos]); i++) {
-      char c = message::infoMessageArray[message::infoPos][i];
+    for (unsigned int i = 0; i < strlen(a_messageArray[a_messageIndex]); i++) {
+      char c = a_messageArray[a_messageIndex][i];
       if (charPos < 32)
         charBuffer[charPos++] = c;
-      if (charPos == 32 || c == ' ' || i == strlen(message::infoMessageArray[message::infoPos]) - 1) {
+      if (charPos == 32 || c == ' ' || i == strlen(a_messageArray[a_messageIndex]) - 1) {
         if (tft.getFontX() + tft.getStringWidth(charBuffer) > startX + 610) {
           startY += 38;
           tft.setCursor(startX - 8, startY);
@@ -655,8 +670,77 @@ void infoMessage() {
         charPos = 0;
       }
     }
-    prevInfoPos = message::infoPos;
   }
+}
+
+void setupMessage(int& a_x, int& a_y, const char* a_message) {
+  char charBuffer[33]{0};
+  int skipButtonStartX = 0, continueButtonStartX = 0;
+  int charPos = 0, fontX = 0, dialogHeight = 40, dialogWidth = 0;
+  tft.setFont(&akashi_36px_Regular);
+  tft.setFontScale(1);
+  tft.setTextColor(RA8875_BLACK, RA8875_WHITE);
+  //clearPage();
+  if (device::globalDebug)
+    printf("Starting setupMessage\n");
+  // Work out the dialog height
+  for (unsigned int i = 0; i < strlen(a_message); i++) {
+    char c = a_message[i];
+    if (charPos < 32)
+      charBuffer[charPos++] = c;
+    if (charPos == 32 || c == '\n' || c == ' ' || i == strlen(a_message) - 1) {
+      if (fontX > dialogWidth) 
+        dialogWidth = fontX;
+      if (c == '\n' || (a_x + fontX + tft.getStringWidth(charBuffer) > tft.width() - 10)) { //tft.getStringWidth(charBuffer)
+        dialogHeight += 40;
+        fontX = 0;
+      }
+      else
+        fontX += tft.getStringWidth(charBuffer);
+      if (fontX > dialogWidth) 
+        dialogWidth = fontX;
+      memset(charBuffer, 0 , 33);
+      charPos = 0;
+    }
+  }
+  //if (charPos > 0 || fontX > 0)
+  //  dialogHeight += 40;
+  if (dialogWidth < 200)
+    dialogWidth = 200;
+  else if (dialogWidth < tft.width() - 30)
+    dialogWidth += 20;
+
+  //Frame
+  tft.fillRoundRect(a_x - 20, a_y, dialogWidth, dialogHeight + 55, 5, RA8875_WHITE);
+  tft.drawRoundRect(a_x - 21, a_y - 1, dialogWidth+2, dialogHeight + 57, 5, RA8875_BLACK);
+  //closeButton(startX + 200, startY + 250);
+  tft.setCursor(a_x - 8, a_y);
+  // Draw text
+  charPos = 0;
+  memset(charBuffer, 0 , 33);
+  fontX = 0;
+  for (unsigned int i = 0; i < strlen(a_message); i++) {
+    char c = a_message[i];
+    if (charPos < 32)
+      charBuffer[charPos++] = c;
+    if (charPos == 32 || c == ' ' || i == strlen(a_message) - 1) {
+      if (c == '\n' || (tft.getFontX() + tft.getStringWidth(charBuffer) > a_x + dialogWidth)) {
+        a_y += 38;
+        fontX = 0;
+        if (device::globalDebug)
+          printf("line length: %dpx, endX: %dpx\n", tft.getFontX() + tft.getStringWidth(charBuffer), a_x + dialogWidth);
+        tft.setCursor(a_x - 8, a_y);
+      }
+      else
+        fontX += tft.getStringWidth(charBuffer);
+      tft.print(charBuffer);
+      memset(charBuffer, 0 , 33);
+      charPos = 0;
+    }
+  }
+  a_x += ((dialogWidth - 194) / 2);
+  a_y += dialogHeight + 5;
+  continueButton(a_x, a_y);
 }
 
 // draw a set button at a given x and y
@@ -787,6 +871,17 @@ void continueButton(const int& a_x, const int& a_y) {
   tft.print(a_x + 14, a_y + 1, "Continue");
 }
 
+// draw a Skip button at a given x and y
+void skipButton(const int& a_x, const int& a_y) {
+  tft.setFont(&akashi_36px_Regular);
+  tft.setFontScale(1);
+  tft.setTextColor(RA8875_BLACK, display::RA8875_DARKGREY);
+  tft.fillRoundRect(a_x, a_y, 148, 42, 5, display::RA8875_DARKGREY);
+  tft.drawRoundRect(a_x - 2, a_y - 2, 152, 46, 5, RA8875_BLACK);
+  tft.drawRoundRect(a_x - 1, a_y - 1, 150, 44, 5, RA8875_BLACK);
+  tft.print(a_x + 22, a_y + 1, "Skip");
+}
+
 // draw a Calibrate button at a given x and y
 void calibrateButton(const int& a_x, const int& a_y) {
   tft.setFont(&akashi_36px_Regular);
@@ -873,7 +968,7 @@ void drawSensorSlide(const float& a_sensorData, const float& a_minTarget, const 
   // draw mini graph
   float* arrayData[1] {a_arrayData};
   unsigned int graphColors[1] {RA8875_BLACK};
-  drawGraph(95, 300, 150, tft.width() - 95, 5, arrayData, 1, device::graphArrayPos, a_percision, graphColors);
+  drawGraph(95, 300, 150, tft.width() - 95, 5, arrayData, 1, sensor::sensorArrayPos, a_percision, graphColors);
 }
 
 // display the set RTC time dialog
@@ -1318,17 +1413,21 @@ void displaySystemLogs() {
     }
     int startX = 160;
     int maxLogsToDsiplay = 0;
-    printf("message::systemLogPos: %d\n", message::systemLogPos);
-    printf("systemLogScrollPos: %d\n", display::systemLogScrollPos);
+    if (device::globalDebug) {   
+      printf("message::systemLogPos: %d\n", message::systemLogPos);
+      printf("systemLogScrollPos: %d\n", display::systemLogScrollPos);
+    }
     if (display::systemLogScrollPos + 6 <= message::systemLogPos)
       maxLogsToDsiplay = display::systemLogScrollPos + 6;
     else 
       maxLogsToDsiplay = message::systemLogPos;
-    printf("maxLogsToDsiplay: %d\n", maxLogsToDsiplay);
+    if (device::globalDebug)
+      printf("maxLogsToDsiplay: %d\n", maxLogsToDsiplay);
     for (uint8_t i = display::systemLogScrollPos; i < maxLogsToDsiplay; i++) {
       int logType = message::logTypeArray[i];      
       const char* logPretext = message::notificationsArray[logType];
-      printf("Printing log: %d, logType: %d, text: %s, time: %s\n", i, logType, logPretext, message::timeStrArray[i]);
+      if (device::globalDebug)
+        printf("Printing log: %d, logType: %d, text: %s, time: %s\n", i, logType, logPretext, message::timeStrArray[i]);
       tft.print(105, startX, (const __FlashStringHelper *)logPretext);
       tft.print(F(" "));
       tft.print(message::timeStrArray[i]);
@@ -1490,4 +1589,178 @@ void displayWifiPassword() {
   }
   if (display::showKeyboard)
     showCursor();
+}
+
+// TO DO...
+void userSetupGuide() {
+  // Prompt to ask the user if everything is connected properly
+  if (device::globalDebug)
+    printf("Starting userSetupGuide\n");
+  display::refreshPage = true;
+  display::showInfoDialog = true;
+  infoMessage(message::setupMessageArray, 0);
+  delay(2000);
+  tft.clearTouchInt();
+  while(!tft.touched());
+  display::showInfoDialog = false;
+
+  int setupDialogPos = 0, prevSetupDialogPos = -1;
+  int startX = 0, startY = 0;
+  //bool refreshSetupDialog = false;
+
+  while (setupDialogPos <= 3) {
+    // Get the user to set the EC to TDS conversion
+    if (setupDialogPos == 0) {
+      if (setupDialogPos != prevSetupDialogPos) {
+        display::page = 4;
+        display::settingsPage = 0;
+        display::settingsPageZeroScrollPos = 2;
+        startX = 120;
+        startY = 120;
+        clearPage();       
+        drawPages();
+        setupMessage(startX, startY, message::sizeConversionSetup); 
+        delay(500);
+      }
+      //
+      //if (tft.touched()) {
+      //  tft.touchReadPixel(&display::touch_x, &display::touch_y);
+        if (display::touch_x >= 680 && display::touch_x <= 750 && display::touch_y >= 370 && display::touch_y <= 400) { // convertToTds
+          static unsigned long lastTouchTime = millis() + 500UL;
+          if (millis() - lastTouchTime >= 2000UL) {
+            beep();
+            tft.fillRect(11, 11, 76, 74, user::backgroundColor);
+            user::convertToTds = !user::convertToTds;
+            display::refreshPage = true;
+            if (user::convertToTds)
+              drawPageIcon(5, 23, 32, ppmIcon, 280, 64, 35);
+            else
+              drawPageIcon(5, 26, 32, ecIcon, 256, 57, 36);
+            drawMiniRadioButton(652, 370, user::convertToTds);
+            lastTouchTime = millis();
+          }
+        }
+     // }
+    }
+    // Get the user to set the CM or inches conversion
+    else if (setupDialogPos == 1) {
+      if (setupDialogPos != prevSetupDialogPos) {
+        display::settingsPageZeroScrollPos = 1;
+        startX = 120;
+        startY = 200;
+        clearPage();
+        drawPages();
+        setupMessage(startX, startY, message::ecConversionSetup); 
+      }
+      //
+      if (tft.touched()) {
+        tft.touchReadPixel(&display::touch_x, &display::touch_y);
+        if (display::touch_x >= 680 && display::touch_x <= 750 && display::touch_y >= 370 && display::touch_y <= 400) { // convertToInches
+          static unsigned long lastTouchTime = millis() + 500UL;
+          if (millis() - lastTouchTime >= 2000UL) {
+            beep();
+            user::convertToInches = !user::convertToInches;
+            drawMiniRadioButton(652, 370, user::convertToInches);
+            lastTouchTime = millis();
+          }
+        }
+      }
+    }
+    // Get the user to set the Celcuis or Ferenheight conversion
+    else if (setupDialogPos == 2) { 
+      if (setupDialogPos != prevSetupDialogPos) {
+        startX = 120;
+        startY = 180;
+        clearPage();
+        drawPages();
+        setupMessage(startX, startY, message::tempConversionSetup);         
+      }
+      //
+      if (tft.touched()) {
+        tft.touchReadPixel(&display::touch_x, &display::touch_y);
+        if (display::touch_x >= 680 && display::touch_x <= 750 && display::touch_y >= 320 && display::touch_y <= 350) { // convertToFarenheit
+          static unsigned long lastTouchTime = millis() + 500UL;
+          if (millis() - lastTouchTime >= 2000UL) {
+            beep();
+            user::convertToF = !user::convertToF;
+            drawMiniRadioButton(652, 320, user::convertToF);
+            lastTouchTime = millis();
+          }
+        }
+      }
+    }
+    // Get the user to set the RTC
+    else if (setupDialogPos == 3) {
+      if (setupDialogPos != prevSetupDialogPos) {
+        display::settingsPageZeroScrollPos = 0;
+        display::showRTCtime = true;
+        startX = 120;
+        startY = 120;
+        clearPage();
+        drawPages();
+        setupMessage(startX, startY, message::setRtcGuide); 
+      }
+      
+    }
+    // Get the user to set the water level sensor
+
+    // Get the user to set the EC cal solution
+
+    // Get the user to set the PH cal solution
+
+    // Get the user to calibrate the EC sensor
+
+    // Get the user to calibrate the TDS sensor
+
+    // Get the user to calibrate the Etape/SR04 sensor
+
+    // Get the user to calibrate the dosing pumps
+
+    // (Op) Get the user to calibrate the Co2 sensor
+
+    // Get the user to set the EC adjustment mode
+
+    // Get the user to set the PH adjustment mode
+
+    // Get the user to set the target EC/TDS
+
+    // Get the user to set the target PH
+
+    // (Op) Get the user to set the target Co2
+
+    // Get the user to set the water page settings
+    // ... 
+
+    // Get the user to set the light settings
+    // ... 
+
+    // Get the user to set the fan settings
+    // ... 
+
+    // Get the user to set the warnings
+    // ... 
+    prevSetupDialogPos = setupDialogPos;
+    //refreshSetupDialog = false;
+  
+    //
+    static unsigned long lastTouchTime = millis() + 2000UL;
+    if (tft.touched()) {
+      tft.touchReadPixel(&display::touch_x, &display::touch_y);
+      if (display::touch_x >= startX && display::touch_x <= startX + 150 && display::touch_y >= startY && display::touch_y <= startY + 35) { // continue
+        if (millis() - lastTouchTime >= 2000UL) {
+          beep();
+          setupDialogPos++;
+          if (device::globalDebug)
+            printf("Continue setup prompt, pos: %d\n", setupDialogPos);      
+          clearPage();     
+          display::refreshPage = true;
+          lastTouchTime = millis();
+        }
+      }
+      //
+      //adjustPageValues();
+      //refreshSetupDialog = true;
+    }
+    //
+  }
 }
