@@ -536,14 +536,14 @@ void profilesPageTouched() {
     }
     else if (display::touch_x >= 460 && display::touch_x <= 638 && display::touch_y >= 368 && display::touch_y <= 414) { // continue with saving profile
       beep();
-      saveSystemEEPROM();
+      getSetSystemEEPROM(device::EEPROM_SET);
       device::settingsAdjusted = true;
       delay(20);
       externalEEPROM.put(7, device::userProfile);
       delay(20);
       device::lockSaveButtons = true;
       device::keyBoardClosedTime = millis();
-      saveUserEEPROM(device::userProfile);
+      getSetProfileEEPROM(device::userProfile, device::EEPROM_SET);
       display::showSaveDialog = false;
       display::refreshPage = true;
       clearPage();
@@ -615,7 +615,7 @@ void profilesPageTouched() {
       display::refreshPage = true;
       device::lockSaveButtons = true;
       device::keyBoardClosedTime = millis();
-      loadUserEEPROM(device::userProfile);
+      getSetProfileEEPROM(device::userProfile, device::EEPROM_GET);
       externalEEPROM.put(7, device::userProfile);
       delay(20);
     }
@@ -626,7 +626,7 @@ void profilesPageTouched() {
       display::refreshPage = true;
       device::lockSaveButtons = true;
       device::keyBoardClosedTime = millis();
-      loadUserEEPROM(device::userProfile);
+      getSetProfileEEPROM(device::userProfile, device::EEPROM_GET);
       externalEEPROM.put(7, device::userProfile);
       delay(20);
     }
@@ -637,7 +637,7 @@ void profilesPageTouched() {
       display::refreshPage = true;
       device::lockSaveButtons = true;
       device::keyBoardClosedTime = millis();
-      loadUserEEPROM(device::userProfile);
+      getSetProfileEEPROM(device::userProfile, device::EEPROM_GET);
       externalEEPROM.put(7, device::userProfile);
       delay(20);
     }
@@ -648,7 +648,7 @@ void profilesPageTouched() {
       display::refreshPage = true;
       device::lockSaveButtons = true;
       device::keyBoardClosedTime = millis();
-      loadUserEEPROM(device::userProfile);
+      getSetProfileEEPROM(device::userProfile, device::EEPROM_GET);
       externalEEPROM.put(7, device::userProfile);
       delay(20);
     }
@@ -659,7 +659,7 @@ void profilesPageTouched() {
       display::refreshPage = true;
       device::lockSaveButtons = true;
       device::keyBoardClosedTime = millis();
-      loadUserEEPROM(device::userProfile);
+      getSetProfileEEPROM(device::userProfile, device::EEPROM_GET);
       externalEEPROM.put(7, device::userProfile);
       delay(20);
     }
@@ -1797,7 +1797,6 @@ void settingsFourPageTouched() {
     else if (display::touch_x >= 460 && display::touch_x <= 638 && display::touch_y >= 368 && display::touch_y <= 414) { // continue with Etape max reading Calibration
       beep();
       setEtapeMaxVolumeResistance();
-      saveSystemEEPROM();
       display::showEtapeCalibration = device::UNCHANGED;
       display::showingDialog = false;
       display::refreshPage = true;

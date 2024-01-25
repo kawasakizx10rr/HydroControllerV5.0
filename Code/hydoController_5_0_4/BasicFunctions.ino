@@ -35,9 +35,9 @@ void initializeDevice() {
    tft.fillRect(120, 370, 400, 24, RA8875_BLACK);
    tft.setTextColor(RA8875_RED, RA8875_BLACK);
    tft.print(120, 370, "Failed to load EEPROM");
-   //while(true){};
+   while(true){};
   }
-  //initializeEEPROM();
+  initializeEEPROM();
   //
   tft.fillRect(120, 370, 400, 24, RA8875_BLACK);
   tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
@@ -707,7 +707,7 @@ float convertGallonsToLtrs(const float a_gallons) {
 
 float lessThan(const float a_val, const float a_target, const int a_precision) {
   long long val = a_val * pow(10, a_precision);
-  long long target = a_target * pow(10, a_precision)
+  long long target = a_target * pow(10, a_precision);
   if (hasChanged(a_val, a_target, a_precision) && val < target)
     return true;
   return false;

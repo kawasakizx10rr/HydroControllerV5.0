@@ -201,7 +201,6 @@ void setTankDepth() {
     if (device::globalDebug)
       Serial.println("Error: tank depth <= 0 or >= 999\n");
   }
-  saveSystemEEPROM();
 }
 
 // This is a generic Co2 formula tried and tested.

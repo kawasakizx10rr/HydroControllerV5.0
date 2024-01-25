@@ -45,7 +45,7 @@ namespace pin {
 const uint8_t rxd2 = 16;
 const uint8_t txd2 = 17;
 // display
-const uint8_t ra8875_rst = 33;
+//const uint8_t ra8875_rst = 33;
 const uint8_t ra8875_cs = 32; // was 5
 const uint8_t ra8875_sdo = 19;
 const uint8_t ra8875_sdi = 23;
@@ -324,6 +324,8 @@ uint8_t infoPos = 0;
 }
 
 namespace device {
+uint32_t profileEEPROMSize = 0;
+uint32_t systemEEPROMSize = 0;
 bool globalDebug = true;
 const char* versionNumber = "5.0.2"; // do not adjust !
 bool relayOffState = HIGH;
@@ -398,6 +400,11 @@ bool co2DisabledFans = false;
 bool usernameAdjusted = false;
 bool settingsAdjusted = false;
 const float aref = 5.0;
+enum eepromModes {
+  EEPROM_VERIFY = -1, 
+  EEPROM_GET = 0, 
+  EEPROM_SET = 1
+};
 enum systemStates {
   NO_ADJUSTMENT,
   ADJUSTING_TDS,
@@ -564,7 +571,6 @@ bool disableHumidityWarnings = true;
 bool disableLED = false;
 bool disableBeeper = false;
 bool disableDrainAndRefill = true;
-bool disableMachineLearning = true;
 bool clearWifiDetails = false;
 bool resetSettings = false;
 uint8_t rtcDayOfWeek = 0;
@@ -651,7 +657,7 @@ char webData[1024] {};
 }
 
 // Class instances
-RA8875 tft = RA8875(pin::ra8875_cs, pin::ra8875_rst);
+RA8875 tft = RA8875(pin::ra8875_cs);//, pin::ra8875_rst
 OneWire oneWire(pin::oneWireBus);
 DallasTemperature dallasTemperature(&oneWire);
 uRTCLib rtc(0x68); // The RTC uses hardware I2C (SCL/SDA) //DS3231 rtc(SDA, SCL);
