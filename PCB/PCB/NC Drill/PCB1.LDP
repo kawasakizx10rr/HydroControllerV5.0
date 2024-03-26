@@ -1,0 +1,4 @@
+Layer Pairs Export File for PCB: C:\Users\husqv\AppData\Local\TempReleases\Snapshot\1\PCB1.CMPcbDoc
+LayersSetName=Top_Bot_Plated_Thru_Holes|DrillFile=pcb1-roundholes-plated.txt|DrillLayers=gtl,gp1,gp2,gbl
+LayersSetName=Top_Bot_Plated_Slot_Holes|DrillFile=pcb1-slotholes-plated.txt|DrillLayers=gtl,gp1,gp2,gbl
+LayersSetName=Top_Bot_NonPlated_Thru_Holes|DrillFile=pcb1-roundholes-nonplated.txt|DrillLayers=gtl,gp1,gp2,gbl

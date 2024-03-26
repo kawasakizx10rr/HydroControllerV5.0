@@ -1,0 +1,39 @@
+----------------------------------------------------------------------------------------------------------------------------------
+NCDrill File Report For: PCB1.CMPcbDoc   26/03/2024  22:16:04
+----------------------------------------------------------------------------------------------------------------------------------
+
+Layer Pair : Top Layer to Bottom Layer
+ASCII Plated RoundHoles File : PCB1-RoundHoles-Plated.TXT
+ASCII Non-Plated RoundHoles File : PCB1-RoundHoles-NonPlated.TXT
+ASCII Plated SlotHoles File : PCB1-SlotHoles-Plated.TXT
+
+Tool       Hole Size               Hole Tolerance               Hole Type       Hole Count   Plated         Tool Travel
+----------------------------------------------------------------------------------------------------------------------------------
+T1      8mil (0.201mm)                                            Round             1         PTH        0.00inch (0.00mm)
+T2      25mil (0.635mm)                                           Round             15        PTH        17.28inch (438.86mm)
+T3      28mil (0.711mm)                                           Round             118       PTH        42.99inch (1091.87mm)
+T4      29mil (0.737mm)                                           Round             4         PTH        1.77inch (44.99mm)
+T5      30mil (0.762mm)                                           Round             55        PTH        27.81inch (706.47mm)
+T6      32mil (0.813mm)                                           Round             24        PTH        4.92inch (125.07mm)
+T7      35mil (0.899mm)                                           Round             6         PTH        0.86inch (21.83mm)
+T8      36mil (0.914mm)                                           Round             17        PTH        7.97inch (202.43mm)
+T9      39mil (1.001mm)                                           Round             73        PTH        27.80inch (706.01mm)
+T10     39mil (1.001mm)                                           Slot              3         PTH        1.15inch (29.12mm)
+T11     40mil (1.016mm)                                           Round             38        PTH        19.92inch (505.85mm)
+T12     43mil (1.1mm)           +/-2mil (0.05mm)                  Round             6         PTH        0.50inch (12.70mm)
+T13     43mil (1.1mm)                                             Round             29        PTH        11.52inch (292.62mm)
+T14     50mil (1.27mm)                                            Round             38        PTH        30.77inch (781.58mm)
+T15     51mil (1.3mm)                                             Round             2         PTH        0.58inch (14.86mm)
+T16     59mil (1.501mm)         +/-2mil (0.05mm)                  Round             9         PTH        2.81inch (71.36mm)
+T17     60mil (1.524mm)                                           Round             10        PTH        17.65inch (448.27mm)
+T18     79mil (1.999mm)                                           Slot              4         PTH        2.45inch (62.20mm)
+T19     118mil (3mm)                                              Round             17        PTH        31.99inch (812.52mm)
+T20     35mil (0.899mm)                                           Round             2         NPTH       0.17inch (4.40mm)
+T21     39mil (1.001mm)                                           Round             1         NPTH       0.00inch (0.00mm)
+T22     49mil (1.25mm)                                            Round             1         NPTH       0.00inch (0.00mm)
+T23     87mil (2.21mm)                                            Round             1         NPTH       0.00inch (0.00mm)
+T24     150mil (3.81mm)                                           Round             1         NPTH       0.00inch (0.00mm)
+----------------------------------------------------------------------------------------------------------------------------------
+Totals                                                                              475
+
+Total Processing Time (hh:mm:ss) : 00:00:00
